@@ -16,19 +16,20 @@ Hedera transactions and receipts are protocol buffers (https://github.com/hashgr
 BigQuery's storage engine (ColumnIO) and processing engine (Dremel) were designed to work great for protocol buffers.
 So the schema would be natural adaptation of Hedera's protobuf (with few deviations, mentioned below) and would look like:
 ```
-* = required fields
-
-transactions
-├── consensusTimestamp: int *
-├── transactionType: int *
-├── cudEntityID: entity
-├── cudEntityType: int
-├── transaction *
-│   └── body *
-│       ├── transactionID *
-│       │   ├── transactionValidStart: int *
-│       │   └── accountID: entity *
-│       ├── nodeAccountID: entity *
+transactions (table name, not part of column names)
+├── consensusTimestamp: int
+├── transactionType: int
+├── entity:
+│   ├── shardNum: int
+│   ├── realmNum: int
+│   ├── entityNum: int
+│   └── type: int
+├── transaction
+│   └── body
+│       ├── transactionID
+│       │   ├── transactionValidStart: int
+│       │   └── accountID: entity
+│       ├── nodeAccountID: entity
 │       ├── transactionFee: int
 │       ├── transactionValidDuration
 │       │   └── seconds: int
@@ -50,16 +51,16 @@ transactions
 │       │   └── claim
 │       │       └── hash: bytes
 │       ├── consensusSubmitMessage
-│       │   └── message: bytes *
+│       │   └── message: bytes
 │       ├── fileCreate
-│       │   └── contents: bytes *
+│       │   └── contents: bytes
 │       ├── fileAppend
-│       │   └── contents: bytes *
+│       │   └── contents: bytes
 │       └── fileUpdate
-│           └── contents: bytes *
-├── record *
-│   ├── receipt *
-│   │   ├── status: int *
+│           └── contents: bytes
+├── record
+│   ├── receipt
+│   │   ├── status: int
 │   │   ├── topicRunningHash: bytes
 │   │   └── topicSequenceNumber: int
 │   ├── transactionHash: bytes
@@ -74,17 +75,17 @@ transactions
 │   │   └── gasUsed: int
 │   └── transferList
 │       └── accountAmounts (repeated)
-│           ├── accountID: entity *
-│           └── amount: int *
+│           ├── accountID: entity
+│           └── amount: int
 └── nonFeeTransfers
     └── accountAmounts (repeated)
-        ├── accountID: entity *
-        └── amount: int *
+        ├── accountID: entity
+        └── amount: int
 
 entity
-├── shardNum: int *
-├── realmNum: int *
-└── entityNum: int *
+├── shardNum: int
+├── realmNum: int
+└── entityNum: int
 ```
 
 - Table will be partitioned using `consensusTimestamp`.
@@ -94,7 +95,7 @@ for those fields is not fixed and can be even 10+, so keeping them repeated is t
 
 Deviations in schema (from PB):
 These additional fields have been added since they are often used in queries and would be otherwise cumbersome to filter on:
-- consensusTimestamp, cudEntityId, cudEntityType, nonFeeTransfers
+- consensusTimestamp, entity, nonFeeTransfers
 - transactionType: No corresponding field in PB. Deduced based on which field in `oneof data{...}` is set.
 
 ### Ingestion
@@ -105,17 +106,26 @@ using streaming inserts.
 
 ![Ingestion](images/hedera_etl_ingestion.png)
 
-However, ensuring exactly-once using streaming inserts is not possible
-([ref](https://cloud.google.com/bigquery/streaming-data-into-bigquery#dataconsistency)). BigQuery's native
-deduplication logic can be helpful here to large extent, but it won't be sufficient. In limited experience
-of running above job for 10 hours, no errors were seen, however to ensure exactly-once guarantee,
-running a small deduplication job periodically (say every minute) would be necessary. One limitation here
-is: "Streaming inserts reside temporarily in the streaming buffer, which has different availability
-characteristics than managed storage". So rows inserted via streaming can not be modified using `DELETE`,
-`UPDATE` or `MERGE` ([ref](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-manipulation-language#limitations)).
-Which means our deduplication job can only remove duplicates after about 30min or so.
+#### Invariants
 
-Some of BigQuery's limit worth noting:
+##### At-least-once guarantee from streaming inserts 
+Ensuring exactly-once using streaming inserts is not possible
+([ref](https://cloud.google.com/bigquery/streaming-data-into-bigquery#dataconsistency)). BigQuery's native
+deduplication logic can be helpful here to large extent, but it doesn't guarantee exactly-once. In limited
+experience of running above job for 10 hours, no errors were seen.
+ 
+ 
+##### At-most-once guarantee from deduplication job
+A deduplication job will run periodically (say every few minutes). It will detect duplicates using
+`consensusTimestamp` and delete them from the table. \
+One limitation here is: "Streaming inserts reside temporarily in the streaming buffer, which has different
+availability characteristics than managed storage". So rows inserted via streaming can not be modified using `DELETE`,
+`UPDATE` or `MERGE` ([ref](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-manipulation-language#limitations)).
+Which means deduplication job can remove duplicates only ~30min after the insert. 
+
+Two above invariants together guarantee exactly-once (for data older than say 1hr).
+
+BigQuery service's limits worth noting:
 - Max streaming row size: 1MB
 - Max rows per streaming insert request: 10,000
 - Max row inserts: 100k/sec (with deduplication)
@@ -133,3 +143,5 @@ build trust in the new ETL process.
   - Can we convert downloader, parser, etc in mirror node to libraries?
 2. Finalize which transaction fields to store.
     - Should we add non-fee transfers to bigquery?
+3. Make BQ queries corresponding to our REST APIs.
+
