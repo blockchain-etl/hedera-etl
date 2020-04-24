@@ -17,6 +17,7 @@ BigQuery's storage engine (ColumnIO) and processing engine (Dremel) were designe
 So the schema would be natural adaptation of Hedera's protobuf (with few deviations, mentioned below) and would look like:
 ```
 transactions (table name, not part of column names)
+├── consensusTimestampTruncated: int
 ├── consensusTimestamp: int
 ├── transactionType: int
 ├── entity:
@@ -88,7 +89,7 @@ entity
 └── entityNum: int
 ```
 
-- Table will be partitioned using `consensusTimestamp`.
+- Table will be partitioned using `consensusTimestampTruncated`.
 - One of the possibility was to flatten `transferList` and `nonFeeTransfers` fields. However, the repetition count
 for those fields is not fixed and can be even 10+, so keeping them repeated is the only option.
 - Max depth allowed in BigQuery schema is 16. Our current max depth is around 6.
