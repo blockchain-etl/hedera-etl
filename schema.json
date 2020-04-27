@@ -13,7 +13,7 @@
     "type": "INTEGER"
   },
   {
-    "name": "entityID",
+    "name": "entity",
     "type": "RECORD",
     "fields": [
       {
