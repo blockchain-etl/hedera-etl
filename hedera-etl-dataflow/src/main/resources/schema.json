@@ -34,7 +34,6 @@
       }
     ]
   },
-
   {
     "name": "transaction",
     "type": "RECORD",
@@ -49,7 +48,17 @@
             "fields": [
               {
                 "name": "transactionValidStart",
-                "type": "INTEGER"
+                "type": "RECORD",
+                "fields": [
+                  {
+                    "name": "seconds",
+                    "type": "INTEGER"
+                  },
+                  {
+                    "name": "nanos",
+                    "type": "INTEGER"
+                  }
+                ]
               },
               {
                 "name": "accountID",
@@ -64,7 +73,7 @@
                     "type": "INTEGER"
                   },
                   {
-                    "name": "entityNum",
+                    "name": "accountNum",
                     "type": "INTEGER"
                   }
                 ]
@@ -84,7 +93,7 @@
                 "type": "INTEGER"
               },
               {
-                "name": "entityNum",
+                "name": "accountNum",
                 "type": "INTEGER"
               }
             ]
@@ -128,7 +137,7 @@
                     "type": "INTEGER"
                   },
                   {
-                    "name": "entityNum",
+                    "name": "accountNum",
                     "type": "INTEGER"
                   }
                 ]
@@ -178,7 +187,7 @@
                     "type": "INTEGER"
                   },
                   {
-                    "name": "entityNum",
+                    "name": "accountNum",
                     "type": "INTEGER"
                   }
                 ]
@@ -254,7 +263,7 @@
     ]
   },
   {
-    "name": "record",
+    "name": "transactionRecord",
     "type": "RECORD",
     "fields": [
       {
@@ -263,7 +272,7 @@
         "fields": [
           {
             "name": "status",
-            "type": "INTEGER"
+            "type": "STRING"
           },
           {
             "name": "topicSequenceNumber",
@@ -326,6 +335,7 @@
           {
             "name": "accountAmounts",
             "type": "RECORD",
+            "mode": "REPEATED",
             "fields": [
               {
                 "name": "accountID",
@@ -340,7 +350,7 @@
                     "type": "INTEGER"
                   },
                   {
-                    "name": "entityNum",
+                    "name": "accountNum",
                     "type": "INTEGER"
                   }
                 ]
@@ -358,34 +368,29 @@
   {
     "name": "nonFeeTransfers",
     "type": "RECORD",
+    "mode": "REPEATED",
     "fields": [
       {
-        "name": "accountAmounts",
+        "name": "accountID",
         "type": "RECORD",
         "fields": [
           {
-            "name": "accountID",
-            "type": "RECORD",
-            "fields": [
-              {
-                "name": "shardNum",
-                "type": "INTEGER"
-              },
-              {
-                "name": "realmNum",
-                "type": "INTEGER"
-              },
-              {
-                "name": "entityNum",
-                "type": "INTEGER"
-              }
-            ]
+            "name": "shardNum",
+            "type": "INTEGER"
           },
           {
-            "name": "amount",
+            "name": "realmNum",
+            "type": "INTEGER"
+          },
+          {
+            "name": "accountNum",
             "type": "INTEGER"
           }
         ]
+      },
+      {
+        "name": "amount",
+        "type": "INTEGER"
       }
     ]
   }
