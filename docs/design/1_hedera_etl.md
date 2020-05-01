@@ -101,9 +101,8 @@ These additional fields have been added since they are often used in queries and
 
 ### Ingestion
 
-[Hedera Mirror Node](https://github.com/hashgraph/hedera-mirror-node) will be used to ingest transactions from record
-stream(GCP Bucket/S3) into BigQuery table. New stream files will be processed immediately and uploaded to BQ table
-using streaming inserts.
+ETL will extract transactions (in json format) from a PubSub topic, transform them into BigQuery's TableRow format,
+and load them into BigQuery table via streaming inserts.
 
 ![Ingestion](../images/hedera_etl_ingestion.png)
 
@@ -114,7 +113,6 @@ Ensuring exactly-once using streaming inserts is not possible
 ([ref](https://cloud.google.com/bigquery/streaming-data-into-bigquery#dataconsistency)). BigQuery's native
 deduplication logic can be helpful here to large extent, but it doesn't guarantee exactly-once. In limited
 experience of running above job for 10 hours, no errors were seen.
- 
  
 ##### At-most-once guarantee from deduplication job
 A deduplication job will run periodically (say every few minutes). It will detect duplicates using
@@ -140,9 +138,5 @@ While this process will take longer (10+ days), it'll help us gain experience wi
 build trust in the new ETL process.
 
  ### Outstanding items
-1. Code location?
-  - Can we convert downloader, parser, etc in mirror node to libraries?
-2. Finalize which transaction fields to store.
-    - Should we add non-fee transfers to bigquery?
-3. Make BQ queries corresponding to our REST APIs.
+- Make BQ queries corresponding to our REST APIs.
 

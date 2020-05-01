@@ -21,20 +21,10 @@ package com.hedera.etl;
  */
 
 import org.apache.beam.sdk.io.gcp.pubsub.PubsubOptions;
-import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.ValueProvider;
 
 public interface PubSubToBigQueryPipelineOptions extends PubsubOptions {
-
-    @Description("This determines whether the template reads from a pub/sub subscription or a topic")
-    @Default.Boolean(false)
-    Boolean getUseSubscription();
-    void setUseSubscription(Boolean value);
-
-    @Description("Pub/Sub topic to read the input from")
-    ValueProvider<String> getInputTopic();
-    void setInputTopic(ValueProvider<String> value);
 
     @Description("The Cloud Pub/Sub subscription to consume from. The name should be in the format of " +
             "projects/<project-id>/subscriptions/<subscription-name>.")

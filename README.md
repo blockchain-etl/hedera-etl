@@ -76,9 +76,7 @@ Configure GCP project id, PubSub subscription/topic, and BigQuery tables.
 
 ```bash
 PROJECT_ID=... # Set your project id
-USE_SUBSCRIPTION=true  # Set to false to read from PubSub Topic
-SUBSCRIPTION=projects/${PROJECT_ID}/subscriptions/subscriptionName # Can be left empty if USE_SUBSCRIPTION=false
-TOPIC=  # Set PubSub Topic if USE_SUBSCRIPTION=true
+SUBSCRIPTION=projects/${PROJECT_ID}/subscriptions/subscriptionName
 TRANSACTIONS_TABLE=${PROJECT_ID}:dataset.transactions
 ERRORS_TABLE=${PROJECT_ID}:dataset.errors
 ```
@@ -90,7 +88,6 @@ cd hedera-etl-dataflow
 
 mvn compile exec:java -PdirectRunner -Dexec.args=" \
   --inputSubscription=${SUBSCRIPTION}, \
-  --inputTopic=${TOPIC}, \
   --outputTransactionsTable=${TRANSACTIONS_TABLE}, \
   --outputErrorsTable=${ERRORS_TABLE}"
 ```
@@ -115,8 +112,7 @@ mvn compile exec:java \
  --stagingLocation=${PIPELINE_FOLDER}/staging \
  --tempLocation=${PIPELINE_FOLDER}/temp \
  --templateLocation=${PIPELINE_FOLDER}/template \
- --runner=DataflowRunner \
- --useSubscription=${USE_SUBSCRIPTION}"
+ --runner=DataflowRunner"
 ```
 
 3. Start Dataflow job using the template
@@ -126,7 +122,6 @@ gcloud dataflow jobs run pubsub-to-bigquery-`date +"%Y%m%d-%H%M%S%z"` \
  --gcs-location=${PIPELINE_FOLDER}/template \
  --parameters \
  "inputSubscription=${SUBSCRIPTION}, \
-  inputTopic=${TOPIC}, \
   outputTransactionsTable=${TRANSACTIONS_TABLE}, \
   outputErrorsTable=${ERRORS_TABLE}"
 ```
