@@ -31,10 +31,76 @@
     </licenses>
 
     <modules>
+        <module>hedera-etl-dataflow</module>
     </modules>
 
     <organization>
         <name>Hedera Hashgraph, LLC</name>
         <url>https://hedera.com</url>
     </organization>
+
+    <properties>
+        <jacoco.version>0.8.5</jacoco.version>
+        <java.version>11</java.version>
+        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <!-- To update license headers: ./mvnw license:update-file-header -N -->
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>license-maven-plugin</artifactId>
+                    <version>2.0.0</version>
+                    <configuration>
+                        <canUpdateCopyright>true</canUpdateCopyright>
+                        <excludes>
+                            <exclude>**/target/**/*</exclude>
+                            <exclude>.mvn/**/*</exclude>
+                        </excludes>
+                        <includes>
+                            <include>**/*.java</include>
+                        </includes>
+                        <licenseName>apache_v2</licenseName>
+                        <!-- These contain unprintable characters to suppress showing the delimiters -->
+                        <processEndTag>‍</processEndTag>
+                        <processStartTag>‌</processStartTag>
+                        <sectionDelimiter>​</sectionDelimiter>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>jacoco-report</id>
+                            <phase>test</phase>
+                            <goals>
+                                <goal>report</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

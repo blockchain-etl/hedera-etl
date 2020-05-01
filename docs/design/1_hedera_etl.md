@@ -105,7 +105,7 @@ These additional fields have been added since they are often used in queries and
 stream(GCP Bucket/S3) into BigQuery table. New stream files will be processed immediately and uploaded to BQ table
 using streaming inserts.
 
-![Ingestion](images/hedera_etl_ingestion.png)
+![Ingestion](../images/hedera_etl_ingestion.png)
 
 #### Invariants
 
