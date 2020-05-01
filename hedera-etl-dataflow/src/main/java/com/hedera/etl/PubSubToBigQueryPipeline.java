@@ -35,7 +35,10 @@ public class PubSubToBigQueryPipeline {
 
     void run() {
         Pipeline pipeline = Pipeline.create(options);
-        WriteResult writeResult = pipeline.apply("PubSubListener", getMessages(options))
+        WriteResult writeResult = pipeline
+                .apply("PubSubListener", PubsubIO.readStrings()
+                        .fromSubscription(options.getInputSubscription())
+                        .withIdAttribute("consensusTimestamp"))
                 .apply("WriteToBigQuery", BigQueryIO.<String>write()
                         .to(options.getOutputTransactionsTable())
                         .withFormatFunction(new TransactionJsonToTableRow())
@@ -51,13 +54,5 @@ public class PubSubToBigQueryPipeline {
                 .apply(new BigQueryErrorsSink(
                         options.getOutputErrorsTable(), Utility.getResource("errors_schema.json")));
         pipeline.run();
-    }
-
-    private static PubsubIO.Read<String> getMessages(PubSubToBigQueryPipelineOptions options) {
-        if (options.getUseSubscription()) {
-            return PubsubIO.readStrings().fromSubscription(options.getInputSubscription());
-        } else {
-            return PubsubIO.readStrings().fromTopic(options.getInputTopic());
-        }
     }
 }
