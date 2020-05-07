@@ -28,4 +28,3 @@ bq mk \
   --description "BigQuery deduplication job state" \
   ${BQ_DEDUPE_STATE_TABLE} \
   ${SCRIPT_DIR}/../hedera-dedupe-bigquery/state-schema.json
-

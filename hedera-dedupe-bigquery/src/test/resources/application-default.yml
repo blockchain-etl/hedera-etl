@@ -1,0 +1,15 @@
+hedera:
+  dedupe:
+    projectId:
+    datasetName:
+    tableName:
+    stateTableName:
+    metricsEnabled: false
+    scheduling:
+      enabled: false # Dedupe runs are manually invoked in tests
+
+spring:
+  cloud:
+    gcp:
+      credentials:
+        location:

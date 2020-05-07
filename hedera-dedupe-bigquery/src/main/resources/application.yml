@@ -1,0 +1,8 @@
+spring:
+  cloud:
+    gcp:
+      credentials:
+        location: file:/Users/appy/git/hedera-mirror-node/gcp_keys/appy-dev-272020-dedupe.json
+      bigquery:
+        projectId: ${hedera.dedupe.projectId}
+        datasetName: ${hedera.dedupe.datasetName}
