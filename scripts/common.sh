@@ -19,7 +19,8 @@ NAME=${DEPLOYMENT_NAME}
 
 : ${KEYS_DIR:=`pwd`/${NAME}-keys}
 
-: ${BUCKET_NAME:=${NAME}-hedera-etl}
+: ${BUCKET_PIPELINES:=gs://${NAME}-hedera-etl-pipelines}
+: ${BUCKET_ETL_GCS:=gs://${NAME}-transactions}
 
 : ${PUBSUB_TOPIC_NAME:=${NAME}-transactions-topic}
 : ${PUBSUB_SUBSCRIPTION_ETL_BIGQUERY:=${NAME}-etl-bigquery}
@@ -30,5 +31,6 @@ NAME=${DEPLOYMENT_NAME}
 : ${BQ_DEDUPE_STATE_TABLE:=${PROJECT_ID}:${BQ_DATASET}.dedupe_state}
 
 : ${SA_ETL_BIGQUERY:=${NAME}-etl-bigquery}
+: ${SA_ETL_GCS:=${NAME}-etl-gcs}
 : ${SA_DEDUPLICATION:=${NAME}-deduplication-bigquery}
 : ${SA_IMPORTER:=${NAME}-importer}
