@@ -31,8 +31,8 @@
     </licenses>
 
     <modules>
-        <module>hedera-etl-dataflow</module>
-        <module>hedera-dedupe-bigquery</module>
+        <module>hedera-etl-bigquery</module>
+        <module>hedera-deduplication-bigquery</module>
     </modules>
 
     <organization>

@@ -26,7 +26,7 @@ Duplicates, if inserted, are removed using a deduplication task.
 ### BigQuery
 
 Schema for BigQuery table to store Hedera transactions is in
-[schema.json](hedera-etl-dataflow/src/main/resources/schema.json) file. Please refer corresponding fields'
+[schema.json](hedera-etl-bigquery/src/main/resources/schema.json) file. Please refer corresponding fields'
 documentation in [hedera-protobuf](https://github.com/hashgraph/hedera-protobuf/tree/master/src/main/proto) for more
 info about columns.
 
@@ -45,7 +45,7 @@ bq mk \
   --time_partitioning_type DAY \
   --clustering_fields transactionType \
   project_id:dataset.transactions \
-  hedera-etl-dataflow/src/main/resources/schema.json
+  hedera-etl-bigquery/src/main/resources/schema.json
 ```
 
 ###### Errors table
@@ -59,7 +59,7 @@ bq mk \
   --table \
   --description "Hedera ETL Errors" \
   project_id:dataset.errors \
-  hedera-etl-dataflow/src/main/resources/errors_schema.json
+  hedera-etl-bigquery/src/main/resources/errors_schema.json
 ```
 
 ##### Deduplication state table
@@ -99,7 +99,7 @@ ERRORS_TABLE=${PROJECT_ID}:dataset.errors
 #### Running locally
 
 ```bash
-cd hedera-etl-dataflow
+cd hedera-etl-bigquery
 
 mvn compile exec:java -PdirectRunner -Dexec.args=" \
   --inputSubscription=${SUBSCRIPTION}, \
@@ -119,7 +119,7 @@ PIPELINE_FOLDER=gs://${BUCKET_NAME}/pipelines/etl-pipeline
 2. Build and upload template to GCS bucket
 
 ```bash
-cd hedera-etl-dataflow
+cd hedera-etl-bigquery
 
 mvn compile exec:java \
  -Dexec.args=" \

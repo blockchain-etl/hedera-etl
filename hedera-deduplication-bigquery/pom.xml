@@ -2,8 +2,8 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
-    <artifactId>hedera-bigquery-deduplication</artifactId>
-    <description>Deduplicates rows in BigQuery table</description>
+    <artifactId>hedera-deduplication-bigquery</artifactId>
+    <description>Removes duplicate rows in BigQuery table</description>
     <modelVersion>4.0.0</modelVersion>
     <name>Hedera BigQuery Deduplication</name>
     <packaging>jar</packaging>
