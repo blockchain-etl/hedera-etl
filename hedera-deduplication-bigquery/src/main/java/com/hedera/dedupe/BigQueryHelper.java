@@ -20,37 +20,3 @@ package com.hedera.dedupe;
  * ‍
  */
 
-import com.google.cloud.bigquery.*;
-import java.time.Instant;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.stereotype.Component;
-
-@Log4j2
-@Component
-@RequiredArgsConstructor
-public class BigQueryHelper {
-    @Getter
-    private final BigQuery bigQuery;
-    private final DedupeProperties properties;
-    private final DedupeMetrics dedupeMetrics;
-
-    public TableResult runQuery(String query, String jobName) throws InterruptedException {
-        // timestamp is just for uniqueness
-        JobId jobId = JobId.of(properties.getProjectId(), "dedupe_" + jobName + "_" + Instant.now().getEpochSecond());
-        log.info("### Starting job {}", jobId.getJob());
-        log.info("Query: {}", query);
-        TableResult tableResult = bigQuery.query(QueryJobConfiguration.newBuilder(query).build(), jobId);
-        Job job = bigQuery.getJob(jobId);
-        dedupeMetrics.recordMetrics(jobName, job.getStatistics());
-        return tableResult;
-    }
-
-    public void ensureTableExists(String dataset, String tableName) {
-        Table table = bigQuery.getTable(dataset, tableName);
-        if (table == null) {
-            throw new IllegalArgumentException("Table does not exist : " + dataset + "." + tableName);
-        }
-    }
-}

@@ -20,13 +20,16 @@ package com.hedera.dedupe;
  * ‍
  */
 
-import java.time.Instant;
+import com.google.cloud.bigquery.BigQuery;
+import com.google.cloud.bigquery.Table;
+import com.google.cloud.bigquery.TableId;
 
 public class Utility {
 
-    static String toBigQueryTimestamp(long timestamp) {
-        return Instant.ofEpochSecond(0L, (timestamp / 1000) * 1000).toString();
+    static public void ensureTableExists(BigQuery bigQuery, TableId tableId) {
+        Table table = bigQuery.getTable(tableId);
+        if (table == null) {
+            throw new IllegalArgumentException("Table does not exist : " + tableId);
+        }
     }
-
-
 }

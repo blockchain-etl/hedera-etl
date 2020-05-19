@@ -23,6 +23,7 @@ package com.hedera.dedupe;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.google.cloud.bigquery.QueryJobConfiguration;
+import java.time.Instant;
 import java.util.Random;
 import javax.annotation.Resource;
 import lombok.extern.log4j.Log4j2;
@@ -60,7 +61,7 @@ public class DedupeIntegrationTest {
     @BeforeEach
     void beforeEach() throws Exception {
         transactionsTable = properties.getProjectId() + "." + properties.getDatasetName()
-                + "." + properties.getTableName();
+                + "." + properties.getTransactionsTableName();
         bigQueryHelper.runQuery("DELETE FROM " +  transactionsTable + " WHERE 1 = 1", "reset_table");
         dedupeState.setState(0);
     }
@@ -117,7 +118,7 @@ public class DedupeIntegrationTest {
     }
 
     private String makeRow(long timestamp) {
-        return String.format("( '%s', %d )", Utility.toBigQueryTimestamp(timestamp), timestamp);
+        return String.format("( '%s', %d )", toBigQueryTimestamp(timestamp), timestamp);
     }
 
     private long getNumRows(String tableName) throws Exception {
@@ -127,5 +128,9 @@ public class DedupeIntegrationTest {
             return row.get("count").getLongValue();
         }
         return 0;
+    }
+
+    static String toBigQueryTimestamp(long timestamp) {
+        return Instant.ofEpochSecond(0L, (timestamp / 1000) * 1000).toString();
     }
 }

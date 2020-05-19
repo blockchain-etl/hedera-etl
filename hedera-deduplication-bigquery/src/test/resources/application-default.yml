@@ -2,7 +2,7 @@ hedera:
   dedupe:
     projectId:
     datasetName:
-    tableName:
+    transactionsTableName:
     stateTableName:
     metricsEnabled: false
     scheduling:

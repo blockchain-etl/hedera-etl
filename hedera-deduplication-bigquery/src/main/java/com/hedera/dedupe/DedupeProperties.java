@@ -20,6 +20,7 @@ package com.hedera.dedupe;
  * ‍
  */
 
+import com.google.cloud.bigquery.TableId;
 import javax.validation.constraints.NotBlank;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -37,10 +38,26 @@ public class DedupeProperties {
     private String datasetName;
 
     // Can be blank if initStateTable is true
-    private String tableName;
+    private String transactionsTableName;
 
     @NotBlank
     private String stateTableName;
 
     private boolean metricsEnabled = false;
+
+    public String getTransactionsTableFullName() {
+        return projectId + "." + datasetName + "." + transactionsTableName;
+    }
+
+    public TableId getTransactionsTableId() {
+        return TableId.of(projectId, datasetName, transactionsTableName);
+    }
+
+    public String getStateTableFullName() {
+        return projectId + "." + datasetName + "." + stateTableName;
+    }
+
+    public TableId getStateTableId() {
+        return TableId.of(projectId, datasetName, stateTableName);
+    }
 }
