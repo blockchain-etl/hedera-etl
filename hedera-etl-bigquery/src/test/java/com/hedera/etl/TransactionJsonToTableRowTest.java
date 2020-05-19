@@ -28,13 +28,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TransactionJsonToTableRowTest {
     private final TransactionJsonToTableRow converter = new TransactionJsonToTableRow();
 
     @Test
-    public void testConversion() throws Exception {
+    void testConversion() throws Exception {
         // Given
         List<String> jsonTransactions = readFileLines("data/TransactionJsonToTableRowTest/transactions.txt");
         List<String> expected = readFileLines("data/TransactionJsonToTableRowTest/expectedTableRows.txt");
@@ -51,7 +51,7 @@ public class TransactionJsonToTableRowTest {
 
 
     @Test
-    public void testThrowsExceptionForBadJson() throws Exception {
+    void testThrowsExceptionForBadJson() throws Exception {
         // given
         String badJson = "{\"consensusTimestamp\":1570802944412586000,\"entity\":{\"shardNum\":0,";
 

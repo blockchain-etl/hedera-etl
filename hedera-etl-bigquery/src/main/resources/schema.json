@@ -393,5 +393,10 @@
         "type": "INTEGER"
       }
     ]
+  },
+  {
+    "name": "dedupe",
+    "type": "INTEGER",
+    "description": "Used internally for deduplication of rows."
   }
 ]

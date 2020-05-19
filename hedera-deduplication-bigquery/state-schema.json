@@ -1,0 +1,13 @@
+[
+  {
+    "name": "name",
+    "type": "STRING",
+    "mode": "REQUIRED",
+    "description": "Name of the state variable"
+  },
+  {
+    "name": "value",
+    "type": "STRING",
+    "description": "Value of the state variable"
+  }
+]

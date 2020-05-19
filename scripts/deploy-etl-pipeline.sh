@@ -19,7 +19,7 @@ if [[ ! -f "${JSON_KEY}" ]]; then
 fi
 export GOOGLE_APPLICATION_CREDENTIALS=${JSON_KEY}
 
-cd ${SCRIPT_DIR}/../hedera-etl-dataflow
+cd ${SCRIPT_DIR}/../hedera-etl-bigquery
 
 echo "Building and uploading pipeline templates to GCS"
 

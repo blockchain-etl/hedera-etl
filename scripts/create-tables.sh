@@ -15,17 +15,16 @@ bq mk \
   --time_partitioning_type DAY \
   --clustering_fields transactionType \
   ${BQ_TRANSACTIONS_TABLE} \
-  ${SCRIPT_DIR}/../hedera-etl-dataflow/src/main/resources/schema.json
+  ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/schema.json
 
 bq mk \
   --table \
   --description "Hedera ETL Errors" \
   ${BQ_ERRORS_TABLE} \
-  ${SCRIPT_DIR}/../hedera-etl-dataflow/src/main/resources/errors_schema.json
+  ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/errors_schema.json
 
 bq mk \
   --table \
   --description "BigQuery deduplication job state" \
   ${BQ_DEDUPE_STATE_TABLE} \
   ${SCRIPT_DIR}/../hedera-dedupe-bigquery/state-schema.json
-
