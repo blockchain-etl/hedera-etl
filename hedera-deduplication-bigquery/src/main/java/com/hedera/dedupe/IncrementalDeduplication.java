@@ -20,104 +20,55 @@ package com.hedera.dedupe;
  * ‍
  */
 
-import static com.hedera.dedupe.query.SetStateQuery.STATE_NAME_LAST_VALID_TIMESTAMP;
-
 import com.google.cloud.bigquery.BigQuery;
-import com.hedera.dedupe.query.GetDuplicatesTemplateQuery;
-import com.hedera.dedupe.query.GetStateQuery;
-import com.hedera.dedupe.query.RemoveDuplicatesTemplateQuery;
-import com.hedera.dedupe.query.SetStateQuery;
+import com.google.cloud.bigquery.FieldValue;
+import com.hedera.dedupe.query.UpdateDedupeColumnTemplateQuery;
+import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Duration;
 import java.time.Instant;
-import lombok.extern.log4j.Log4j2;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-/**
- * Dedupe runner periodically executes BigQuery job to deduplicate rows.
- * State across runs is maintained using a separate BigQuery table.
- * If a run exceeds the configured 'fixedRate', next run will be queued and started only after previous one finishes.
- *
- * Deduplication algorithm:
- * (consensusTimestamp is unique for each transaction)
- * 1. Get state: startTimestamp = lastValidTimestamp + 1 (from stateTable). 0 if not set.
- * 2. Flag rows not in the streaming buffer: UPDATE table SET dedupe = 1 WHERE ...;
- * 3. Get endTimestamp: SELECT MAX(consensusTimestamp) FROM table WHERE dedupe IS NOT NULL ....
- * 4. Check for duplicates in [startTimestamp , endTimestamp] window
- * 5. Remove duplicates (if present)
- * 6. Save state: Set lastValidTimestamp in state table to endTimestamp
- */
-@Log4j2
 @Component
-public class IncrementalDeduplication {
-    private final DedupeMetrics metrics;
+public class IncrementalDeduplication extends AbstractDeduplication {
 
-    private final GetDuplicatesTemplateQuery getDuplicatesTemplateQuery;
-    private final RemoveDuplicatesTemplateQuery removeDuplicatesTemplateQuery;
-    private final GetStateQuery getStateQuery;
-    private final SetStateQuery setStateQuery;
+    private final AtomicLong delayGauge = new AtomicLong(0L);
+    private final UpdateDedupeColumnTemplateQuery updateDedupeColumnTemplateQuery;
 
-    public IncrementalDeduplication(DedupeProperties properties, BigQuery bigQuery,
-                                    DedupeMetrics dedupeMetrics, MeterRegistry meterRegistry) {
-        this.metrics = dedupeMetrics;
-        Utility.ensureTableExists(bigQuery, properties.getTransactionsTableId());
-        Utility.ensureTableExists(bigQuery, properties.getStateTableId());
-        String projectId = properties.getProjectId();
-        getDuplicatesTemplateQuery = new GetDuplicatesTemplateQuery(
-                projectId, DedupeType.INCREMENTAL, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
-        removeDuplicatesTemplateQuery = new RemoveDuplicatesTemplateQuery(
-                projectId, DedupeType.INCREMENTAL, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
-        getStateQuery = new GetStateQuery(projectId, properties.getStateTableFullName(), bigQuery, meterRegistry);
-        setStateQuery = new SetStateQuery(projectId, properties.getStateTableFullName(), bigQuery, meterRegistry);
+    public IncrementalDeduplication(DedupeProperties properties, BigQuery bigQuery, MeterRegistry meterRegistry) {
+        super(DedupeType.INCREMENTAL, properties, bigQuery, meterRegistry);
+        updateDedupeColumnTemplateQuery = new UpdateDedupeColumnTemplateQuery(properties.getProjectId(),
+                properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
+        Gauge.builder("dedupe.incremental.delay", delayGauge, AtomicLong::get)
+                .description("Delay in deduplication (now - startTimestamp)")
+                .baseUnit("sec")
+                .register(meterRegistry);
     }
 
     // TODO: lookup
     @Scheduled(fixedRateString = "${hedera.dedupe.fixedRate:300000}") // default: 5 min
     public void run() {
-        try {
-            Instant dedupeStart = Instant.now();
-            metrics.getInvocationsCounter().increment();
-            runDedupe();
-            metrics.getRuntimeGauge().set(Duration.between(dedupeStart, Instant.now()).getSeconds());
-        } catch (Exception e) {
-            log.error("Failed deduplication", e);
-            metrics.getFailuresCounter().increment();
-        }
+        runDedupe();
     }
 
-    private void runDedupe() throws Exception {
-        var state = getStateQuery.run();
-
-        // 1. Get state: startTimestamp = lastValidTimestamp + 1 (from stateTable). 0 if not set.
-        long startTimestamp = 0; // in nanos
-        if (state.containsKey(STATE_NAME_LAST_VALID_TIMESTAMP)) {
-            startTimestamp = state.get(STATE_NAME_LAST_VALID_TIMESTAMP).getLongValue() + 1;
+    @Override
+    TimestampWindow getTimestampWindow(Map<String, FieldValue> state) {
+        long startTimestamp = 0;
+        if (state.containsKey(INCREMENTAL_LATEST_END_TIMESTAMP)) {
+            // no +1 since since we filter on non-unique column
+            startTimestamp = state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue();
         }
-        metrics.getStartTimestampGauge().set(startTimestamp);
+        delayGauge.set(Duration.between(Instant.ofEpochSecond(0L, startTimestamp), Instant.now()).getSeconds());
 
-        // 2. Flag rows not in the streaming buffer: UPDATE table SET dedupe = 1 WHERE ...;
-//        setDedupeState(startTimestamp);
+        long endTimestmap = 0; // TODO: iterate using updateDedupeColumnTemplateQuery
+        return new TimestampWindow(startTimestamp, endTimestmap);
+    }
 
-        // 3. Get endTimestamp: SELECT MAX(consensusTimestamp) FROM table WHERE dedupe IS NOT NULL ....
-//        long endTimestamp = getEndTimestamp(startTimestamp);
-//        if (endTimestamp == startTimestamp) {
-//            return;
-//        }
-        long endTimestamp = 0; // TODO
-
-        // Check for duplicates in [startTimestamp , endTimestamp] window
-        var result = getDuplicatesTemplateQuery.runWith(startTimestamp, endTimestamp);
-
-        // Remove duplicates (if present)
-        if (result.getTotalRows() != 0) {
-            removeDuplicatesTemplateQuery.runWith(startTimestamp, endTimestamp);
-        }
-
-        // 6. Save state: Set lastValidTimestamp in state table to endTimestamp
-        setStateQuery.run(endTimestamp);
-
-        metrics.getDelayGauge().set(
-                Duration.between(Instant.ofEpochSecond(0L, startTimestamp), Instant.now()).getSeconds());
+    @Override
+    void saveState(TimestampWindow timestampWindow) throws InterruptedException {
+        setStateQuery.run(INCREMENTAL_LATEST_END_TIMESTAMP, String.valueOf(timestampWindow.getEndTimestamp()));
     }
 }
