@@ -150,8 +150,19 @@ single transaction gets inserted more than once. Deduplication task removes thes
 guarantee. See class comments on [DedupeRunner](hedera-dedupe-bigquery/src/main/java/com/hedera/dedupe/DedupeRunner.java)
 for more details.
 
+## Development
+
+### Building locally
+
+`mvn clean compile -DskipTests`
+
+### Running tests
+
+TODO params for running bigquery tests: transactionsSchemaLocation, stateSchemaLocation, credentialsLocation, project id
+
 ## More documentation
-[Deployment](docs/deployment.md)
+[Deployment](docs/deployment.md) \
+[Configurations](docs/configurations.md)
 
 ## Code of Conduct
 This project is governed by the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are
