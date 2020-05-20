@@ -2,7 +2,13 @@
 
 # Deploys ETL-Pipeline to GCP Dataflow
 # This script assumes that resources have been allocated using setup-gcp-resources.sh
+#
 # Usage: PROJECT_ID=... DEPLOYMENT_NAME=<testnet/mainnet/etc> KEYS_DIR=... deploy-etl-pipeline.sh
+# Note that KEYS_DIR should be absolute path.
+# Optional parameters:
+# - ETL_TO_GCS: Set to 'true' to start ETL pipeline which will read from PubSub and write to GCS.
+
+set -e
 
 if [[ "${KEYS_DIR}" == "" ]]; then
   echo "KEYS_DIR is not set"
@@ -21,9 +27,9 @@ export GOOGLE_APPLICATION_CREDENTIALS=${JSON_KEY}
 
 cd ${SCRIPT_DIR}/../hedera-etl-bigquery
 
-echo "Building and uploading pipeline templates to GCS"
+echo "Building and uploading template (to GCS) for ETL BigQuery"
 
-PIPELINE_FOLDER=gs://${BUCKET_NAME}/pipelines/etl-bigquery
+PIPELINE_FOLDER=${BUCKET_PIPELINES}/etl-bigquery
 mvn clean compile exec:java \
  -Dexec.args=" \
  --project=${PROJECT_ID} \
@@ -32,10 +38,26 @@ mvn clean compile exec:java \
  --templateLocation=${PIPELINE_FOLDER}/template \
  --runner=DataflowRunner"
 
-echo "Staring Dataflow job"
+echo "Staring ETL BigQuery on Dataflow"
 
 SUBSCRIPTION="projects/${PROJECT_ID}/subscriptions/${PUBSUB_SUBSCRIPTION_ETL_BIGQUERY}"
-gcloud dataflow jobs run etl-pipeline-`date +"%Y%m%d-%H%M%S%z"` \
+gcloud dataflow jobs run etl-bigquery-`date +"%Y%m%d-%H%M%S%z"` \
   --gcs-location=${PIPELINE_FOLDER}/template \
   --service-account-email=${SA_ETL_BIGQUERY}@${PROJECT_ID}.iam.gserviceaccount.com \
-  --parameters "inputSubscription=${SUBSCRIPTION},outputTransactionsTable=${BQ_TRANSACTIONS_TABLE},outputErrorsTable=${BQ_ERRORS_TABLE}"
+  --parameters \
+inputSubscription=${SUBSCRIPTION},\
+outputTransactionsTable=${BQ_TRANSACTIONS_TABLE},\
+outputErrorsTable=${BQ_ERRORS_TABLE}
+
+if [[ "${ETL_TO_GCS}" == "true" ]]; then
+  TEMPLATE_LOCATION=gs://dataflow-templates/2020-03-31-01_RC00/Cloud_PubSub_to_GCS_Text
+  TOPIC="projects/${PROJECT_ID}/topics/${PUBSUB_TOPIC_NAME}"
+  gcloud dataflow jobs run etl-gcs-`date +"%Y%m%d-%H%M%S%z"` \
+    --gcs-location=${TEMPLATE_LOCATION} \
+    --service-account-email=${SA_ETL_GCS}@${PROJECT_ID}.iam.gserviceaccount.com \
+    --parameters \
+inputTopic=${TOPIC},\
+outputDirectory=${BUCKET_ETL_GCS}/,\
+outputFilenamePrefix=transactions-,\
+outputFilenameSuffix=.txt
+fi

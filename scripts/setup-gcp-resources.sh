@@ -4,8 +4,10 @@
 # For more details, refer to docs/deployment.md.
 #
 # Usage: PROJECT_ID=... DEPLOYMENT_NAME=<testnet/mainnet/etc> setup-gcp-resources.sh
-# Optionally, KEYS_DIR can be set to specify the directory where service accounts' keys would be downloaded. Default to
-# './${DEPLOYMENT_NAME}-keys'
+# Optional parameters:
+# - KEYS_DIR: Can be set to specify the directory where service accounts' keys would be downloaded. Defaults to
+#   './${DEPLOYMENT_NAME}-keys'
+# - ETL_TO_GCS: Set to 'true' to provision resources for ETL pipeline which will read from PubSub and write to GCS.
 
 set -e
 
@@ -42,6 +44,15 @@ create_service_account_key()
     --iam-account=${sa_name}@${PROJECT_ID}.iam.gserviceaccount.com
 }
 
+create_pubsub_subscription()
+{
+  gcloud pubsub subscriptions create $1 \
+    --project=${PROJECT_ID} \
+    --topic=${PUBSUB_TOPIC_NAME} \
+    --message-retention-duration=7d \
+    --expiration-period=never
+}
+
 #### Base resources ####
 mkdir -p ${KEYS_DIR}
 
@@ -53,14 +64,10 @@ DATASET_NAME=${BQ_DATASET} ${SCRIPT_DIR}/create-tables.sh
 gcloud pubsub topics create ${PUBSUB_TOPIC_NAME} --project=${PROJECT_ID}
 
 # Create GCS bucket for dataflow pipelines
-gsutil mb -p ${PROJECT_ID} gs://${BUCKET_NAME}
+gsutil mb -b on -p ${PROJECT_ID} ${BUCKET_PIPELINES}
 
 #### Resources for ETL to BigQuery ####
-gcloud pubsub subscriptions create ${PUBSUB_SUBSCRIPTION_ETL_BIGQUERY} \
-  --project=${PROJECT_ID} \
-  --topic=${PUBSUB_TOPIC_NAME} \
-  --message-retention-duration=7d \
-  --expiration-period=never
+create_pubsub_subscription ${PUBSUB_SUBSCRIPTION_ETL_BIGQUERY}
 
 create_service_account_with_roles \
   ${SA_ETL_BIGQUERY} \
@@ -82,3 +89,13 @@ create_service_account_with_roles \
   ${SA_IMPORTER} "roles/pubsub.publisher" "For hedera mirror node importer (publishes to PubSub)"
 
 create_service_account_key ${SA_IMPORTER}
+
+#### Resources for ETL to GCS ####
+if [[ "${ETL_TO_GCS}" == "true" ]]; then
+  gsutil mb -b on -p ${PROJECT_ID} ${BUCKET_ETL_GCS}
+
+  create_service_account_with_roles \
+    ${SA_ETL_GCS} \
+    "roles/dataflow.worker roles/pubsub.editor roles/storage.admin" \
+    "For pubsub --> GCS dataflow controller"
+fi

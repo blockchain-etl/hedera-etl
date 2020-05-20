@@ -113,7 +113,7 @@ mvn compile exec:java -PdirectRunner -Dexec.args=" \
 
 ```bash
 BUCKET_NAME=... # Set your bucket name
-PIPELINE_FOLDER=gs://${BUCKET_NAME}/pipelines/etl-pipeline
+PIPELINE_FOLDER=gs://${BUCKET_NAME}/etl-bigquery
 ```
 
 2. Build and upload template to GCS bucket
@@ -133,7 +133,7 @@ mvn compile exec:java \
 3. Start Dataflow job using the template
 
 ```bash
-gcloud dataflow jobs run etl-pipeline-`date +"%Y%m%d-%H%M%S%z"` \
+gcloud dataflow jobs run etl-bigquery-`date +"%Y%m%d-%H%M%S%z"` \
  --gcs-location=${PIPELINE_FOLDER}/template \
  --parameters "inputSubscription=${SUBSCRIPTION},outputTransactionsTable=${TRANSACTIONS_TABLE},outputErrorsTable=${ERRORS_TABLE}"
 ```
