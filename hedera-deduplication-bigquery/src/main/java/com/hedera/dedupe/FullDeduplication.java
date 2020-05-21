@@ -48,6 +48,9 @@ import org.springframework.stereotype.Component;
  *   the pipeline.</li>
  * </ul>
  * To cover such scenarios, running an infrequent job which does deduplication over all past data is necessary.
+ * <p/>
+ * There is a limit of 4000 partitions that can be updated by a single DML operation. That's more than 10 years of data,
+ * so we don't need to worry about it for now.
  */
 @Component
 public class FullDeduplication extends AbstractDeduplication {
