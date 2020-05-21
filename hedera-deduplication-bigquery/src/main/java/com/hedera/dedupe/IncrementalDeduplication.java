@@ -48,11 +48,11 @@ public class IncrementalDeduplication extends AbstractDeduplication {
     public IncrementalDeduplication(DedupeProperties properties, BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(DedupeType.INCREMENTAL, properties, bigQuery, meterRegistry);
         updateDedupeColumnTemplateQuery = new UpdateDedupeColumnTemplateQuery(properties.getProjectId(),
-                properties.getTransactionsTableFullName(), DedupeType.INCREMENTAL, bigQuery, meterRegistry);
+                DedupeType.INCREMENTAL, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
         getLatestDedupeRowTemplateQuery = new GetLatestDedupeRowTemplateQuery(properties.getProjectId(),
-                properties.getTransactionsTableFullName(), DedupeType.INCREMENTAL, bigQuery, meterRegistry);
+                DedupeType.INCREMENTAL, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
         getNextTimestamp = new GetNextTimestampTemplateQuery(properties.getProjectId(),
-                properties.getTransactionsTableFullName(), DedupeType.INCREMENTAL, bigQuery, meterRegistry);
+                DedupeType.INCREMENTAL, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
         initialProbeInterval = properties.getIncrementalInitialProbeInterval();
         Gauge.builder("dedupe.delay", delayGauge, AtomicLong::get)
                 .tag("name", DedupeType.INCREMENTAL.toString()) // to be consistent with other metrics

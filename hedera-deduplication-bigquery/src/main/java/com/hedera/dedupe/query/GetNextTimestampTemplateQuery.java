@@ -32,7 +32,7 @@ public class GetNextTimestampTemplateQuery extends TemplateQuery {
     private final String transactionsTable;
 
     public GetNextTimestampTemplateQuery(
-            String projectId, String transactionTable, DedupeType dedupeType,
+            String projectId, DedupeType dedupeType, String transactionTable,
             BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(projectId, dedupeType + "_get_next_timestamp", QUERY, bigQuery, meterRegistry);
         this.transactionsTable = transactionTable;

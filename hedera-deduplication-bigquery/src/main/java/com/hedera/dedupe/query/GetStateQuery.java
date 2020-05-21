@@ -34,7 +34,7 @@ import com.hedera.dedupe.DedupeType;
 public class GetStateQuery extends TemplateQuery {
     private static final String QUERY = "SELECT name, value FROM `%s`";
 
-    public GetStateQuery(String projectId, String stateTableName, DedupeType dedupeType,
+    public GetStateQuery(String projectId, DedupeType dedupeType, String stateTableName,
                          BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(projectId, dedupeType + "_get_state", String.format(QUERY, stateTableName), bigQuery, meterRegistry);
     }

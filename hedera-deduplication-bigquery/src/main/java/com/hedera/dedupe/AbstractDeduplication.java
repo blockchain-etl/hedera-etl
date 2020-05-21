@@ -85,9 +85,9 @@ public abstract class AbstractDeduplication {
         removeDuplicates = new RemoveDuplicatesTemplateQuery(
                 projectId, dedupeType, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
         getState = new GetStateQuery(
-                projectId, properties.getStateTableFullName(), dedupeType, bigQuery, meterRegistry);
+                projectId, dedupeType, properties.getStateTableFullName(), bigQuery, meterRegistry);
         setState = new SetStateQuery(
-                projectId, properties.getStateTableFullName(), dedupeType, bigQuery, meterRegistry);
+                projectId, dedupeType, properties.getStateTableFullName(), bigQuery, meterRegistry);
         this.metrics = new DedupeMetrics(dedupeType, meterRegistry);
     }
 
@@ -115,6 +115,7 @@ public abstract class AbstractDeduplication {
                         timestampWindow.startTimestamp, timestampWindow.endTimestamp);
             }
             saveState(timestampWindow);
+            metrics.endTimestampGauge.set(timestampWindow.endTimestamp);
         } catch (Exception e) {
             log.error("Failed deduplication", e);
             metrics.getFailuresCounter().increment();

@@ -41,7 +41,7 @@ public class SetStateQuery extends TemplateQuery {
 
     private final String stateTableName;
 
-    public SetStateQuery(String projectId, String stateTableName, DedupeType dedupeType,
+    public SetStateQuery(String projectId, DedupeType dedupeType, String stateTableName,
                          BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(projectId, dedupeType + "_set_state", QUERY, bigQuery, meterRegistry);
         this.stateTableName = stateTableName;

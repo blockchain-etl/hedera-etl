@@ -32,7 +32,7 @@ public class GetLatestDedupeRowTemplateQuery extends TemplateQuery {
     private final String transactionsTable;
 
     public GetLatestDedupeRowTemplateQuery(
-            String projectId, String transactionTable, DedupeType dedupeType,
+            String projectId, DedupeType dedupeType, String transactionTable,
             BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(projectId, dedupeType + "_get_latest_dedupe_row", QUERY, bigQuery, meterRegistry);
         this.transactionsTable = transactionTable;

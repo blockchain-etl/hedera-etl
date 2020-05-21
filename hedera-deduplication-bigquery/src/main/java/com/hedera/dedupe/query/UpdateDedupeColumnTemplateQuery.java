@@ -32,7 +32,7 @@ public class UpdateDedupeColumnTemplateQuery extends TemplateQuery {
     private final String transactionsTable;
 
     public UpdateDedupeColumnTemplateQuery(
-            String projectId, String transactionTable, DedupeType dedupeType,
+            String projectId, DedupeType dedupeType, String transactionTable,
             BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(projectId, dedupeType + "_update_dedupe_column", QUERY, bigQuery, meterRegistry);
         this.transactionsTable = transactionTable;

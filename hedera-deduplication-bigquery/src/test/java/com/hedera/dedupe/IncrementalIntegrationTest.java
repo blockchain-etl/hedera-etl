@@ -98,7 +98,8 @@ public class IncrementalIntegrationTest {
         transactionsGenerator = new TransactionsGenerator(
                 projectId, transactionsTable, properties.getTransactionsTableId(), bigQuery, meterRegistry);
         getRowCount = new GetRowCountTemplateQuery(projectId, bigQuery, meterRegistry);
-        getState = new GetStateQuery(projectId, properties.getStateTableFullName(), bigQuery, meterRegistry);
+        getState = new GetStateQuery(
+                projectId, DedupeType.INCREMENTAL, properties.getStateTableFullName(), bigQuery, meterRegistry);
     }
 
     @AfterEach
