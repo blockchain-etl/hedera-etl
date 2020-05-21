@@ -86,10 +86,5 @@ public abstract class TemplateQuery {
             runtimeGauge = meterRegistry.gauge("dedupe.job.runtime", tags, new AtomicLong(0L));
             affectedRowsGauge = meterRegistry.gauge("dedupe.job.rows", tags, new AtomicLong(0L));
         }
-
-        void reset() {
-            runtimeGauge.set(0L);
-            affectedRowsGauge.set(0L);
-        }
     }
 }

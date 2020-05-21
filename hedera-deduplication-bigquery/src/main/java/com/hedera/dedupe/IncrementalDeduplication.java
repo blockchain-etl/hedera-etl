@@ -48,13 +48,14 @@ public class IncrementalDeduplication extends AbstractDeduplication {
     public IncrementalDeduplication(DedupeProperties properties, BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(DedupeType.INCREMENTAL, properties, bigQuery, meterRegistry);
         updateDedupeColumnTemplateQuery = new UpdateDedupeColumnTemplateQuery(properties.getProjectId(),
-                properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
+                properties.getTransactionsTableFullName(), DedupeType.INCREMENTAL, bigQuery, meterRegistry);
         getLatestDedupeRowTemplateQuery = new GetLatestDedupeRowTemplateQuery(properties.getProjectId(),
-                properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
+                properties.getTransactionsTableFullName(), DedupeType.INCREMENTAL, bigQuery, meterRegistry);
         getNextTimestamp = new GetNextTimestampTemplateQuery(properties.getProjectId(),
-                properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
+                properties.getTransactionsTableFullName(), DedupeType.INCREMENTAL, bigQuery, meterRegistry);
         initialProbeInterval = properties.getIncrementalInitialProbeInterval();
-        Gauge.builder("dedupe.incremental.delay", delayGauge, AtomicLong::get)
+        Gauge.builder("dedupe.delay", delayGauge, AtomicLong::get)
+                .tag("name", DedupeType.INCREMENTAL.toString()) // to be consistent with other metrics
                 .description("Delay in deduplication (now - startTimestamp)")
                 .baseUnit("sec")
                 .register(meterRegistry);
@@ -88,8 +89,9 @@ public class IncrementalDeduplication extends AbstractDeduplication {
         long baseTimestamp = getNextTimestamp.afterTimestamp(startTimestamp); // can be in streaming buffer
         for (int i = 0; i < 5; i++) { // can make '5' config later
             // quadratic probing, for faster catchup
-            long nextEndTimestamp = baseTimestamp + (initialProbeInterval * (long) Math.pow(2, i));
-            log.info("Probing for endTimestamp = {}", nextEndTimestamp);
+            long interval = (initialProbeInterval * (long) Math.pow(2, i));
+            long nextEndTimestamp = baseTimestamp + interval;
+            log.info("Probing for endTimestamp = {} (interval : {})", nextEndTimestamp, interval);
             try {
                 updateDedupeColumnTemplateQuery.inTimeWindow(startTimestamp, nextEndTimestamp);
             } catch (BigQueryException e) {

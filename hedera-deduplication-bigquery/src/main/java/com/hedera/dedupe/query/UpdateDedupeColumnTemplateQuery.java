@@ -23,6 +23,8 @@ package com.hedera.dedupe.query;
 import com.google.cloud.bigquery.BigQuery;
 import io.micrometer.core.instrument.MeterRegistry;
 
+import com.hedera.dedupe.DedupeType;
+
 public class UpdateDedupeColumnTemplateQuery extends TemplateQuery {
     private static final String QUERY = "UPDATE `%s` SET dedupe = 1 " +
             "WHERE UNIX_SECONDS(consensusTimestampTruncated) BETWEEN %d AND %d";
@@ -30,8 +32,9 @@ public class UpdateDedupeColumnTemplateQuery extends TemplateQuery {
     private final String transactionsTable;
 
     public UpdateDedupeColumnTemplateQuery(
-            String projectId, String transactionTable, BigQuery bigQuery, MeterRegistry meterRegistry) {
-        super(projectId, "update_dedupe_column", QUERY, bigQuery, meterRegistry);
+            String projectId, String transactionTable, DedupeType dedupeType,
+            BigQuery bigQuery, MeterRegistry meterRegistry) {
+        super(projectId, dedupeType + "_update_dedupe_column", QUERY, bigQuery, meterRegistry);
         this.transactionsTable = transactionTable;
     }
 

@@ -26,14 +26,17 @@ import io.micrometer.core.instrument.MeterRegistry;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.hedera.dedupe.DedupeType;
+
 /**
  * Reads state from the given table. Returns Map where key is state field's name and value is state field's value.
  */
 public class GetStateQuery extends TemplateQuery {
     private static final String QUERY = "SELECT name, value FROM `%s`";
 
-    public GetStateQuery(String projectId, String stateTableName, BigQuery bigQuery, MeterRegistry meterRegistry) {
-        super(projectId, "get_state", String.format(QUERY, stateTableName), bigQuery, meterRegistry);
+    public GetStateQuery(String projectId, String stateTableName, DedupeType dedupeType,
+                         BigQuery bigQuery, MeterRegistry meterRegistry) {
+        super(projectId, dedupeType + "_get_state", String.format(QUERY, stateTableName), bigQuery, meterRegistry);
     }
 
     public Map<String, FieldValue> get() throws InterruptedException {

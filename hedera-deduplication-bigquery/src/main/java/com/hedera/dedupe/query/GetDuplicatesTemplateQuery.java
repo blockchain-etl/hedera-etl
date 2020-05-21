@@ -22,10 +22,11 @@ package com.hedera.dedupe.query;
 
 import com.google.cloud.bigquery.BigQuery;
 import com.google.cloud.bigquery.TableResult;
-import com.hedera.dedupe.DedupeType;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.log4j.Log4j2;
+
+import com.hedera.dedupe.DedupeType;
 
 @Log4j2
 public class GetDuplicatesTemplateQuery extends TemplateQuery {
@@ -42,8 +43,9 @@ public class GetDuplicatesTemplateQuery extends TemplateQuery {
             BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(projectId, dedupeType + "_get_duplicates", QUERY, bigQuery, meterRegistry);
         this.transactionsTable = transactionsTable;
-        this.duplicatesCounter = Counter.builder("dedupe." + dedupeType + ".duplicates.count")
-                .description("Count of duplicates found in " + dedupeType + " deduplication")
+        this.duplicatesCounter = Counter.builder("dedupe.duplicates.count")
+                .tag("name", dedupeType.toString())
+                .description("Count of duplicates found in deduplication")
                 .register(meterRegistry);
     }
 

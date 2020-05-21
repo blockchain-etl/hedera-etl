@@ -57,12 +57,12 @@ import com.hedera.dedupe.testhelper.query.TruncateTableTemplateQuery;
 @Log4j2
 @SpringBootTest(properties = {
         "hedera.dedupe.datasetName=${random.string}",
-        "hedera.dedupe.incrementalInitialProbeInterval=8",
+        "hedera.dedupe.incrementalInitialProbeInterval=10",
         "hedera.dedupe.scheduling.enabled=false" // Dedupe runs are manually invoked in tests
 })
 @Tag("gcpBigquery")
 public class IncrementalIntegrationTest {
-    private static final int INITIAL_PROBE_INTERVAL = 8;
+    private static final int INITIAL_PROBE_INTERVAL = 10;
 
     @Resource
     protected BigQuery bigQuery;
@@ -126,14 +126,14 @@ public class IncrementalIntegrationTest {
 
         // run dedupe with streaming data
         deduplication.run();
-        // With initial probe interval = 8, and consensusTimestamp of new rows spanning 50 seconds (expected value)
-        expectedState = expectedState + 32;
+        // +1 for getNextTimestamp after startTimestamp
+        // +40 with initial probe interval = 10 and consensusTimestamp of new rows spanning 50 seconds
+        expectedState = expectedState + 1 + 40;
         assertLatestEndTimestamp(expectedState);
 
         // No new data.
         deduplication.run();
-        expectedState = expectedState + 16;
-        assertLatestEndTimestamp(expectedState);
+        assertLatestEndTimestamp(expectedState); // since (1 + 10) will go into streaming buffer range
     }
 
     // tests for the case when there is large gap in consensusTimestamps

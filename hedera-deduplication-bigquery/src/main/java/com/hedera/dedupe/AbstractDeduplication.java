@@ -84,8 +84,10 @@ public abstract class AbstractDeduplication {
                 projectId, dedupeType, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
         removeDuplicates = new RemoveDuplicatesTemplateQuery(
                 projectId, dedupeType, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
-        getState = new GetStateQuery(projectId, properties.getStateTableFullName(), bigQuery, meterRegistry);
-        setState = new SetStateQuery(projectId, properties.getStateTableFullName(), bigQuery, meterRegistry);
+        getState = new GetStateQuery(
+                projectId, properties.getStateTableFullName(), dedupeType, bigQuery, meterRegistry);
+        setState = new SetStateQuery(
+                projectId, properties.getStateTableFullName(), dedupeType, bigQuery, meterRegistry);
         this.metrics = new DedupeMetrics(dedupeType, meterRegistry);
     }
 

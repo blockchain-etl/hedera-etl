@@ -23,6 +23,8 @@ package com.hedera.dedupe.query;
 import com.google.cloud.bigquery.BigQuery;
 import io.micrometer.core.instrument.MeterRegistry;
 
+import com.hedera.dedupe.DedupeType;
+
 /**
  * Saves state to the given table.
  */
@@ -39,8 +41,9 @@ public class SetStateQuery extends TemplateQuery {
 
     private final String stateTableName;
 
-    public SetStateQuery(String projectId, String stateTableName, BigQuery bigQuery, MeterRegistry meterRegistry) {
-        super(projectId, "set_state", QUERY, bigQuery, meterRegistry);
+    public SetStateQuery(String projectId, String stateTableName, DedupeType dedupeType,
+                         BigQuery bigQuery, MeterRegistry meterRegistry) {
+        super(projectId, dedupeType + "_set_state", QUERY, bigQuery, meterRegistry);
         this.stateTableName = stateTableName;
     }
 

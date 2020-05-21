@@ -23,6 +23,8 @@ package com.hedera.dedupe.query;
 import com.google.cloud.bigquery.BigQuery;
 import io.micrometer.core.instrument.MeterRegistry;
 
+import com.hedera.dedupe.DedupeType;
+
 public class GetNextTimestampTemplateQuery extends TemplateQuery {
     private static final String QUERY = "SELECT MIN(UNIX_SECONDS(consensusTimestampTruncated)) AS ts FROM `%s` " +
             "WHERE UNIX_SECONDS(consensusTimestampTruncated) > %d";
@@ -30,8 +32,9 @@ public class GetNextTimestampTemplateQuery extends TemplateQuery {
     private final String transactionsTable;
 
     public GetNextTimestampTemplateQuery(
-            String projectId, String transactionTable, BigQuery bigQuery, MeterRegistry meterRegistry) {
-        super(projectId, "get_next_timestamp", QUERY, bigQuery, meterRegistry);
+            String projectId, String transactionTable, DedupeType dedupeType,
+            BigQuery bigQuery, MeterRegistry meterRegistry) {
+        super(projectId, dedupeType + "_get_next_timestamp", QUERY, bigQuery, meterRegistry);
         this.transactionsTable = transactionTable;
     }
 

@@ -23,6 +23,8 @@ package com.hedera.dedupe.query;
 import com.google.cloud.bigquery.BigQuery;
 import io.micrometer.core.instrument.MeterRegistry;
 
+import com.hedera.dedupe.DedupeType;
+
 public class GetLatestDedupeRowTemplateQuery extends TemplateQuery {
     private static final String QUERY = "SELECT MAX(UNIX_SECONDS(consensusTimestampTruncated)) AS ts FROM `%s` " +
             "WHERE dedupe = 1 AND UNIX_SECONDS(consensusTimestampTruncated) >= %d";
@@ -30,8 +32,9 @@ public class GetLatestDedupeRowTemplateQuery extends TemplateQuery {
     private final String transactionsTable;
 
     public GetLatestDedupeRowTemplateQuery(
-            String projectId, String transactionTable, BigQuery bigQuery, MeterRegistry meterRegistry) {
-        super(projectId, "get_latest_dedupe_row", QUERY, bigQuery, meterRegistry);
+            String projectId, String transactionTable, DedupeType dedupeType,
+            BigQuery bigQuery, MeterRegistry meterRegistry) {
+        super(projectId, dedupeType + "_get_latest_dedupe_row", QUERY, bigQuery, meterRegistry);
         this.transactionsTable = transactionTable;
     }
 
