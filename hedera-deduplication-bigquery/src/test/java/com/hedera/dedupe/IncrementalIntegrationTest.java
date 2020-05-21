@@ -57,11 +57,13 @@ import com.hedera.dedupe.testhelper.query.TruncateTableTemplateQuery;
 @Log4j2
 @SpringBootTest(properties = {
         "hedera.dedupe.datasetName=${random.string}",
-        "hedera.dedupe.incrementalProbeInterval=8",
+        "hedera.dedupe.incrementalInitialProbeInterval=8",
         "hedera.dedupe.scheduling.enabled=false" // Dedupe runs are manually invoked in tests
 })
 @Tag("gcpBigquery")
 public class IncrementalIntegrationTest {
+    private static final int INITIAL_PROBE_INTERVAL = 8;
+
     @Resource
     protected BigQuery bigQuery;
     @Resource
@@ -106,37 +108,54 @@ public class IncrementalIntegrationTest {
 
     @Test
     void testDeduplication() throws Exception {
-        final int NUM_ROWS = 100;
+        final int numRows = 100;
 
         // add data
-        long endTimestamp = transactionsGenerator.insert(0, NUM_ROWS);
+        long endTimestamp = transactionsGenerator.insert(0, numRows);
         long expectedState = endTimestamp;
 
         // run dedupe with no streaming data
         deduplication.run();
         long actualNumRows = getRowCount.forTable(transactionsTable);
-        var state = getState.get();
-        assertEquals(NUM_ROWS, actualNumRows);
-        assertEquals(expectedState, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
+        assertEquals(numRows, actualNumRows);
+        assertLatestEndTimestamp(expectedState);
 
-        // add more data
-        endTimestamp = transactionsGenerator.insert(endTimestamp + 1, NUM_ROWS);
-        // add streaming data
-        transactionsGenerator.insertStreaming(endTimestamp + 1, NUM_ROWS);
+        // add more data + streaming data
+        endTimestamp = transactionsGenerator.insert(endTimestamp + 1, numRows);
+        transactionsGenerator.insertStreaming(endTimestamp + 1, numRows);
 
         // run dedupe with streaming data
         deduplication.run();
-        state = getState.get();
         // With initial probe interval = 8, and consensusTimestamp of new rows spanning 50 seconds (expected value)
         expectedState = expectedState + 32;
-        assertEquals(expectedState, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
+        assertLatestEndTimestamp(expectedState);
 
         // No new data.
-        // Run dedupe, check num rows and state.
         deduplication.run();
-        state = getState.get();
         expectedState = expectedState + 16;
-        assertEquals(expectedState, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
+        assertLatestEndTimestamp(expectedState);
+    }
+
+    // tests for the case when there is large gap in consensusTimestamps
+    @Test
+    void testGap() throws Exception {
+        final int numRows = 100;
+
+        // add data
+        long endTimestamp1 = transactionsGenerator.insert(0, numRows);
+        // add data with huge gap in timestamps
+        long endTimestamp2 = transactionsGenerator.insert(endTimestamp1 + 100 * INITIAL_PROBE_INTERVAL, numRows);
+
+        deduplication.run();
+        assertLatestEndTimestamp(endTimestamp1);
+
+        deduplication.run();
+        assertLatestEndTimestamp(endTimestamp2);
+    }
+
+    private void assertLatestEndTimestamp(long timestamp) throws InterruptedException {
+        var state = getState.get();
+        assertEquals(timestamp, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
     }
 
     private static void createTable(BigQuery bigQuery, TableId tableId, String jsonSchemaPath) throws Exception {

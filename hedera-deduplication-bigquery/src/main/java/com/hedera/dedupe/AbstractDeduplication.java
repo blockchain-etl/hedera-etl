@@ -26,9 +26,12 @@ import com.google.common.base.Stopwatch;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import io.micrometer.core.instrument.Tag;
 import lombok.Getter;
 import lombok.Value;
 import org.apache.logging.log4j.LogManager;
@@ -94,7 +97,10 @@ public abstract class AbstractDeduplication {
             var state = getState.get();
             var timestampWindow = getTimestampWindow(state);
             metrics.getStartTimestampGauge().set(timestampWindow.startTimestamp);
+            log.info("startTimestamp = {}", timestampWindow.startTimestamp);
+            log.info("endTimestamp = {}", timestampWindow.endTimestamp);
             if (timestampWindow.startTimestamp == timestampWindow.endTimestamp) {
+                log.info("endTimestamp is same as startTimestamp");
                 return;
             }
 
@@ -111,6 +117,7 @@ public abstract class AbstractDeduplication {
             log.error("Failed deduplication", e);
             metrics.getFailuresCounter().increment();
         } finally {
+            log.info("End of deduplication");
             metrics.getRuntimeGauge().set(stopwatch.elapsed(TimeUnit.SECONDS));
         }
     }
@@ -124,20 +131,27 @@ public abstract class AbstractDeduplication {
         private final Counter failuresCounter;
 
         public DedupeMetrics(DedupeType dedupeType, MeterRegistry meterRegistry) {
-            String prefix = "dedupe." + dedupeType + ".";
-            this.invocationsCounter = Counter.builder(prefix + "invocations").register(meterRegistry);
-            this.failuresCounter = Counter.builder(prefix + "failures").register(meterRegistry);
-            Gauge.builder(prefix + "start.timestamp", startTimestampGauge, AtomicLong::get)
+            Collection<Tag> tags = List.of(Tag.of("name", dedupeType.toString()));
+            this.invocationsCounter = Counter.builder("dedupe.invocations")
+                    .tags(tags)
+                    .register(meterRegistry);
+            this.failuresCounter = Counter.builder("dedupe.failures")
+                    .tags(tags)
+                    .register(meterRegistry);
+            Gauge.builder("dedupe.start.timestamp", startTimestampGauge, AtomicLong::get)
                     .description("Start of dedupe window. Last endTimestamp + 1")
                     .baseUnit("ns")
+                    .tags(tags)
                     .register(meterRegistry);
-            Gauge.builder(prefix + "end.timestamp", endTimestampGauge, AtomicLong::get)
+            Gauge.builder("dedupe.end.timestamp", endTimestampGauge, AtomicLong::get)
                     .description("consensusTimestamp of last row in dedupe window.")
                     .baseUnit("ns")
+                    .tags(tags)
                     .register(meterRegistry);
-            Gauge.builder(prefix + "runtime", runtimeGauge, AtomicLong::get)
+            Gauge.builder("dedupe.runtime", runtimeGauge, AtomicLong::get)
                     .description("Total time taken by single dedupe run")
                     .baseUnit("sec")
+                    .tags(tags)
                     .register(meterRegistry);
         }
     }

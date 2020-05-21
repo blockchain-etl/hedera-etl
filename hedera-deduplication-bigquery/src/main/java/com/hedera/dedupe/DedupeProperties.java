@@ -37,7 +37,7 @@ public class DedupeProperties {
     @NotBlank
     private String datasetName;
 
-    // Can be blank if initStateTable is true
+    @NotBlank
     private String transactionsTableName = "transactions";
 
     @NotBlank
@@ -45,7 +45,7 @@ public class DedupeProperties {
 
     private boolean metricsEnabled = false;
 
-    private Long incrementalProbeInterval = 300L; // in sec
+    private Long incrementalInitialProbeInterval = 600L; // in sec
 
     public String getTransactionsTableFullName() {
         return projectId + "." + datasetName + "." + transactionsTableName;

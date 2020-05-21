@@ -33,6 +33,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.hedera.dedupe.query.GetLatestDedupeRowTemplateQuery;
+import com.hedera.dedupe.query.GetNextTimestampTemplateQuery;
 import com.hedera.dedupe.query.UpdateDedupeColumnTemplateQuery;
 
 @Component
@@ -41,7 +42,8 @@ public class IncrementalDeduplication extends AbstractDeduplication {
     private final AtomicLong delayGauge = new AtomicLong(0L);
     private final UpdateDedupeColumnTemplateQuery updateDedupeColumnTemplateQuery;
     private final GetLatestDedupeRowTemplateQuery getLatestDedupeRowTemplateQuery;
-    private final long incrementalProbeInteraval;
+    private final GetNextTimestampTemplateQuery getNextTimestamp;
+    private final long initialProbeInterval;
 
     public IncrementalDeduplication(DedupeProperties properties, BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(DedupeType.INCREMENTAL, properties, bigQuery, meterRegistry);
@@ -49,7 +51,9 @@ public class IncrementalDeduplication extends AbstractDeduplication {
                 properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
         getLatestDedupeRowTemplateQuery = new GetLatestDedupeRowTemplateQuery(properties.getProjectId(),
                 properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
-        incrementalProbeInteraval = properties.getIncrementalProbeInterval();
+        getNextTimestamp = new GetNextTimestampTemplateQuery(properties.getProjectId(),
+                properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
+        initialProbeInterval = properties.getIncrementalInitialProbeInterval();
         Gauge.builder("dedupe.incremental.delay", delayGauge, AtomicLong::get)
                 .description("Delay in deduplication (now - startTimestamp)")
                 .baseUnit("sec")
@@ -71,7 +75,6 @@ public class IncrementalDeduplication extends AbstractDeduplication {
         delayGauge.set(Duration.between(Instant.ofEpochSecond(0L, startTimestamp), Instant.now()).getSeconds());
 
         long endTimestamp = probeEndTimestamp(startTimestamp);
-        log.info("Using endTimestamp = {}", endTimestamp);
         return new TimestampWindow(startTimestamp, endTimestamp);
     }
 
@@ -82,10 +85,10 @@ public class IncrementalDeduplication extends AbstractDeduplication {
 
     private long probeEndTimestamp(long startTimestamp) throws InterruptedException {
         long endTimestamp = startTimestamp;
-        long intervalInSec = incrementalProbeInteraval;
-        int maxIterations = 7; // no special significance
-        for (int i = 0; i < maxIterations; i++) {
-            long nextEndTimestamp = startTimestamp + intervalInSec;
+        long baseTimestamp = getNextTimestamp.afterTimestamp(startTimestamp); // can be in streaming buffer
+        for (int i = 0; i < 5; i++) { // can make '5' config later
+            // quadratic probing, for faster catchup
+            long nextEndTimestamp = baseTimestamp + (initialProbeInterval * (long) Math.pow(2, i));
             log.info("Probing for endTimestamp = {}", nextEndTimestamp);
             try {
                 updateDedupeColumnTemplateQuery.inTimeWindow(startTimestamp, nextEndTimestamp);
@@ -107,7 +110,6 @@ public class IncrementalDeduplication extends AbstractDeduplication {
                 break;
             }
             endTimestamp = nextEndTimestamp;
-            intervalInSec = 2 * intervalInSec; // quadratic probing, for faster catchup
         }
         return endTimestamp;
     }

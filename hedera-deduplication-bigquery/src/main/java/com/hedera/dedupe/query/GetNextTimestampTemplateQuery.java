@@ -23,19 +23,26 @@ package com.hedera.dedupe.query;
 import com.google.cloud.bigquery.BigQuery;
 import io.micrometer.core.instrument.MeterRegistry;
 
-public class UpdateDedupeColumnTemplateQuery extends TemplateQuery {
-    private static final String QUERY = "UPDATE `%s` SET dedupe = 1 " +
-            "WHERE UNIX_SECONDS(consensusTimestampTruncated) BETWEEN %d AND %d";
+public class GetNextTimestampTemplateQuery extends TemplateQuery {
+    private static final String QUERY = "SELECT MIN(UNIX_SECONDS(consensusTimestampTruncated)) AS ts FROM `%s` " +
+            "WHERE UNIX_SECONDS(consensusTimestampTruncated) > %d";
 
     private final String transactionsTable;
 
-    public UpdateDedupeColumnTemplateQuery(
+    public GetNextTimestampTemplateQuery(
             String projectId, String transactionTable, BigQuery bigQuery, MeterRegistry meterRegistry) {
-        super(projectId, "update_dedupe_column", QUERY, bigQuery, meterRegistry);
+        super(projectId, "get_next_timestamp", QUERY, bigQuery, meterRegistry);
         this.transactionsTable = transactionTable;
     }
 
-    public void inTimeWindow(long startTimestamp, long endTimestamp) throws InterruptedException {
-        runWith(transactionsTable, startTimestamp, endTimestamp);
+    public Long afterTimestamp(long timestamp) throws InterruptedException {
+        var tableResult = runWith(transactionsTable, timestamp);
+        var row = tableResult.iterateAll().iterator().next(); // only one row in the result
+        var ts = row.get("ts");
+        if (ts == null) {
+            return null;
+        } else {
+            return ts.getLongValue();
+        }
     }
 }
