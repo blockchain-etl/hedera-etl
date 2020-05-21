@@ -1,4 +1,4 @@
-package com.hedera.dedupe;
+package com.hedera.dedupe.testhelper.query;
 
 /*-
  * ‌
@@ -20,13 +20,20 @@ package com.hedera.dedupe;
  * ‍
  */
 
-import java.time.Instant;
+import com.google.cloud.bigquery.BigQuery;
+import io.micrometer.core.instrument.MeterRegistry;
 
-public class Utility {
+import com.hedera.dedupe.query.TemplateQuery;
 
-    static String toBigQueryTimestamp(long timestamp) {
-        return Instant.ofEpochSecond(0L, (timestamp / 1000) * 1000).toString();
+public class TruncateTableTemplateQuery extends TemplateQuery {
+    private static final String QUERY = "DELETE FROM `%s` WHERE 1 = 1";
+
+    public TruncateTableTemplateQuery(
+            String projectId, BigQuery bigQuery, MeterRegistry meterRegistry) {
+        super(projectId, "truncate_table", QUERY, bigQuery, meterRegistry);
     }
 
-
+    public void truncate(String tableName) throws InterruptedException {
+        runWith(tableName);
+    }
 }

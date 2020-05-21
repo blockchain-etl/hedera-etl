@@ -150,8 +150,37 @@ single transaction gets inserted more than once. Deduplication task removes thes
 guarantee. See class comments on [DedupeRunner](hedera-dedupe-bigquery/src/main/java/com/hedera/dedupe/DedupeRunner.java)
 for more details.
 
+## Development
+
+Build: `mvn clean compile -DskipTests`
+
+Running tests: `mvn test`
+
+#### Running deduplication tests
+
+Due to lack of an emulator for BigQuery, deduplication tests requires GCP BigQuery. To run the tests, you'll need a
+GCP project with BigQuery API enabled and json key of a service account with BigQuery Editor role.
+
+Setup `application.yml` as follows:
+```yaml
+hedera:
+  dedupe:
+    projectId: projectName
+    credentialsLocation: file:/path/to/key.json
+    transactionsSchemaLocation: /path/to/hedera-etl/hedera-etl-bigquery/src/main/resources/schema.json
+    stateSchemaLocation: /path/to/hedera-etl/hedera-deduplication-bigquery/state-schema.json
+```
+
+Use following command to run deduplication tests
+```bash
+mvn test -PgcpBigquery -Dspring.config.additional-location=file:/path/to/dir/with/yaml/file/
+```
+Note that it assumes current directory to be project's root. If that is not the case, change the schema location
+values appropriately.
+
 ## More documentation
-[Deployment](docs/deployment.md)
+[Deployment](docs/deployment.md) \
+[Configurations](docs/configurations.md)
 
 ## Code of Conduct
 This project is governed by the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md). By participating, you are
