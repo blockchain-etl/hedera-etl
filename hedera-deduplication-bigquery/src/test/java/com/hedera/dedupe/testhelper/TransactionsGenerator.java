@@ -1,4 +1,4 @@
-package com.hedera.dedupe;
+package com.hedera.dedupe.testhelper;
 
 /*-
  * ‌
@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.function.Consumer;
 
-import com.hedera.dedupe.query.InsertTemplateQuery;
+import com.hedera.dedupe.testhelper.query.InsertTemplateQuery;
 
 // Generates fake transaction
 public class TransactionsGenerator {

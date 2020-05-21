@@ -1,4 +1,4 @@
-package com.hedera.dedupe.query;
+package com.hedera.dedupe.testhelper.query;
 
 /*-
  * ‌
@@ -22,6 +22,8 @@ package com.hedera.dedupe.query;
 
 import com.google.cloud.bigquery.BigQuery;
 import io.micrometer.core.instrument.MeterRegistry;
+
+import com.hedera.dedupe.query.TemplateQuery;
 
 public class TruncateTableTemplateQuery extends TemplateQuery {
     private static final String QUERY = "DELETE FROM `%s` WHERE 1 = 1";

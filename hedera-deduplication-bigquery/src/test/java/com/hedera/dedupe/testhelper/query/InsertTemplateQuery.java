@@ -1,4 +1,4 @@
-package com.hedera.dedupe.query;
+package com.hedera.dedupe.testhelper.query;
 
 /*-
  * ‌
@@ -21,6 +21,7 @@ package com.hedera.dedupe.query;
  */
 
 import com.google.cloud.bigquery.BigQuery;
+import com.hedera.dedupe.query.TemplateQuery;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.assertj.core.util.Strings;
 

@@ -70,8 +70,9 @@ public class IncrementalDeduplication extends AbstractDeduplication {
         }
         delayGauge.set(Duration.between(Instant.ofEpochSecond(0L, startTimestamp), Instant.now()).getSeconds());
 
-        long endTimestmap = probeEndTimestamp(startTimestamp);
-        return new TimestampWindow(startTimestamp, endTimestmap);
+        long endTimestamp = probeEndTimestamp(startTimestamp);
+        log.info("Using endTimestamp = {}", endTimestamp);
+        return new TimestampWindow(startTimestamp, endTimestamp);
     }
 
     @Override
@@ -82,29 +83,32 @@ public class IncrementalDeduplication extends AbstractDeduplication {
     private long probeEndTimestamp(long startTimestamp) throws InterruptedException {
         long endTimestamp = startTimestamp;
         long intervalInSec = incrementalProbeInteraval;
-        while (true) {
+        int maxIterations = 7; // no special significance
+        for (int i = 0; i < maxIterations; i++) {
             long nextEndTimestamp = startTimestamp + intervalInSec;
             log.info("Probing for endTimestamp = {}", nextEndTimestamp);
             try {
                 updateDedupeColumnTemplateQuery.inTimeWindow(startTimestamp, nextEndTimestamp);
-                log.info("successful");
-                Long latestUpdatedTimestamp = getLatestDedupeRowTemplateQuery.fromTimestamp(startTimestamp);
-                // Can happen if there is no data in buffer (so no JobException).
-                // In rare case, if there happen to be no transactions corresponding to nextEndTimestamp, then it'll
-                // only cause the window to be smaller than what it could have been, but no correctness issues.
-                if (latestUpdatedTimestamp < nextEndTimestamp) {
-                    endTimestamp = latestUpdatedTimestamp;
-                    break;
-                } else {
-                    intervalInSec = 2 * intervalInSec; // quadratic probing, for faster catchup
-                }
             } catch (BigQueryException e) {
                 log.info("failed");
-                endTimestamp = getLatestDedupeRowTemplateQuery.fromTimestamp(startTimestamp);
                 break;
             }
+            log.info("successful");
+            Long latestUpdatedTimestamp = getLatestDedupeRowTemplateQuery.fromTimestamp(startTimestamp);
+            // If there is no data in table
+            if (latestUpdatedTimestamp == null) {
+                break;
+            }
+            // Can happen if there is no data in buffer (so no JobException).
+            // In rare case, if there happen to be no transactions corresponding to nextEndTimestamp, then it'll
+            // only cause the window to be smaller than what it could have been, but no correctness issues.
+            if (latestUpdatedTimestamp < nextEndTimestamp) {
+                endTimestamp = latestUpdatedTimestamp;
+                break;
+            }
+            endTimestamp = nextEndTimestamp;
+            intervalInSec = 2 * intervalInSec; // quadratic probing, for faster catchup
         }
-        log.info("Using endTimestamp = {}", endTimestamp);
         return endTimestamp;
     }
 }

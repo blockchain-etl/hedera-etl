@@ -45,18 +45,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import com.hedera.dedupe.query.GetRowCountTemplateQuery;
 import com.hedera.dedupe.query.GetStateQuery;
-import com.hedera.dedupe.query.TruncateTableTemplateQuery;
+import com.hedera.dedupe.testhelper.TransactionsGenerator;
+import com.hedera.dedupe.testhelper.query.GetRowCountTemplateQuery;
+import com.hedera.dedupe.testhelper.query.TruncateTableTemplateQuery;
 
 /**
- * Due to lack of any fake/mock/emulator for BigQuery, this test requires GCP BigQuery.
- * Setup:
- * - Create transactions and state table. See documentation for more details.
- * - Fill the properties in resources/application-default.yml
- *
- * Test is not run as part of 'mvn test'. To run the test, use following command:
- * - mvn test -PgcpBigquery
+ * Due to lack of an emulator for BigQuery, this test requires GCP BigQuery.
+ * See docs on how to run deduplication tests.
  */
 @Log4j2
 @SpringBootTest(properties = {
@@ -65,9 +61,7 @@ import com.hedera.dedupe.query.TruncateTableTemplateQuery;
         "hedera.dedupe.scheduling.enabled=false" // Dedupe runs are manually invoked in tests
 })
 @Tag("gcpBigquery")
-public class IncrementalDeduplicationIT {
-    static final int NUM_ROWS = 100;
-
+public class IncrementalIntegrationTest {
     @Resource
     protected BigQuery bigQuery;
     @Resource
@@ -112,35 +106,37 @@ public class IncrementalDeduplicationIT {
 
     @Test
     void testDeduplication() throws Exception {
+        final int NUM_ROWS = 100;
+
         // add data
-        long expectedEndTimestamp = transactionsGenerator.insert(0, NUM_ROWS);
+        long endTimestamp = transactionsGenerator.insert(0, NUM_ROWS);
+        long expectedState = endTimestamp;
 
         // run dedupe with no streaming data
         deduplication.run();
         long actualNumRows = getRowCount.forTable(transactionsTable);
         var state = getState.get();
         assertEquals(NUM_ROWS, actualNumRows);
-        assertEquals(expectedEndTimestamp, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
+        assertEquals(expectedState, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
 
         // add more data
-        expectedEndTimestamp = transactionsGenerator.insert(expectedEndTimestamp + 1, NUM_ROWS);
+        endTimestamp = transactionsGenerator.insert(endTimestamp + 1, NUM_ROWS);
         // add streaming data
-        transactionsGenerator.insertStreaming(expectedEndTimestamp + 1, NUM_ROWS);
+        transactionsGenerator.insertStreaming(endTimestamp + 1, NUM_ROWS);
 
         // run dedupe with streaming data
         deduplication.run();
-        actualNumRows = getRowCount.forTable(transactionsTable);
         state = getState.get();
-        assertEquals(2 * NUM_ROWS, actualNumRows);
-        assertEquals(expectedEndTimestamp, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
+        // With initial probe interval = 8, and consensusTimestamp of new rows spanning 50 seconds (expected value)
+        expectedState = expectedState + 32;
+        assertEquals(expectedState, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
 
         // No new data.
         // Run dedupe, check num rows and state.
         deduplication.run();
-        actualNumRows = getRowCount.forTable(transactionsTable);
         state = getState.get();
-        assertEquals(2 * NUM_ROWS, actualNumRows);
-        assertEquals(expectedEndTimestamp, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
+        expectedState = expectedState + 16;
+        assertEquals(expectedState, state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue());
     }
 
     private static void createTable(BigQuery bigQuery, TableId tableId, String jsonSchemaPath) throws Exception {

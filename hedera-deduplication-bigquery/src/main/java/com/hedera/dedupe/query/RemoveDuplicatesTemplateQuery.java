@@ -21,8 +21,9 @@ package com.hedera.dedupe.query;
  */
 
 import com.google.cloud.bigquery.BigQuery;
-import com.hedera.dedupe.DedupeType;
 import io.micrometer.core.instrument.MeterRegistry;
+
+import com.hedera.dedupe.DedupeType;
 
 public class RemoveDuplicatesTemplateQuery extends TemplateQuery {
     private static final String QUERY = "MERGE INTO `%s` AS dest \n" +
@@ -46,7 +47,7 @@ public class RemoveDuplicatesTemplateQuery extends TemplateQuery {
     public RemoveDuplicatesTemplateQuery(
             String projectId, DedupeType dedupeType, String transactionsTable,
             BigQuery bigQuery, MeterRegistry meterRegistry) {
-        super(projectId, dedupeType + "_get_duplicates", QUERY, bigQuery, meterRegistry);
+        super(projectId, dedupeType + "_remove_duplicates", QUERY, bigQuery, meterRegistry);
         this.transactionsTable = transactionsTable;
     }
 

@@ -152,13 +152,25 @@ for more details.
 
 ## Development
 
-### Building locally
+Build: `mvn clean compile -DskipTests`
 
-`mvn clean compile -DskipTests`
+Running tests: `mvn test`
 
-### Running tests
+#### Running deduplication tests
 
-TODO params for running bigquery tests: transactionsSchemaLocation, stateSchemaLocation, credentialsLocation, project id
+Due to lack of an emulator for BigQuery, deduplication tests requires GCP BigQuery. To run the tests, you'll need a
+GCP project with BigQuery API enabled and json key of a service account with BigQuery Editor role.
+
+Use following command to run deduplication tests
+```bash
+mvn test -PgcpBigquery \
+  -Dspring.hedera.dedupe.projectId=projectId \
+  -Dspring.hedera.dedupe.credentialsLocation=file:/path/to/key.json \
+  -Dspring.hedera.dedupe.transactionsSchemaLocation=`pwd`/hedera-etl-bigquery/src/main/resources/schema.json \
+  -Dspring.hedera.dedupe.stateSchemaLocation=`pwd`/hedera-etl/hedera-deduplication-bigquery/state-schema.json
+```
+Note that it assumes current directory to be project's root. If that is not the case, change the schema location
+values appropriately.
 
 ## More documentation
 [Deployment](docs/deployment.md) \
