@@ -1,8 +1,8 @@
 spring:
   cloud:
     gcp:
+      projectId: ${hedera.dedupe.projectId}
       credentials:
         location: ${hedera.dedupe.credentialsLocation}
       bigquery:
-        projectId: ${hedera.dedupe.projectId}
         datasetName: ${hedera.dedupe.datasetName}
