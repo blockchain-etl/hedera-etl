@@ -35,8 +35,6 @@ bq mk \
   ${BQ_TRANSACTION_TYPES_TABLE} \
   ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/transaction-types-schema.json
 
-# Not using 'bq load' or 'bq insert' because of lack of flag to specify project_id. That'd require operator to
-# chane default project in GCloud SDK which is not good.
 echo "INSERT INTO ${PROJECT_ID}.${DATASET}.transaction_types (id, name) VALUES \
 (7, 'CONTRACTCALL'), \
 (8, 'CONTRACTCREATEINSTANCE'), \
