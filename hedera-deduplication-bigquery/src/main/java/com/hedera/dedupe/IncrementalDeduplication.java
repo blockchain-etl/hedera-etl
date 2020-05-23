@@ -57,7 +57,7 @@ public class IncrementalDeduplication extends AbstractDeduplication {
         Gauge.builder("dedupe.delay", delayGauge, AtomicLong::get)
                 .tag("name", DedupeType.INCREMENTAL.toString()) // to be consistent with other metrics
                 .description("Delay in deduplication (now - startTimestamp)")
-                .baseUnit("sec")
+                .baseUnit("s")
                 .register(meterRegistry);
     }
 

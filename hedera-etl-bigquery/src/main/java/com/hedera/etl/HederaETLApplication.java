@@ -26,6 +26,6 @@ public class HederaETLApplication {
     public static void main(String[] args) {
         PubSubToBigQueryPipelineOptions options =
                 PipelineOptionsFactory.fromArgs(args).withValidation().as(PubSubToBigQueryPipelineOptions.class);
-        new PubSubToBigQueryPipeline(options, Utility.getResource("schema.json")).run();
+        new PubSubToBigQueryPipeline(options, Utility.getResource("transactions-schema.json")).run();
     }
 }

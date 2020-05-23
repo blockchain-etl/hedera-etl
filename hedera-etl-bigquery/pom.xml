@@ -34,7 +34,6 @@
                     <groupId>org.apache.beam</groupId>
                     <artifactId>beam-runners-direct-java</artifactId>
                     <version>${beam.version}</version>
-                    <type>runtime</type>
                 </dependency>
                 <dependency>
                     <groupId>org.apache.logging.log4j</groupId>

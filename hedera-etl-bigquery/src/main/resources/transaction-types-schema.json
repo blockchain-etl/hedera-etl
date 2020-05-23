@@ -1,0 +1,12 @@
+[
+  {
+    "name": "id",
+    "type": "INTEGER",
+    "description": "transactionType id"
+  },
+  {
+    "name": "name",
+    "type": "STRING",
+    "description": "transactionType name"
+  }
+]

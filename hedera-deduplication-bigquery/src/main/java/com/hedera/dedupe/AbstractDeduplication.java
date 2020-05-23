@@ -153,7 +153,7 @@ public abstract class AbstractDeduplication {
                     .register(meterRegistry);
             Gauge.builder("dedupe.runtime", runtimeGauge, AtomicLong::get)
                     .description("Total time taken by single dedupe run")
-                    .baseUnit("sec")
+                    .baseUnit("s")
                     .tags(tags)
                     .register(meterRegistry);
         }
