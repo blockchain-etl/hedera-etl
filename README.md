@@ -26,7 +26,7 @@ Duplicates, if inserted, are removed using a deduplication task.
 ### BigQuery
 
 Schema for BigQuery table to store Hedera transactions is in
-[schema.json](hedera-etl-bigquery/src/main/resources/schema.json) file. Please refer corresponding fields'
+[transactions-schema.json](hedera-etl-bigquery/src/main/resources/transactions-schema.json) file. Please refer corresponding fields'
 documentation in [hedera-protobuf](https://github.com/hashgraph/hedera-protobuf/tree/master/src/main/proto) for more
 info about columns.
 
@@ -45,7 +45,7 @@ bq mk \
   --time_partitioning_type DAY \
   --clustering_fields transactionType \
   project_id:dataset.transactions \
-  hedera-etl-bigquery/src/main/resources/schema.json
+  hedera-etl-bigquery/src/main/resources/transactions-schema.json
 ```
 
 ###### Errors table
@@ -59,7 +59,7 @@ bq mk \
   --table \
   --description "Hedera ETL Errors" \
   project_id:dataset.errors \
-  hedera-etl-bigquery/src/main/resources/errors_schema.json
+  hedera-etl-bigquery/src/main/resources/errors-schema.json
 ```
 
 ##### Deduplication state table
@@ -72,7 +72,7 @@ bq mk \
   --description "BigQuery deduplication task state" \
   --description "Hedera Dedupe " \
   project_id:dataset.dedupe_state \
-  hedera-dedupe-bigquery/state-schema.json
+  hedera-etl-bigquery/src/main/resources/state-schema.json
 ```
 
 
@@ -167,8 +167,8 @@ hedera:
   dedupe:
     projectId: projectName
     credentialsLocation: file:/path/to/key.json
-    transactionsSchemaLocation: /path/to/hedera-etl/hedera-etl-bigquery/src/main/resources/schema.json
-    stateSchemaLocation: /path/to/hedera-etl/hedera-deduplication-bigquery/state-schema.json
+    transactionsSchemaLocation: /path/to/hedera-etl/hedera-etl-bigquery/src/main/resources/transactions-schema.json
+    stateSchemaLocation: /path/to/hedera-etl/hedera-etl-bigquery/src/main/resources/state-schema.json
 ```
 
 Use following command to run deduplication tests

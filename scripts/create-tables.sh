@@ -15,16 +15,50 @@ bq mk \
   --time_partitioning_type DAY \
   --clustering_fields transactionType \
   ${BQ_TRANSACTIONS_TABLE} \
-  ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/schema.json
+  ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/transactions-schema.json
 
 bq mk \
   --table \
   --description "Hedera ETL Errors" \
   ${BQ_ERRORS_TABLE} \
-  ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/errors_schema.json
+  ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/errors-schema.json
 
 bq mk \
   --table \
   --description "BigQuery deduplication job state" \
   ${BQ_DEDUPE_STATE_TABLE} \
-  ${SCRIPT_DIR}/../hedera-dedupe-bigquery/state-schema.json
+  ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/state-schema.json
+
+bq mk \
+  --table \
+  --description "Transaction Types" \
+  ${BQ_TRANSACTION_TYPES_TABLE} \
+  ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/transaction-types-schema.json
+
+# Not using 'bq load' or 'bq insert' because of lack of flag to specify project_id. That'd require operator to
+# chane default project in GCloud SDK which is not good.
+echo "INSERT INTO ${PROJECT_ID}.${DATASET}.transaction_types (id, name) VALUES \
+(7, 'CONTRACTCALL'), \
+(8, 'CONTRACTCREATEINSTANCE'), \
+(9, 'CONTRACTUPDATEINSTANCE'), \
+(10, 'CRYPTOADDLIVEHASH'), \
+(11, 'CRYPTOCREATEACCOUNT'), \
+(12, 'CRYPTODELETE'), \
+(13, 'CRYPTODELETELIVEHASH'), \
+(14, 'CRYPTOTRANSFER'), \
+(15, 'CRYPTOUPDATEACCOUNT'), \
+(16, 'FILEAPPEND'), \
+(17, 'FILECREATE'), \
+(18, 'FILEDELETE'), \
+(19, 'FILEUPDATE'), \
+(20, 'SYSTEMDELETE'), \
+(21, 'SYSTEMUNDELETE'), \
+(22, 'CONTRACTDELETEINSTANCE'), \
+(23, 'FREEZE'), \
+(24, 'CONSENSUSCREATETOPIC'), \
+(25, 'CONSENSUSUPDATETOPIC'), \
+(26, 'CONSENSUSDELETETOPIC'), \
+(27, 'CONSENSUSSUBMITMESSAGE')" | bq query --nouse_legacy_sql
+
+
+

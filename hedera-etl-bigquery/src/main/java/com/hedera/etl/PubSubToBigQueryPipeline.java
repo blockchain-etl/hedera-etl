@@ -52,7 +52,7 @@ public class PubSubToBigQueryPipeline {
                         .withFailedInsertRetryPolicy(InsertRetryPolicy.retryTransientErrors()));
         writeResult.getFailedInsertsWithErr()
                 .apply(new BigQueryErrorsSink(
-                        options.getOutputErrorsTable(), Utility.getResource("errors_schema.json")));
+                        options.getOutputErrorsTable(), Utility.getResource("errors-schema.json")));
         pipeline.run();
     }
 }
