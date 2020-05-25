@@ -13,7 +13,8 @@ Following configurations can be set for deduplication job:
 | `hedera.dedupe.datasetName`                        |                  | Name of BigQuery dataset containing the tables |
 | `hedera.dedupe.fullFixedRate`                      | 84600000 (24 hr) | Rate at which full deduplication should be run. Format: milliseconds |
 | `hedera.dedupe.incrementalFixedRate`               | 300000 (5 min)   | Rate at which incremental deduplication should be run. Format: milliseconds |
-| `hedera.dedupe.incrementalInitialProbeInterval`    | 600 (10 min)     | Initial interval when probing for endTimestamp in incremental deduplication. Format: seconds |
+| `hedera.dedupe.catchupProbeIntervalSec`            | 21600 (6 hr)     | Interval to calculate endTimestamp when deduplication is catching up |
+| `hedera.dedupe.steadyStateProbeIntervalSec`        | 600 (10 min)     | Interval to calculate endTimestamp when deduplication is all caught up and in steady state |
 | `hedera.dedupe.metricsEnabled`                     | false            | Set to true to publish metrics to Stackdriver |
 | `hedera.dedupe.projectId`                          |                  | Project containing the BigQuery tables |
 | `hedera.dedupe.stateTableName`                     | state            | Name of state table |

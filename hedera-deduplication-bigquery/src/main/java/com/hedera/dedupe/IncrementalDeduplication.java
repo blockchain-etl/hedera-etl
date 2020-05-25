@@ -43,7 +43,8 @@ public class IncrementalDeduplication extends AbstractDeduplication {
     private final UpdateDedupeColumnTemplateQuery updateDedupeColumnTemplateQuery;
     private final GetLatestDedupeRowTemplateQuery getLatestDedupeRowTemplateQuery;
     private final GetNextTimestampTemplateQuery getNextTimestamp;
-    private final long initialProbeInterval;
+    private final int catchupProbeIntervalSec;
+    private final int steadyStateProbeIntervalSec;
 
     public IncrementalDeduplication(DedupeProperties properties, BigQuery bigQuery, MeterRegistry meterRegistry) {
         super(DedupeType.INCREMENTAL, properties, bigQuery, meterRegistry);
@@ -53,7 +54,8 @@ public class IncrementalDeduplication extends AbstractDeduplication {
                 DedupeType.INCREMENTAL, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
         getNextTimestamp = new GetNextTimestampTemplateQuery(properties.getProjectId(),
                 DedupeType.INCREMENTAL, properties.getTransactionsTableFullName(), bigQuery, meterRegistry);
-        initialProbeInterval = properties.getIncrementalInitialProbeInterval();
+        catchupProbeIntervalSec = properties.getCatchupProbeIntervalSec();
+        steadyStateProbeIntervalSec = properties.getSteadyStateProbeIntervalSec();
         Gauge.builder("dedupe.delay", delayGauge, AtomicLong::get)
                 .tag("name", DedupeType.INCREMENTAL.toString()) // to be consistent with other metrics
                 .description("Delay in deduplication (now - startTimestamp)")
@@ -73,7 +75,7 @@ public class IncrementalDeduplication extends AbstractDeduplication {
             // no +1 since since we filter on non-unique column
             startTimestamp = state.get(INCREMENTAL_LATEST_END_TIMESTAMP).getLongValue();
         }
-        delayGauge.set(Duration.between(Instant.ofEpochSecond(0L, startTimestamp), Instant.now()).getSeconds());
+        delayGauge.set(Duration.between(Instant.ofEpochSecond(startTimestamp), Instant.now()).getSeconds());
 
         long endTimestamp = probeEndTimestamp(startTimestamp);
         return new TimestampWindow(startTimestamp, endTimestamp);
@@ -85,34 +87,22 @@ public class IncrementalDeduplication extends AbstractDeduplication {
     }
 
     private long probeEndTimestamp(long startTimestamp) throws InterruptedException {
-        long endTimestamp = startTimestamp;
         long baseTimestamp = getNextTimestamp.afterTimestamp(startTimestamp); // can be in streaming buffer
-        for (int i = 0; i < 5; i++) { // can make '5' config later
-            // quadratic probing, for faster catchup
-            long interval = (initialProbeInterval * (long) Math.pow(2, i));
-            long nextEndTimestamp = baseTimestamp + interval;
-            log.info("Probing for endTimestamp = {} (interval : {})", nextEndTimestamp, interval);
-            try {
-                updateDedupeColumnTemplateQuery.inTimeWindow(startTimestamp, nextEndTimestamp);
-            } catch (BigQueryException e) {
-                log.info("failed");
-                break;
-            }
+        log.info("Next timestamp greater than startTimestamp ({}) is {}", startTimestamp, baseTimestamp);
+        try {
+            // Try smaller steady state interval first
+            long probeTimestamp = baseTimestamp + steadyStateProbeIntervalSec;
+            log.info("Probing for endTimestamp = {} (interval : {})", probeTimestamp, steadyStateProbeIntervalSec);
+            updateDedupeColumnTemplateQuery.inTimeWindow(startTimestamp, probeTimestamp);
             log.info("successful");
-            Long latestUpdatedTimestamp = getLatestDedupeRowTemplateQuery.fromTimestamp(startTimestamp);
-            // If there is no data in table
-            if (latestUpdatedTimestamp == null) {
-                break;
-            }
-            // Can happen if there is no data in buffer (so no JobException).
-            // In rare case, if there happen to be no transactions corresponding to nextEndTimestamp, then it'll
-            // only cause the window to be smaller than what it could have been, but no correctness issues.
-            if (latestUpdatedTimestamp < nextEndTimestamp) {
-                endTimestamp = latestUpdatedTimestamp;
-                break;
-            }
-            endTimestamp = nextEndTimestamp;
+
+            probeTimestamp = baseTimestamp + catchupProbeIntervalSec;
+            log.info("Probing for endTimestamp = {} (interval : {})", probeTimestamp, catchupProbeIntervalSec);
+            updateDedupeColumnTemplateQuery.inTimeWindow(startTimestamp, probeTimestamp);
+            log.info("successful");
+        } catch (BigQueryException e) {
+            log.info("failed");
         }
-        return endTimestamp;
+        return getLatestDedupeRowTemplateQuery.fromTimestamp(startTimestamp);
     }
 }

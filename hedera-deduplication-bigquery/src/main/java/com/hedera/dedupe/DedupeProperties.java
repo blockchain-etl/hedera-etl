@@ -45,7 +45,8 @@ public class DedupeProperties {
 
     private boolean metricsEnabled = false;
 
-    private Long incrementalInitialProbeInterval = 600L; // in sec
+    private int catchupProbeIntervalSec = 6 * 60 * 60; // 6 hours
+    private int steadyStateProbeIntervalSec = 10 * 60; // 10 min
 
     public String getTransactionsTableFullName() {
         return projectId + "." + datasetName + "." + transactionsTableName;

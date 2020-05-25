@@ -57,12 +57,14 @@ import com.hedera.dedupe.testhelper.query.TruncateTableTemplateQuery;
 @Log4j2
 @SpringBootTest(properties = {
         "hedera.dedupe.datasetName=${random.string}",
-        "hedera.dedupe.incrementalInitialProbeInterval=10",
+        "hedera.dedupe.catchupProbeIntervalSec=1000",
+        "hedera.dedupe.steadyStateProbeIntervalSec=10",
         "hedera.dedupe.scheduling.enabled=false" // Dedupe runs are manually invoked in tests
 })
 @Tag("gcpBigquery")
 public class IncrementalIntegrationTest {
-    private static final int INITIAL_PROBE_INTERVAL = 10;
+    private static final int CATCH_PROBE_INTERVAL = 1000;
+    private static final int STEADY_STATE_PROBE_INTERVAL = 10;
 
     @Resource
     protected BigQuery bigQuery;
@@ -128,13 +130,13 @@ public class IncrementalIntegrationTest {
         // run dedupe with streaming data
         deduplication.run();
         // +1 for getNextTimestamp after startTimestamp
-        // +40 with initial probe interval = 10 and consensusTimestamp of new rows spanning 50 seconds
-        expectedState = expectedState + 1 + 40;
+        expectedState = expectedState + 1 + STEADY_STATE_PROBE_INTERVAL;
         assertLatestEndTimestamp(expectedState);
 
         // No new data.
         deduplication.run();
-        assertLatestEndTimestamp(expectedState); // since (1 + 10) will go into streaming buffer range
+        expectedState = expectedState + 1 + STEADY_STATE_PROBE_INTERVAL;
+        assertLatestEndTimestamp(expectedState);
     }
 
     // tests for the case when there is large gap in consensusTimestamps
@@ -142,12 +144,12 @@ public class IncrementalIntegrationTest {
     void testGap() throws Exception {
         final int numRows = 100;
 
-        // add data
+        // Add chunk 1 data
         long endTimestamp1 = transactionsGenerator.insert(0, numRows);
-        // add data with huge gap in timestamps
-        long endTimestamp2 = transactionsGenerator.insert(endTimestamp1 + 100 * INITIAL_PROBE_INTERVAL, numRows);
+        // Add chunk 2 data with huge gap in timestamps, bigger even than catchup interval
+        long endTimestamp2 = transactionsGenerator.insert(endTimestamp1 + 10 * CATCH_PROBE_INTERVAL, numRows);
 
-        deduplication.run();
+        deduplication.run(); // will deduplicate all of chunk 1
         assertLatestEndTimestamp(endTimestamp1);
 
         deduplication.run();
