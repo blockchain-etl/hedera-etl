@@ -41,7 +41,7 @@ public class DedupeProperties {
     private String transactionsTableName = "transactions";
 
     @NotBlank
-    private String stateTableName = "state";
+    private String stateTableName = "dedupe_state";
 
     private boolean metricsEnabled = false;
 

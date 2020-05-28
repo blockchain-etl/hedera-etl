@@ -19,8 +19,8 @@ NAME=${DEPLOYMENT_NAME}
 
 : ${KEYS_DIR:=`pwd`/${NAME}-keys}
 
-: ${BUCKET_PIPELINES:=gs://${NAME}-hedera-etl-pipelines}
-: ${BUCKET_ETL_GCS:=gs://${NAME}-transactions}
+: ${BUCKET_PIPELINES:=gs://${PROJECT_ID}-${NAME}-pipelines} # Should be globally unique
+: ${BUCKET_ETL_GCS:=gs://${PROJECT_ID}-${NAME}-transactions}
 
 : ${PUBSUB_TOPIC_NAME:=${NAME}-transactions-topic}
 : ${PUBSUB_SUBSCRIPTION_ETL_BIGQUERY:=${NAME}-etl-bigquery}
@@ -35,3 +35,7 @@ NAME=${DEPLOYMENT_NAME}
 : ${SA_ETL_GCS:=${NAME}-etl-gcs}
 : ${SA_DEDUPLICATION:=${NAME}-deduplication-bigquery}
 : ${SA_IMPORTER:=${NAME}-importer}
+
+NOW=`date +"%Y%m%d-%H%M%S%z"`
+: ${JOB_NAME_ETL_BIGQUERY:=${NAME}-etl-bigquery-${NOW}}
+: ${JOB_NAME_ETL_GCS:=${NAME}-etl-gcs-${NOW}}

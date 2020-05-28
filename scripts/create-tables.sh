@@ -35,7 +35,7 @@ bq mk \
   ${BQ_TRANSACTION_TYPES_TABLE} \
   ${SCRIPT_DIR}/../hedera-etl-bigquery/src/main/resources/transaction-types-schema.json
 
-echo "INSERT INTO ${PROJECT_ID}.${DATASET}.transaction_types (id, name) VALUES \
+echo "INSERT INTO ${PROJECT_ID}.${DATASET_NAME}.transaction_types (id, name) VALUES \
 (7, 'CONTRACTCALL'), \
 (8, 'CONTRACTCREATEINSTANCE'), \
 (9, 'CONTRACTUPDATEINSTANCE'), \
