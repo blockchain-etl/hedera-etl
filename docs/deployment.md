@@ -1,7 +1,7 @@
 # Deployment
 
 ## Requirements:
-1. BigQuery tables : transactions, errors, dedupe_state
+1. BigQuery tables : transactions, errors, dedupe_state, transaction_types
 1. PubSub topic for transactions
 1. GCS bucket : Used for dataflow templates, staging and as temp location
 1. ETL Pipeline from PubSub to BigQuery:
@@ -27,11 +27,11 @@ Resource creation can be automated using [setup-gcp-resources.sh](../scripts/set
 
 Use [deploy-etl-pipeline.sh](../scripts/deploy-etl-pipeline.sh) script to deploy the etl pipeline to GCP Dataflow.
 
-1. Deploy Deduplication task
+2. Deploy Deduplication task
 
 TODO
 
-1. Deploy Hedera Mirror Node Importer to publish transactions to the pubsub topic. See
+3. Deploy Hedera Mirror Node Importer to publish transactions to the pubsub topic. See
 Mirror Nodes [installation](https://github.com/hashgraph/hedera-mirror-node/blob/master/docs/installation.md) and
 [configuration](https://github.com/hashgraph/hedera-mirror-node/blob/master/docs/configuration.md#importer) for more
 details.

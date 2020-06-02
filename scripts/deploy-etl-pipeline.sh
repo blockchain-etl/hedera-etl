@@ -41,9 +41,10 @@ mvn clean compile exec:java \
 echo "Staring ETL BigQuery on Dataflow"
 
 SUBSCRIPTION="projects/${PROJECT_ID}/subscriptions/${PUBSUB_SUBSCRIPTION_ETL_BIGQUERY}"
-gcloud dataflow jobs run etl-bigquery-`date +"%Y%m%d-%H%M%S%z"` \
+gcloud dataflow jobs run ${JOB_NAME_ETL_BIGQUERY} \
   --gcs-location=${PIPELINE_FOLDER}/template \
   --service-account-email=${SA_ETL_BIGQUERY}@${PROJECT_ID}.iam.gserviceaccount.com \
+  --project=${PROJECT_ID} \
   --parameters \
 inputSubscription=${SUBSCRIPTION},\
 outputTransactionsTable=${BQ_TRANSACTIONS_TABLE},\
@@ -52,9 +53,10 @@ outputErrorsTable=${BQ_ERRORS_TABLE}
 if [[ "${ETL_TO_GCS}" == "true" ]]; then
   TEMPLATE_LOCATION=gs://dataflow-templates/2020-03-31-01_RC00/Cloud_PubSub_to_GCS_Text
   TOPIC="projects/${PROJECT_ID}/topics/${PUBSUB_TOPIC_NAME}"
-  gcloud dataflow jobs run etl-gcs-`date +"%Y%m%d-%H%M%S%z"` \
+  gcloud dataflow jobs run ${JOB_NAME_ETL_GCS} \
     --gcs-location=${TEMPLATE_LOCATION} \
     --service-account-email=${SA_ETL_GCS}@${PROJECT_ID}.iam.gserviceaccount.com \
+    --project=${PROJECT_ID} \
     --parameters \
 inputTopic=${TOPIC},\
 outputDirectory=${BUCKET_ETL_GCS}/,\
