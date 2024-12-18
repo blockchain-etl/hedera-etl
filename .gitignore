@@ -69,3 +69,13 @@ local.properties
 ### IntelliJ Idea ###
 .idea/
 *.iml
+
+# Terraform files
+.terraform*
+terraform.tfstate
+terraform.tfvars
+*.tfstate*
+_access.sh
+.*.sw?
+variables_secret.tf
+terraform/credentials/
