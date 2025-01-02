@@ -24,8 +24,8 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory;
 
 public class HederaETLApplication {
     public static void main(String[] args) {
-        PubSubToBigQueryPipelineOptions options =
-                PipelineOptionsFactory.fromArgs(args).withValidation().as(PubSubToBigQueryPipelineOptions.class);
-        new PubSubToBigQueryPipeline(options, Utility.getResource("transactions-schema.json")).run();
+        var options =
+                PipelineOptionsFactory.fromArgs(args).withValidation().as(StorageToBigQueryPipelineOptions.class);
+        new HistoricalStorageToBigQueryPipeline(options).run();
     }
 }
