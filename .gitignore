@@ -79,3 +79,6 @@ _access.sh
 .*.sw?
 variables_secret.tf
 terraform/credentials/
+
+.env
+.envrc

@@ -7,11 +7,8 @@ module "enabled_google_apis" {
 
   activate_apis = [
     "iam.googleapis.com",
-    "compute.googleapis.com",
     "logging.googleapis.com",
     "monitoring.googleapis.com",
-    "container.googleapis.com",
-    "stackdriver.googleapis.com",
-    "cloudresourcemanager.googleapis.com"
+    "dataflow.googleapis.com"
   ]
 }

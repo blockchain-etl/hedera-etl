@@ -11,12 +11,10 @@ terraform {
   }
 }
 provider "google" {
-  credentials = file(var.credentials_file)
   project     = var.project_id
   region      = var.region
 }
 provider "google-beta" {
-  credentials = file(var.credentials_file)
   project     = var.project_id
   region      = var.region
 }
@@ -24,6 +22,5 @@ terraform {
   backend "gcs" {
     bucket      = "h2gcp-tf-state"
     prefix      = "dev/infra"
-    credentials = "./../../credentials/mystical-being.json"
   }
 }
