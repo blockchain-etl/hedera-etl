@@ -15,7 +15,7 @@
     </parent>
 
     <properties>
-        <lombok.version>1.18.12</lombok.version>
+        <lombok.version>1.18.36</lombok.version>
         <micrometer.version>1.5.1</micrometer.version>
     </properties>
 

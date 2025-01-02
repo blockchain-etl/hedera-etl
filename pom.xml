@@ -48,7 +48,7 @@
     </parent>
 
     <properties>
-        <jacoco.version>0.8.5</jacoco.version>
+        <jacoco.version>0.8.12</jacoco.version>
         <java.version>11</java.version>
         <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
     </properties>
