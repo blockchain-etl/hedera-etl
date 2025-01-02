@@ -20,12 +20,46 @@ package com.hedera.etl;
  * ‍
  */
 
+import org.apache.beam.sdk.options.Default;
+import org.apache.beam.sdk.options.Description;
+import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 
 public class HederaETLApplication {
+
     public static void main(String[] args) {
-        var options =
-                PipelineOptionsFactory.fromArgs(args).withValidation().as(StorageToBigQueryPipelineOptions.class);
-        new HistoricalStorageToBigQueryPipeline(options).run();
+        var applicationOptions = PipelineOptionsFactory.fromArgs(args)
+                .withValidation()
+                .withoutStrictParsing()
+                .as(ApplicationOptions.class);
+
+        switch (applicationOptions.getMode()) {
+            case BATCH:
+                var options =
+                        PipelineOptionsFactory
+                                .fromArgs(args)
+                                .withValidation()
+                                .withoutStrictParsing()
+                                .as(BatchStorageToBigQueryPipelineOptions.class);
+                new BatchStorageToBigQueryPipeline(options).run();
+                break;
+            case REALTIME:
+                throw new UnsupportedOperationException("Realtime mode is unsupported for now");
+            default:
+                throw new UnsupportedOperationException("Unknown mode " + applicationOptions.getMode());
+        }
+
+    }
+
+    public interface ApplicationOptions extends PipelineOptions {
+        @Description("Which mode to use")
+        @Default.Enum("BATCH") // TODO: remove default value after implementation of realtime pipeline
+        Mode getMode();
+        void setMode(Mode value);
+
+        enum Mode {
+            BATCH,
+            REALTIME,
+        }
     }
 }

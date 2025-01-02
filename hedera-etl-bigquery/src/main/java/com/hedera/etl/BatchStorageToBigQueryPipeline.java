@@ -27,9 +27,9 @@ import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.FileIO;
 
 @RequiredArgsConstructor
-public class HistoricalStorageToBigQueryPipeline {
+public class BatchStorageToBigQueryPipeline {
 
-    private final StorageToBigQueryPipelineOptions options;
+    private final BatchStorageToBigQueryPipelineOptions options;
 
     void run() {
         var pipeline = Pipeline.create(options);
