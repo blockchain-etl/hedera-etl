@@ -16,8 +16,103 @@
 
 package com.hedera.etl.recordfile.entity;
 
+import lombok.*;
+import java.util.Collection;
+import java.util.List;
 
-import java.io.Serializable;
+@Builder(toBuilder = true)
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RecordFile implements StreamFile<RecordItem> {
 
-public class RecordFile implements Serializable {
+    public static final Version HAPI_VERSION_NOT_SET = new Version(0, 0, 0);
+    public static final Version HAPI_VERSION_0_23_0 = new Version(0, 23, 0);
+    public static final Version HAPI_VERSION_0_27_0 = new Version(0, 27, 0);
+    public static final Version HAPI_VERSION_0_47_0 = new Version(0, 47, 0);
+    public static final Version HAPI_VERSION_0_49_0 = new Version(0, 49, 0);
+    public static final Version HAPI_VERSION_0_53_0 = new Version(0, 53, 0);
+
+    @ToString.Exclude
+    private byte[] bytes;
+
+    private Long consensusStart;
+
+    private Long consensusEnd;
+
+    private Long count;
+
+    private DigestAlgorithm digestAlgorithm;
+
+    @ToString.Exclude
+    private String fileHash;
+
+    @Builder.Default
+    private long gasUsed = 0L;
+
+    private Integer hapiVersionMajor;
+    private Integer hapiVersionMinor;
+    private Integer hapiVersionPatch;
+
+    @Getter(lazy = true)
+    private final Version hapiVersion = hapiVersion();
+
+    @ToString.Exclude
+    private String hash;
+
+    private Long index;
+
+    @Builder.Default
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Collection<RecordItem> items = List.of();
+
+    private Long loadEnd;
+
+    private Long loadStart;
+
+    @ToString.Exclude
+    private byte[] logsBloom;
+
+    @ToString.Exclude
+    private String metadataHash;
+
+    private String name;
+
+    private Long nodeId;
+
+    @ToString.Exclude
+    private String previousHash;
+
+    private int sidecarCount;
+
+//    @Builder.Default
+//    @EqualsAndHashCode.Exclude
+//    @ToString.Exclude
+//    private Collection<SidecarFile> sidecars = List.of();
+
+    private Integer size;
+
+    private int version;
+
+    @Override
+    public void clear() {
+        StreamFile.super.clear();
+        setLogsBloom(null);
+//        setSidecars(List.of());
+    }
+
+    @Override
+    public StreamFile<RecordItem> copy() {
+        return this.toBuilder().build();
+    }
+
+
+    private Version hapiVersion() {
+        if (hapiVersionMajor == null || hapiVersionMinor == null || hapiVersionPatch == null) {
+            return HAPI_VERSION_NOT_SET;
+        }
+
+        return new Version(hapiVersionMajor, hapiVersionMinor, hapiVersionPatch);
+    }
 }
