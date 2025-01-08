@@ -86,10 +86,10 @@ public class RecordFile implements StreamFile<RecordItem> {
 
     private int sidecarCount;
 
-//    @Builder.Default
-//    @EqualsAndHashCode.Exclude
-//    @ToString.Exclude
-//    private Collection<SidecarFile> sidecars = List.of();
+    @Builder.Default
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Collection<SidecarFile> sidecars = List.of();
 
     private Integer size;
 
