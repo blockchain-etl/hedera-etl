@@ -40,7 +40,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @Data
 @NoArgsConstructor
-public class SidecarFile {
+public class SidecarFile implements Serializable {
 
     @JsonIgnore
     @ToString.Exclude

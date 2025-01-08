@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <artifactId>hedera-shaded-hapi</artifactId>
+    <description>
+        HAPI with shaded Protobuf
+    </description>
+    <modelVersion>4.0.0</modelVersion>
+    <name>Shaded HAPI</name>
+    <packaging>jar</packaging>
+
+    <parent>
+        <groupId>com.hedera</groupId>
+        <artifactId>hedera-etl</artifactId>
+        <version>0.0.1</version>
+    </parent>
+
+    <properties>
+        <!-- skip source archives -->
+        <assembly.attach>false</assembly.attach>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <skipSource>true</skipSource>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.6.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createSourcesJar>true</createSourcesJar>
+                            <shadeSourcesContent>true</shadeSourcesContent>
+                            <relocations>
+                                <relocation>
+                                    <pattern>com.google.protobuf</pattern>
+                                    <shadedPattern>com.hedera.shaded.hapi.com.google.protobuf</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <dependencyReducedPomLocation>target/reduced-pom.xml</dependencyReducedPomLocation>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.hedera.hashgraph</groupId>
+            <artifactId>hapi</artifactId>
+            <version>0.57.3</version>
+        </dependency>
+    </dependencies>
+</project>

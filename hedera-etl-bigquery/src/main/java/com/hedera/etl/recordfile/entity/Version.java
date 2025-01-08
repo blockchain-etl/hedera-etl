@@ -2,11 +2,12 @@ package com.hedera.etl.recordfile.entity;
 
 import org.apache.commons.lang3.StringUtils;
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class Version implements Comparable<Version> {
+public class Version implements Comparable<Version>, Serializable {
 
 	private static final String VERSION_PARSE_ERROR = "Invalid version string; Could not parse segment %s within %s";
 

@@ -18,8 +18,8 @@ package com.hedera.etl.recordfile.entity;
 
 import static lombok.AccessLevel.PRIVATE;
 
-import com.google.protobuf.ByteString;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.hedera.shaded.hapi.com.google.protobuf.ByteString;
+import com.hedera.shaded.hapi.com.google.protobuf.InvalidProtocolBufferException;
 
 import com.hedera.etl.recordfile.exception.ProtobufException;
 import com.hedera.etl.recordfile.utils.DomainUtils;
@@ -30,6 +30,7 @@ import com.hederahashgraph.api.proto.java.SignedTransaction;
 import com.hederahashgraph.api.proto.java.Transaction;
 import com.hederahashgraph.api.proto.java.TransactionBody;
 import com.hederahashgraph.api.proto.java.TransactionRecord;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,7 +56,7 @@ import org.apache.commons.codec.binary.Hex;
 @AllArgsConstructor(access = PRIVATE)
 @CustomLog
 @Value
-public class RecordItem implements StreamItem {
+public class RecordItem implements StreamItem, Serializable {
 
     static final String BAD_TRANSACTION_BYTES_MESSAGE = "Failed to parse transaction bytes";
     static final String BAD_RECORD_BYTES_MESSAGE = "Failed to parse record bytes";

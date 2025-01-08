@@ -25,7 +25,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import com.hedera.etl.recordfile.entity.EntityId;
 
-import io.hypersistence.utils.hibernate.type.util.JsonConfiguration;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -46,9 +45,6 @@ public class ObjectToStringSerializer extends JsonSerializer<Object> {
         OBJECT_MAPPER = new ObjectMapper()
                 .registerModule(module)
                 .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE);
-
-        // Configure hyperpersistence utils so that JsonBinaryType uses the same object mapper
-        JsonConfiguration.INSTANCE.getObjectMapperWrapper().setObjectMapper(OBJECT_MAPPER);
     }
 
     public static void init() {

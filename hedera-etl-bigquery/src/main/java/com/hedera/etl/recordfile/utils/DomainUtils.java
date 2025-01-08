@@ -16,10 +16,10 @@
 
 package com.hedera.etl.recordfile.utils;
 
-import com.google.protobuf.ByteOutput;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Internal;
-import com.google.protobuf.UnsafeByteOperations;
+import com.hedera.shaded.hapi.com.google.protobuf.ByteOutput;
+import com.hedera.shaded.hapi.com.google.protobuf.ByteString;
+import com.hedera.shaded.hapi.com.google.protobuf.Internal;
+import com.hedera.shaded.hapi.com.google.protobuf.UnsafeByteOperations;
 
 import com.hedera.etl.recordfile.converter.ObjectToStringSerializer;
 import com.hedera.etl.recordfile.entity.EntityId;
