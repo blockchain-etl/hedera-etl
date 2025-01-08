@@ -12,6 +12,9 @@ import org.apache.beam.sdk.values.PCollection;
 
 @Slf4j
 public class RecordFileTransform extends PTransform<PCollection<FileIO.ReadableFile>, PCollection<RecordFile>> {
+
+    RecordFileReader reader = new CompositeRecordFileReader();
+
     @Override
     public PCollection<RecordFile> expand(PCollection<FileIO.ReadableFile> input) {
         return input
@@ -21,7 +24,7 @@ public class RecordFileTransform extends PTransform<PCollection<FileIO.ReadableF
                     @Override
                     public RecordFile apply(FileIO.ReadableFile file) {
                         log.debug("Parsing file {}", file.getMetadata().resourceId());
-                        return RecordFileReader.parse(file.readFullyAsBytes());
+                        return reader.read(StreamFilename.from(file), file.readFullyAsBytes());
                     }
                 }));
     }
