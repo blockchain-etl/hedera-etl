@@ -21,7 +21,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 @Data
-@jakarta.persistence.Entity
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 public class Entity extends AbstractEntity {

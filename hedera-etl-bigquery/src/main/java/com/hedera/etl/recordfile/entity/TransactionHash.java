@@ -18,8 +18,6 @@ package com.hedera.etl.recordfile.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.primitives.Shorts;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -37,7 +35,6 @@ public class TransactionHash {
     @Setter(value = AccessLevel.NONE)
     private short distributionId;
 
-    @Id
     private byte[] hash;
 
     private long payerAccountId;

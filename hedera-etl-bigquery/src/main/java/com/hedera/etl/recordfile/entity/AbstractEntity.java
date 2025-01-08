@@ -18,11 +18,6 @@ package com.hedera.etl.recordfile.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Range;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
 import java.sql.Date;
 import java.util.concurrent.TimeUnit;
 import lombok.Data;
@@ -33,7 +28,6 @@ import lombok.experimental.SuperBuilder;
 import com.hedera.etl.recordfile.utils.DomainUtils;
 
 @Data
-@MappedSuperclass
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 public abstract class AbstractEntity {
@@ -43,7 +37,6 @@ public abstract class AbstractEntity {
             TimeUnit.MILLISECONDS.toNanos(Date.valueOf("2100-1-1").getTime());
     public static final long NODE_ID_CLEARED = -1L;
 
-    @Column(updatable = false)
     @ToString.Exclude
     private byte[] alias;
 
@@ -55,7 +48,6 @@ public abstract class AbstractEntity {
 
     private Long balanceTimestamp;
 
-    @Column(updatable = false)
     private Long createdTimestamp;
 
     private Boolean declineReward;
@@ -64,13 +56,11 @@ public abstract class AbstractEntity {
 
     private Long ethereumNonce;
 
-    @Column(updatable = false)
     @ToString.Exclude
     private byte[] evmAddress;
 
     private Long expirationTimestamp;
 
-    @Id
     private Long id;
 
     @ToString.Exclude
@@ -80,7 +70,6 @@ public abstract class AbstractEntity {
 
     private String memo;
 
-    @Column(updatable = false)
     private Long num;
 
     private EntityId obtainerId;
@@ -91,12 +80,10 @@ public abstract class AbstractEntity {
 
     private String publicKey;
 
-    @Column(updatable = false)
     private Long realm;
 
     private Boolean receiverSigRequired;
 
-    @Column(updatable = false)
     private Long shard;
 
     private Long stakedAccountId;
@@ -110,7 +97,6 @@ public abstract class AbstractEntity {
 
     private Range<Long> timestampRange;
 
-    @Enumerated(EnumType.STRING)
     private EntityType type;
 
     public void addBalance(Long balance) {

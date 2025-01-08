@@ -16,9 +16,6 @@
 
 package com.hedera.etl.recordfile.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.IdClass;
 import java.io.Serial;
 import java.io.Serializable;
 import lombok.AccessLevel;
@@ -30,25 +27,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor(access = AccessLevel.PRIVATE) // For Builder
 @Builder
 @Data
-@IdClass(EntityTransaction.Id.class)
 @NoArgsConstructor
 public class EntityTransaction {
 
-    @Column(updatable = false)
-    @jakarta.persistence.Id
     private Long consensusTimestamp;
 
-    @Column(updatable = false)
-    @jakarta.persistence.Id
     private Long entityId;
 
-    @Column(updatable = false)
     private EntityId payerAccountId;
 
-    @Column(updatable = false)
     private Integer result;
 
-    @Column(updatable = false)
     private Integer type;
 
     @AllArgsConstructor

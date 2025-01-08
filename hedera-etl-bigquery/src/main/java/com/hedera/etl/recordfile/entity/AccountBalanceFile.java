@@ -16,9 +16,6 @@
 
 package com.hedera.etl.recordfile.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,7 +37,6 @@ public class AccountBalanceFile implements StreamFile<AccountBalance> {
     @ToString.Exclude
     private byte[] bytes;
 
-    @Id
     private Long consensusTimestamp;
 
     private Long count;
@@ -51,7 +47,6 @@ public class AccountBalanceFile implements StreamFile<AccountBalance> {
     @Builder.Default
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @Transient
     private Collection<AccountBalance> items = List.of();
 
     private Long loadEnd;

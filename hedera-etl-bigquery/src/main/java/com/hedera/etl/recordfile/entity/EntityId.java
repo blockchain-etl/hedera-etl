@@ -30,7 +30,6 @@ import com.hederahashgraph.api.proto.java.FileID;
 import com.hederahashgraph.api.proto.java.ScheduleID;
 import com.hederahashgraph.api.proto.java.TokenID;
 import com.hederahashgraph.api.proto.java.TopicID;
-import jakarta.persistence.Transient;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Comparator;
@@ -170,17 +169,14 @@ public final class EntityId implements Serializable, Comparable<EntityId> {
         return entityId == null || EMPTY.equals(entityId);
     }
 
-    @Transient
     public long getNum() {
         return id & NUM_MASK;
     }
 
-    @Transient
     public long getRealm() {
         return (id >> NUM_BITS) & REALM_MASK;
     }
 
-    @Transient
     public long getShard() {
         return id >> (NUM_BITS + REALM_BITS);
     }

@@ -17,7 +17,6 @@
 package com.hedera.etl.recordfile.entity;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import jakarta.persistence.IdClass;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Collections;
@@ -33,12 +32,9 @@ import com.hedera.etl.recordfile.converter.ListToStringSerializer;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@IdClass(ContractTransaction.Id.class)
 public class ContractTransaction {
-    @jakarta.persistence.Id
     private Long consensusTimestamp;
 
-    @jakarta.persistence.Id
     private Long entityId;
 
     @Builder.Default
