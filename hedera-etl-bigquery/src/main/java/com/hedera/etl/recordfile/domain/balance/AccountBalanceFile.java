@@ -16,10 +16,8 @@
 
 package com.hedera.etl.recordfile.domain.balance;
 
-import com.hedera.etl.recordfile.domain.StreamFile;
-
-import com.hedera.etl.recordfile.domain.balance.AccountBalance;
-
+import java.util.Collection;
+import java.util.List;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,8 +25,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import java.util.Collection;
-import java.util.List;
+
+import com.hedera.etl.recordfile.domain.StreamFile;
 
 @Builder(toBuilder = true)
 @Data

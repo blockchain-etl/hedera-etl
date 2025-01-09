@@ -17,22 +17,6 @@
 package com.hedera.etl.recordfile.reader.record;
 
 import com.google.common.primitives.Longs;
-
-import com.hedera.etl.recordfile.domain.StreamFilename;
-import com.hedera.etl.recordfile.entity.AbstractStreamObject;
-import com.hedera.etl.recordfile.entity.DigestAlgorithm;
-
-import com.hedera.etl.recordfile.reader.HashObject;
-import com.hedera.etl.recordfile.domain.transaction.RecordFile;
-
-import com.hedera.etl.recordfile.domain.transaction.RecordItem;
-import com.hedera.etl.recordfile.exception.InvalidStreamFileException;
-import com.hedera.etl.recordfile.exception.StreamFileReaderException;
-
-import com.hedera.etl.recordfile.reader.ValidatedDataInputStream;
-
-import com.hedera.etl.recordfile.reader.record.RecordFileReader;
-
 import com.hederahashgraph.api.proto.java.Transaction;
 import com.hederahashgraph.api.proto.java.TransactionRecord;
 import java.io.BufferedInputStream;
@@ -47,6 +31,16 @@ import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import org.apache.commons.codec.binary.Hex;
+
+import com.hedera.etl.recordfile.domain.StreamFilename;
+import com.hedera.etl.recordfile.domain.transaction.RecordFile;
+import com.hedera.etl.recordfile.domain.transaction.RecordItem;
+import com.hedera.etl.recordfile.entity.AbstractStreamObject;
+import com.hedera.etl.recordfile.entity.DigestAlgorithm;
+import com.hedera.etl.recordfile.exception.InvalidStreamFileException;
+import com.hedera.etl.recordfile.exception.StreamFileReaderException;
+import com.hedera.etl.recordfile.reader.HashObject;
+import com.hedera.etl.recordfile.reader.ValidatedDataInputStream;
 
 public class RecordFileReaderImplV5 implements RecordFileReader {
 

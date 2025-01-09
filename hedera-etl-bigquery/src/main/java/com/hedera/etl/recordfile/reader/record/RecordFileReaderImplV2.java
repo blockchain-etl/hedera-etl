@@ -16,8 +16,6 @@
 
 package com.hedera.etl.recordfile.reader.record;
 
-import com.hedera.etl.recordfile.reader.record.AbstractPreV5RecordFileReader;
-
 import java.io.InputStream;
 
 public class RecordFileReaderImplV2 extends AbstractPreV5RecordFileReader {
