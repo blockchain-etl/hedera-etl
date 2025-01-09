@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile;
+package com.hedera.etl.recordfile.reader.record;
 
 import static java.lang.String.format;
 
@@ -31,11 +31,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import com.hedera.etl.recordfile.domain.StreamFilename;
 import com.hedera.etl.recordfile.entity.DigestAlgorithm;
-import com.hedera.etl.recordfile.entity.RecordFile;
+import com.hedera.etl.recordfile.domain.transaction.RecordFile;
 
-import com.hedera.etl.recordfile.entity.RecordItem;
-import com.hedera.etl.recordfile.entity.SidecarFile;
+import com.hedera.etl.recordfile.domain.transaction.RecordItem;
+import com.hedera.etl.recordfile.domain.transaction.SidecarFile;
 import com.hedera.etl.recordfile.entity.Version;
 import com.hedera.etl.recordfile.exception.InvalidStreamFileException;
 import com.hedera.etl.recordfile.exception.StreamFileReaderException;

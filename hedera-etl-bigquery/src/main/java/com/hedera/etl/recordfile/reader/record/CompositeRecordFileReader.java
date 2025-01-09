@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile;
+package com.hedera.etl.recordfile.reader.record;
 
 import com.google.common.base.Stopwatch;
 
-import com.hedera.etl.recordfile.entity.RecordFile;
+import com.hedera.etl.recordfile.domain.StreamFilename;
+import com.hedera.etl.recordfile.domain.transaction.RecordFile;
 
 import com.hedera.etl.recordfile.exception.InvalidStreamFileException;
 

@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain.transaction;
 
+import com.hedera.etl.recordfile.domain.StreamFile;
+
+import com.hedera.etl.recordfile.entity.DigestAlgorithm;
+import com.hedera.etl.recordfile.entity.Version;
 import lombok.*;
 import java.io.Serializable;
 import java.util.Collection;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.Range;

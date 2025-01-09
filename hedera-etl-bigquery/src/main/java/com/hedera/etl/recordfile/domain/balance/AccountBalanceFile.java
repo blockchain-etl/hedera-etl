@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain.balance;
+
+import com.hedera.etl.recordfile.domain.StreamFile;
+
+import com.hedera.etl.recordfile.domain.balance.AccountBalance;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

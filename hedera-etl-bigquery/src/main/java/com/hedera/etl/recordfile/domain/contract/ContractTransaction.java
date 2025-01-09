@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain.contract;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import java.io.Serial;

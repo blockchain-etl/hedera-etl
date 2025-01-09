@@ -1,5 +1,7 @@
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain;
 
+import com.hedera.etl.recordfile.domain.balance.AccountBalanceFile;
+import com.hedera.etl.recordfile.domain.transaction.RecordFile;
 import lombok.Getter;
 import com.google.common.collect.ImmutableSortedSet;
 import java.time.Duration;

@@ -1,5 +1,6 @@
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain;
 
+import com.hedera.etl.recordfile.entity.StreamItem;
 import lombok.NonNull;
 import java.util.Collection;
 import java.util.List;

@@ -14,31 +14,24 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain.balance;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+
+import com.hedera.etl.recordfile.entity.EntityId;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountBalance implements StreamItem {
+public class TokenBalance {
 
     private long balance;
-
-    @Builder.Default
-    @EqualsAndHashCode.Exclude
-    @JsonIgnore
-    private List<TokenBalance> tokenBalances = new ArrayList<>();
 
     @JsonUnwrapped
     private Id id;
@@ -48,10 +41,12 @@ public class AccountBalance implements StreamItem {
     @NoArgsConstructor
     public static class Id implements Serializable {
 
-        private static final long serialVersionUID = 1345295043157256768L;
+        private static final long serialVersionUID = -8547332015249955424L;
 
         private long consensusTimestamp;
 
         private EntityId accountId;
+
+        private EntityId tokenId;
     }
 }

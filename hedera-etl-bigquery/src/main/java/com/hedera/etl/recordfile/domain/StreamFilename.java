@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile;
+package com.hedera.etl.recordfile.domain;
 
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
@@ -29,8 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.hedera.etl.recordfile.entity.StreamType;
 
 import com.hedera.etl.recordfile.exception.InvalidStreamFileException;
 

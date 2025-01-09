@@ -1,6 +1,9 @@
 package com.hedera.etl.recordfile;
 
-import com.hedera.etl.recordfile.entity.RecordFile;
+import com.hedera.etl.recordfile.domain.StreamFilename;
+import com.hedera.etl.recordfile.domain.transaction.RecordFile;
+
+import com.hedera.etl.recordfile.reader.record.RecordFileReader;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

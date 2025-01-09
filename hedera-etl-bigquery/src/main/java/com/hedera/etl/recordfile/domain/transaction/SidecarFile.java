@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain.transaction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import com.hedera.etl.recordfile.converter.ListToStringSerializer;
+import com.hedera.etl.recordfile.entity.DigestAlgorithm;
 import com.hedera.services.stream.proto.TransactionSidecarRecord;
 
 import lombok.AccessLevel;

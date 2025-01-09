@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile;
+package com.hedera.etl.recordfile.reader.record;
+
+import com.hedera.etl.recordfile.reader.record.AbstractPreV5RecordFileReader;
 
 import java.io.InputStream;
 
-public class RecordFileReaderImplV2 extends AbstractPreV5RecordFileReader {
+public class RecordFileReaderImplV1 extends AbstractPreV5RecordFileReader {
 
-    public RecordFileReaderImplV2() {
-        super(2);
+    public RecordFileReaderImplV1() {
+        super(1);
     }
 
     @Override
-    protected RecordFileDigest getRecordFileDigest(InputStream is) {
-        return new RecordFileDigest(is, false);
+    protected RecordFileDigest getRecordFileDigest(final InputStream is) {
+        return new RecordFileDigest(is, true);
     }
 }

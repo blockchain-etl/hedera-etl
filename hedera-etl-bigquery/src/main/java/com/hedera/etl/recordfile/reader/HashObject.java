@@ -14,11 +14,12 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.reader;
 
-import com.hedera.etl.recordfile.ValidatedDataInputStream;
 import java.io.IOException;
 
+import com.hedera.etl.recordfile.entity.AbstractStreamObject;
+import com.hedera.etl.recordfile.entity.DigestAlgorithm;
 import com.hedera.etl.recordfile.exception.InvalidStreamFileException;
 
 import lombok.EqualsAndHashCode;

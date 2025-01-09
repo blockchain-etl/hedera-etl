@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain.transaction;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import com.hedera.etl.recordfile.domain.contract.ContractTransaction;
+import com.hedera.etl.recordfile.entity.EntityId;
+import com.hedera.etl.recordfile.entity.EntityTransaction;
+import com.hedera.etl.recordfile.entity.StreamItem;
+import com.hedera.etl.recordfile.entity.Version;
 import com.hedera.shaded.hapi.com.google.protobuf.ByteString;
 import com.hedera.shaded.hapi.com.google.protobuf.InvalidProtocolBufferException;
 

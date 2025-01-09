@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile;
+package com.hedera.etl.recordfile.reader;
 
 import java.io.DataInputStream;
 import java.io.IOException;

@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.hedera.etl.recordfile.entity;
+package com.hedera.etl.recordfile.domain.transaction;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.hedera.etl.recordfile.entity.EntityId;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
