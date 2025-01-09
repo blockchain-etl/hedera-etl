@@ -15,7 +15,16 @@
 export GOOGLE_APPLICATION_CREDENTIALS={{path}}
 ```
 
-4. Go to `terraform/global` directory, reviev & set desired values `variables.tf`, next init terraform and create bucket for terraform state files (TODO – make it optional)
+4. Review terraform variables. Create `terraform.tfvars` file with following content and desired values and put in `terraform/global` and `terraform/dev/infra`
+
+```
+project_id = "project ID in GCP"
+region = "project region in GCP"
+project_name = "your project name"
+env_name = "your environment name"
+```
+
+5. Go to `terraform/global` directory, reviev & set desired values `variables.tf`, next init terraform and create bucket for terraform state files
 
 ```bash
 cd terraform/global
@@ -23,7 +32,7 @@ terraform init
 terraform apply
 ```
 
-5. Go to `terraform/dev/infra`, reviev & set desired values `variables.tf` and up infrastructure
+6. Go to `terraform/dev/infra`, reviev & set desired values `variables.tf` and up infrastructure
 
 ```bash
 cd terraform/dev/infra
@@ -31,4 +40,4 @@ terraform init
 terraform apply
 ```
 
-Alternatively you can use [provided script](../scripts/automate-terraform.sh) to automate this - WIP
+Alternatively you can use [provided script](../scripts/automate-terraform.sh) to automate this

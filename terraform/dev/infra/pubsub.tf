@@ -25,7 +25,6 @@ resource "google_project_iam_binding" "pubsub" {
   role    = "roles/pubsub.editor"
 
   members = [
-    "user:maciej.malik@arianelabs.com",
     "serviceAccount:${google_service_account.pubsub.email}"
   ]
 }

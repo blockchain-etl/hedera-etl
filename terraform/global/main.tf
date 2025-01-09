@@ -1,6 +1,5 @@
 provider "google" {
   project     = var.project_id
-  credentials = file(var.credentials_path)
   region      = var.region
 }
 
@@ -23,10 +22,6 @@ variable "project_name" {
 
 variable "project_id" {
   default = "mystical-being-444413-n9"
-}
-
-variable "credentials_path" {
-  default = "./../credentials/mystical-being.json"
 }
 
 variable "region" {
