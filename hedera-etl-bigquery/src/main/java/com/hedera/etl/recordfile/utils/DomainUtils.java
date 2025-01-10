@@ -32,7 +32,7 @@ import com.hederahashgraph.api.proto.java.Key;
 import com.hederahashgraph.api.proto.java.KeyList;
 import com.hederahashgraph.api.proto.java.Timestamp;
 import jakarta.annotation.Nullable;
-import lombok.CustomLog;
+import lombok.extern.log4j.Log4j2;
 import lombok.experimental.UtilityClass;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.ArrayUtils;
@@ -42,7 +42,7 @@ import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.List;
 
-@CustomLog
+@Log4j2
 @UtilityClass
 public class DomainUtils {
 

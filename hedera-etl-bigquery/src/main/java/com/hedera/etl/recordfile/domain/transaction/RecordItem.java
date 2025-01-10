@@ -50,16 +50,17 @@ import java.util.function.Predicate;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.CustomLog;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Value;
 import lombok.experimental.NonFinal;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.codec.binary.Hex;
 
 @Builder(buildMethodName = "buildInternal")
 @AllArgsConstructor(access = PRIVATE)
-@CustomLog
+@Log4j2
 @Value
 public class RecordItem implements StreamItem, Serializable {
 

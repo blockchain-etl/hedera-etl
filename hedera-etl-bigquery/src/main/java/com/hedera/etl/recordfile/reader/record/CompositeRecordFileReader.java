@@ -25,13 +25,13 @@ import com.hedera.etl.recordfile.exception.InvalidStreamFileException;
 
 import com.hedera.etl.recordfile.exception.StreamFileReaderException;
 
-import lombok.CustomLog;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-@CustomLog
+@Log4j2
 @RequiredArgsConstructor
 public class CompositeRecordFileReader implements RecordFileReader {
 

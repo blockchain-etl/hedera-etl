@@ -50,4 +50,9 @@ public interface BatchStorageToBigQueryPipelineOptions extends PipelineOptions {
             return "gs://" + options.getInputBucket() + "/recordstreams/records*/" + options.getIngestionDate() + "*.{rcd,rcd.gz}";
         }
     }
+
+    @Description("Output dataset for entities")
+    String getOutputDataset();
+    void setOutputDataset(String value);
+
 }

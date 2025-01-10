@@ -42,12 +42,12 @@ import com.hedera.etl.recordfile.exception.InvalidStreamFileException;
 import com.hedera.etl.recordfile.exception.StreamFileReaderException;
 import com.hedera.etl.recordfile.utils.DomainUtils;
 
-import lombok.CustomLog;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.output.NullOutputStream;
 import com.hedera.services.stream.proto.HashAlgorithm;
 import com.hedera.services.stream.proto.RecordStreamFile;
 
-@CustomLog
+@Log4j2
 public class ProtoRecordFileReader implements RecordFileReader {
 
     public static final int VERSION = 6;
