@@ -84,9 +84,6 @@ public class RecordItem implements StreamItem, Serializable {
     private final TransactionRecord transactionRecord;
     private final int transactionType;
 
-    @Getter(PRIVATE)
-    private final AtomicInteger logIndex = new AtomicInteger(0);
-
     @NonFinal
     @Setter
     private Predicate<EntityId> contractTransactionPredicate;
@@ -148,10 +145,6 @@ public class RecordItem implements StreamItem, Serializable {
             entityTransactions = new HashMap<>();
         }
         return entityTransactions;
-    }
-
-    public int getAndIncrementLogIndex() {
-        return logIndex.getAndIncrement();
     }
 
     public int getTransactionStatus() {

@@ -20,20 +20,20 @@ import java.util.Map;
 public class EntitiesExtractor {
   public static Map<String, PCollection<Row>> extract(PCollection<FileIO.ReadableFile> input) {
     var recordFiles = input.apply("Parse Record Files", new RecordFileTransform());
-//    var recordItems = recordFiles.apply("Extract Record Items", FlatMapElements
-//            .into(TypeDescriptor.of(RecordItem.class))
-//            .via(RecordFile::getItems));
+    var recordItems = recordFiles.apply("Extract Record Items", FlatMapElements
+            .into(TypeDescriptor.of(RecordItem.class))
+            .via(RecordFile::getItems));
 
     var extractedFromRecordFiles = Extract.from(recordFiles)
             .add(Block.class, Block::from)
             .getOutput();
 
-//    var extractedFromRecordItems = Extract.from(recordItems)
-//            .getOutput();
+    var extractedFromRecordItems = Extract.from(recordItems)
+            .getOutput();
 
     var result = new HashMap<String, PCollection<Row>>();
     result.putAll(extractedFromRecordFiles);
-//    result.putAll(extractedFromRecordItems);
+    result.putAll(extractedFromRecordItems);
 
     return result;
   }

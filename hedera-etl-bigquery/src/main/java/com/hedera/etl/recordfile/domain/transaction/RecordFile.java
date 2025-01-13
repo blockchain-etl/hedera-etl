@@ -79,6 +79,8 @@ public class RecordFile implements StreamFile<RecordItem>, Serializable {
     @ToString.Exclude
     private byte[] logsBloom;
 
+//    @Getter(PRIVATE)
+//    private final AtomicInteger logIndex = new AtomicInteger(0);
     @ToString.Exclude
     private String metadataHash;
 
