@@ -1,6 +1,6 @@
 package com.hedera.etl;
 
-import com.hedera.etl.entity.Block;
+import com.hedera.etl.entity.TopicMessage;
 import com.hedera.etl.recordfile.RecordFileTransform;
 import com.hedera.etl.recordfile.domain.transaction.RecordFile;
 import com.hedera.etl.recordfile.domain.transaction.RecordItem;
@@ -25,10 +25,10 @@ public class EntitiesExtractor {
             .via(RecordFile::getItems));
 
     var extractedFromRecordFiles = Extract.from(recordFiles)
-            .add(Block.class, Block::from)
             .getOutput();
 
     var extractedFromRecordItems = Extract.from(recordItems)
+            .add(TopicMessage.class, TopicMessage::from)
             .getOutput();
 
     var result = new HashMap<String, PCollection<Row>>();
