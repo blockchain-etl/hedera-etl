@@ -2,6 +2,7 @@ package com.hedera.etl;
 
 import com.hedera.etl.entity.Block;
 import com.hedera.etl.entity.TopicMessage;
+import com.hedera.etl.entity.smartcontracts.Contract;
 import com.hedera.etl.entity.token.Token;
 import com.hedera.etl.recordfile.RecordFileTransform;
 import com.hedera.etl.recordfile.domain.transaction.RecordFile;
@@ -33,6 +34,7 @@ public class EntitiesExtractor {
     var extractedFromRecordItems = Extract.from(recordItems)
             .add(Token.class, Token::from)
             .add(TopicMessage.class, TopicMessage::from)
+            .add(Contract.class, Contract::from)
             .getOutput();
 
     var result = new HashMap<String, PCollection<Row>>();
