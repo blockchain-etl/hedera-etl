@@ -8,6 +8,9 @@ import com.hedera.etl.recordfile.domain.transaction.RecordItem;
 import com.hedera.etl.recordfile.entity.EntityId;
 import com.hedera.etl.recordfile.utils.DomainUtils;
 
+import com.hederahashgraph.api.proto.java.ContractCreateTransactionBody;
+import com.hederahashgraph.api.proto.java.ContractDeleteTransactionBody;
+import com.hederahashgraph.api.proto.java.ContractUpdateTransactionBody;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -36,18 +39,26 @@ public class Contract {
   @Nullable private String obtainer_id;
   @Nullable private Boolean permanent_removal;
   @Nullable private String proxy_account_id;
-  @Nullable private TimestampRange timestampRange;
+  @Nullable private TimestampRange timestamp;
+  @Nullable private Boolean removed;
   @Nullable private byte[] bytecode;
   @Nullable private byte[] runtime_bytecode;
 
   public static Contract from(RecordItem recordItem) {
     if (recordItem.getTransactionRecord().hasContractCreateResult()
             || recordItem.getTransactionBody().hasContractCreateInstance()) {
-
+      return from(recordItem, recordItem.getTransactionBody().getContractCreateInstance());
     }
 
+    if (recordItem.getTransactionBody().hasContractUpdateInstance()) {
+      return from(recordItem, recordItem.getTransactionBody().getContractUpdateInstance());
+    }
+
+    return null;
+  }
+
+  private static Contract from(RecordItem recordItem, ContractUpdateTransactionBody transactionBody) {
     var contractCreateResult = recordItem.getTransactionRecord().getContractCreateResult();
-    var transactionBody = recordItem.getTransactionBody().getContractCreateInstance();
 
     var builder = builder();
 
@@ -57,11 +68,10 @@ public class Contract {
 //              .lookup(transactionBody.getAutoRenewAccountId())
 //              .orElse(EntityId.EMPTY);
 //      if (!EntityId.isEmpty(autoRenewAccount)) {
-//        entity.setAutoRenewAccountId(autoRenewAccount.getId());
-//        recordItem.addEntityId(autoRenewAccount);
-//      } else {
-//        Utility.handleRecoverableError("Invalid autoRenewAccountId at {}", recordItem.getConsensusTimestamp());
+//        builder.auto_renew_account(autoRenewAccount);
 //      }
+      // TODO: replace with lookup once done
+      builder.auto_renew_account(EntityId.of(transactionBody.getAutoRenewAccountId()).toString());
     }
 
     if (transactionBody.hasAutoRenewPeriod()) {
@@ -70,7 +80,8 @@ public class Contract {
 
     if (contractCreateResult.hasEvmAddress()) {
       builder.evm_address(
-              DomainUtils.bytesToHex(DomainUtils.toBytes(contractCreateResult.getEvmAddress().getValue())));
+              DomainUtils.bytesToHex(DomainUtils.toBytes(contractCreateResult.getEvmAddress().getValue()))
+      );
     }
 
     if (transactionBody.hasAdminKey()) {
@@ -83,19 +94,8 @@ public class Contract {
     }
 
     builder
-            .memo(transactionBody.getMemo());
-
-    switch (transactionBody.getInitcodeSourceCase()) {
-      case FILEID:
-        var fileId = EntityId.of(transactionBody.getFileID());
-        builder.file_id(fileId.toString());
-        break;
-      case INITCODE:
-        builder.bytecode(DomainUtils.toBytes(transactionBody.getInitcode()));
-        break;
-      default:
-        break;
-    }
+            .memo(transactionBody.getMemo())
+            .removed(false);
 
     var contractId = recordItem.getTransactionRecord().getReceipt().getContractID();
     var sidecarRecords = recordItem.getSidecarRecords();
@@ -112,6 +112,73 @@ public class Contract {
           break;
         }
       }
+    }
+
+    // for child transactions FileID is located in parent ContractCreate/EthereumTransaction types
+    // and initcode is located in the sidecar
+    updateChildFromParent(builder, recordItem);
+
+    return builder.build();
+  }
+
+  private static Contract from(RecordItem recordItem, ContractDeleteTransactionBody transactionBody) {
+    return builder()
+            .contract_id(EntityId.of(transactionBody.getContractID()).toString())
+            .removed(transactionBody.getPermanentRemoval())
+            .build();
+
+  }
+
+  private static Contract from(RecordItem recordItem, ContractCreateTransactionBody transactionBody) {
+    var contractCreateResult = recordItem.getTransactionRecord().getContractCreateResult();
+
+    var builder = builder();
+
+    if (transactionBody.hasAutoRenewAccountId()) {
+      // TODO: get hold of lookup
+//      var autoRenewAccount = entityIdService
+//              .lookup(transactionBody.getAutoRenewAccountId())
+//              .orElse(EntityId.EMPTY);
+//      if (!EntityId.isEmpty(autoRenewAccount)) {
+//        builder.auto_renew_account(autoRenewAccount);
+//      }
+      // TODO: replace with lookup once done
+      builder.auto_renew_account(EntityId.of(transactionBody.getAutoRenewAccountId()).toString());
+    }
+
+    if (transactionBody.hasAutoRenewPeriod()) {
+      builder.auto_renew_period(transactionBody.getAutoRenewPeriod().getSeconds());
+    }
+
+    if (contractCreateResult.hasEvmAddress()) {
+      builder.evm_address(
+              DomainUtils.bytesToHex(DomainUtils.toBytes(contractCreateResult.getEvmAddress().getValue()))
+      );
+    }
+
+    if (transactionBody.hasAdminKey()) {
+      builder.admin_key(Key.from(transactionBody.getAdminKey()));
+    }
+
+    if (transactionBody.hasProxyAccountID()) {
+      var proxyAccountId = EntityId.of(transactionBody.getProxyAccountID());
+      builder.proxy_account_id(proxyAccountId.toString());
+    }
+
+    builder
+            .memo(transactionBody.getMemo())
+            .removed(false);
+
+    switch (transactionBody.getInitcodeSourceCase()) {
+      case FILEID:
+        var fileId = EntityId.of(transactionBody.getFileID());
+        builder.file_id(fileId.toString());
+        break;
+      case INITCODE:
+        builder.bytecode(DomainUtils.toBytes(transactionBody.getInitcode()));
+        break;
+      default:
+        break;
     }
 
     // for child transactions FileID is located in parent ContractCreate/EthereumTransaction types
