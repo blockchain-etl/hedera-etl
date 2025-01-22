@@ -2,6 +2,7 @@ package com.hedera.etl.entity.token;
 
 import javax.annotation.Nullable;
 
+import com.hedera.etl.entity.FractionalAmount;
 import com.hedera.etl.recordfile.entity.EntityId;
 
 import com.hederahashgraph.api.proto.java.CustomFee;

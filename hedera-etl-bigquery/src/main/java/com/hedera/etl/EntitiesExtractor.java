@@ -1,6 +1,7 @@
 package com.hedera.etl;
 
 import com.hedera.etl.entity.Block;
+import com.hedera.etl.entity.network.NetworkStake;
 import com.hedera.etl.entity.topic.TopicMessage;
 import com.hedera.etl.entity.transaction.Transaction;
 import com.hedera.etl.entity.smartcontracts.Contract;
@@ -37,6 +38,7 @@ public class EntitiesExtractor {
             .add(TopicMessage.class, TopicMessage::from)
             .add(Contract.class, Contract::from)
             .add(Transaction.class, Transaction::from)
+            .add(NetworkStake.class, NetworkStake::from)
             .getOutput();
 
     var result = new HashMap<String, PCollection<Row>>();

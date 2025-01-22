@@ -1,4 +1,4 @@
-package com.hedera.etl.entity.token;
+package com.hedera.etl.entity;
 
 import com.hederahashgraph.api.proto.java.Fraction;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-class FractionalAmount {
+public class FractionalAmount {
   @Nullable
   private Long numerator;
   @Nullable
