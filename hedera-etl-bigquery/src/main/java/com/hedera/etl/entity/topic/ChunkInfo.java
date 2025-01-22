@@ -1,4 +1,4 @@
-package com.hedera.etl.entity;
+package com.hedera.etl.entity.topic;
 
 import lombok.Builder;
 import lombok.Data;

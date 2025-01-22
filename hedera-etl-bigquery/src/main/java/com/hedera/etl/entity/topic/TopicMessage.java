@@ -1,6 +1,4 @@
-package com.hedera.etl.entity;
-
-import com.fasterxml.jackson.annotation.JsonTypeName;
+package com.hedera.etl.entity.topic;
 
 import com.hedera.etl.recordfile.domain.transaction.RecordItem;
 
