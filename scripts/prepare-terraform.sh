@@ -1,7 +1,9 @@
 #!/bin/bash
 
-set -eu
+set -eu # fail on any error
 cd $(dirname "$0")
+
+read -p "This script will configure service account to use with Terraform, setup needed variables and init & deploy terraform code. We assume that you already have some GCP project with linked Billing account [Press enter to continue]"
 # set env
 read -p "Enter your project id [${PROJECT_ID:-myproject}]: " project_id
 PROJECT_ID=${project_id:-myproject}
@@ -19,8 +21,9 @@ read -p "Enter your environment name [${env_name:-dev}]: " env_name
 ENV_NAME=${env_name:-dev}
 
 # create GCP project & service account for Terraform
-gcloud projects create ${PROJECT_ID}
+# gcloud projects create ${PROJECT_ID}
 
+# service account for Terraform
 gcloud iam service-accounts create ${SERVICE_ACCOUNT_NAME} \
   --description="${SERVICE_ACCOUNT_DESCRIPTION}" \
   --display-name="${SERVICE_ACCOUNT_DISPLAY_NAME}"
@@ -32,7 +35,6 @@ gcloud projects add-iam-policy-binding ${PROJECT_ID} \
 gcloud iam service-accounts keys create ${KEY_FILE} \
   --iam-account=${SERVICE_ACCOUNT_NAME}@${PROJECT_ID}.iam.gserviceaccount.com
 
-# to remove?
 # create bucket for terraform state
 cd ../terraform/global
 # write variables
@@ -42,12 +44,20 @@ region = ${GCP_REGION}
 project_name = ${PROJECT_NAME}
 env_name = ${ENV_NAME}
 EOL
+# check & deploy
+terraform fmt -check
 terraform init
-terraform apply -auto-approve
+terraform validate
+terraform apply
+
+# make sure bucket exist before further actions
+gcloud storage ls gs://${PROJECT_ID}-tf-state
 
 # deploy core resources
 cd $(dirname "$0")
 cd ../terraform/dev/infra
+# set correct state bucket name
+sed -i "s/changeme/${{ PROJECT_NAME }}-tf-state/g" providers.tf
 # write variables
 cat >terraform.tfvars <<EOL
 project_id = ${PROJECT_ID}
@@ -55,6 +65,10 @@ region = ${GCP_REGION}
 project_name = ${PROJECT_NAME}
 env_name = ${ENV_NAME}
 EOL
-# init & deploy
+# check & deploy
+terraform fmt -check
 terraform init
-terraform apply -auto-approve
+terraform validate
+terraform apply
+
+echo 'Deployment finished, from now for future updates you only need run "terraform apply" from terraform/dev/infra directory'

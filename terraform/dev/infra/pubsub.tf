@@ -38,7 +38,8 @@ resource "google_service_account_key" "pubsub" {
   service_account_id = google_service_account.pubsub.name
 }
 
-resource "local_file" "pubsub" {
-  content  = base64decode(google_service_account_key.pubsub.private_key)
-  filename = "./.terraform/pubsub-key.json"
-}
+# you don't need this in CI
+# resource "local_file" "pubsub" {
+#   content  = base64decode(google_service_account_key.pubsub.private_key)
+#   filename = "./.terraform/pubsub-key.json"
+# }

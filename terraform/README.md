@@ -32,7 +32,7 @@ terraform init
 terraform apply
 ```
 
-6. Go to `terraform/dev/infra`, reviev & set desired values `variables.tf` and up infrastructure
+6. Go to `terraform/dev/infra`, change bucket in backend section in [providers.tf](dev/infra/providers.tf) file to correct value (should follow `${project_id}-tf-state` schema) reviev & set desired values `variables.tf` and up infrastructure
 
 ```bash
 cd terraform/dev/infra
@@ -40,4 +40,13 @@ terraform init
 terraform apply
 ```
 
-Alternatively you can use [provided script](../scripts/automate-terraform.sh) to automate this
+Alternatively you can use [provided script](../scripts/prepare-terraform.sh) to automate in interactive way
+
+## CI
+
+You can use both Gitlab CI or Github Actions. For both you need setup following variables (secrets in Github case)
+
+- `GCP_CREDENTIALS` - json credentials for GCP
+- `TFVARS` - content of terraform.tfvars file as described above, in Gitlab this variable should be set as file type
+- `GCP_PROJECT_ID` - project ID in GCP
+- `STATE_BUCKET_PREFIX` - prefix for state bucket, usually should be same as project_name in terraform.tfvars

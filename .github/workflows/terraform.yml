@@ -1,0 +1,153 @@
+name: "Terraform"
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "terraform/dev/infra/*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  state_bucket:
+    name: "Check existence of state bucket & deploy if needed"
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform/global
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auth gcloud
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: "Setup gcloud"
+        uses: "google-github-actions/setup-gcloud@v2"
+
+      - name: "Check existence of terraform state bucket"
+        id: test_bucket
+        run: gcloud storage ls gs://${{ secrets.STATE_BUCKET_PREFIX }}-tf-state
+
+      - name: Setup Terraform
+        if: steps.test_bucket.outcome == 'failure'
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10"
+
+      - name: Setup tfvars
+        if: steps.test_bucket.outcome == 'failure'
+        run: echo ${{ secrets.TFVARS }} > terraform.tfvars
+
+      - name: Terraform Init
+        if: steps.test_bucket.outcome == 'failure'
+        run: terraform init
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Terraform Format
+        if: steps.test_bucket.outcome == 'failure'
+        run: terraform fmt -check
+
+      - name: Terraform Plan
+        if: steps.test_bucket.outcome == 'failure'
+        run: terraform plan -lock=false -out plan.json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Terraform Apply
+        if: steps.test_bucket.outcome == 'failure'
+        run: terraform apply -auto-approve plan.json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+
+  test:
+    name: "Terraform test"
+    runs-on: ubuntu-latest
+    needs: [state_bucket]
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform/dev/infra
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # You cannot set backend bucket name as terraform variable it must be hardcoded or managed other way :(
+      - name: Set correct backend bucket name
+        run: sed -i "s/changeme/${{ secrets.STATE_BUCKET_PREFIX }}-tf-state/g" providers.tf
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10"
+
+      - name: Setup tfvars
+        run: echo ${{ secrets.TFVARS }} > terraform.tfvars
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Plan
+        run: terraform plan -lock=false -out plan.json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+
+  terraform:
+    name: "Terraform apply"
+    runs-on: ubuntu-latest
+    needs: [test]
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./terraform/dev/infra
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # You cannot set backend bucket name as terraform variable it must be hardcoded or managed other way :(
+      - name: Set correct backend bucket name
+        run: sed -i "s/changeme/${{ secrets.STATE_BUCKET_PREFIX }}-tf-state/g" providers.tf
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.10"
+
+      - name: Setup tfvars
+        run: echo ${{ secrets.GCP_CREDENTIALS }} > terraform.tfvars
+
+      - name: Terraform Init
+        run: terraform init
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Plan
+        run: terraform plan -lock=false -out plan.json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
+        run: terraform apply -auto-approve plan.json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}

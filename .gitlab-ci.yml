@@ -1,0 +1,105 @@
+image:
+  name: hashicorp/terraform:1.10
+  entrypoint:
+    - "/usr/bin/env"
+    - "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+
+stages:
+  - state_bucket_existence
+  - state_bucket_deploy
+  - test
+  - deploy
+
+workflow:
+  rules:
+    - changes:
+        - terraform/dev/infra/*
+
+default:
+  tags:
+    - docker
+  before_script:
+    - cp $GCP_CREDENTIALS /tmp/credentials.json
+    - export GOOGLE_APPLICATION_CREDENTIALS="/tmp/credentials.json"
+  after_script:
+    - rm /tmp/credentials.json
+
+.terraform: &terraform
+  - terraform fmt -check
+  - cp $TFVARS terraform.tfvars
+  - terraform init
+  - terraform validate
+  - terraform plan -lock=false -out plan.json
+
+state_bucket_existence:
+  image: google/cloud-sdk:alpine
+  stage: state_bucket_existence
+  script:
+    - gcloud auth activate-service-account --key-file /tmp/credentials.json
+    - gcloud config set project $GCP_PROJECT_ID
+    - gcloud storage ls gs://${STATE_BUCKET_PREFIX}-tf-state
+  only:
+    - main
+    - merge_requests
+
+deploy_state_bucket:
+  stage: state_bucket_deploy
+  when: on_failure
+  needs:
+    - job: state_bucket_existence
+  script:
+    - cd terraform/global
+    - *terraform
+  only:
+    - main
+    - merge_requests
+
+test:
+  stage: test
+  when: on_success
+  needs:
+    - job: state_bucket_existence
+  script:
+    - cd terraform/dev/infra
+    - sed -i "s/changeme/${STATE_BUCKET_PREFIX}-tf-state/g" providers.tf
+    - *terraform
+  only:
+    - main
+    - merge_requests
+
+deploy:
+  stage: deploy
+  needs:
+    - job: test
+  script:
+    - cd terraform/dev/infra
+    - sed -i "s/changeme/${STATE_BUCKET_PREFIX}-tf-state/g" providers.tf
+    - *terraform
+    - terraform apply -auto-approve plan.json
+  only:
+    - main
+
+test_after_state_bucket:
+  stage: test
+  when: on_success
+  needs:
+    - job: deploy_state_bucket
+  script:
+    - cd terraform/dev/infra
+    - sed -i "s/changeme/${STATE_BUCKET_PREFIX}-tf-state/g" providers.tf
+    - *terraform
+  only:
+    - main
+    - merge_requests
+
+deploy_after_state_bucket:
+  stage: deploy
+  needs:
+    - job: test_after_state_bucket
+  script:
+    - cd terraform/dev/infra
+    - sed -i "s/changeme/${STATE_BUCKET_PREFIX}-tf-state/g" providers.tf
+    - *terraform
+    - terraform apply -auto-approve plan.json
+  only:
+    - main

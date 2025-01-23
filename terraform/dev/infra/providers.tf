@@ -11,16 +11,17 @@ terraform {
   }
 }
 provider "google" {
-  project     = var.project_id
-  region      = var.region
+  project = var.project_id
+  region  = var.region
 }
 provider "google-beta" {
-  project     = var.project_id
-  region      = var.region
+  project = var.project_id
+  region  = var.region
 }
 terraform {
   backend "gcs" {
-    bucket      = "h2gcp-tf-state"
-    prefix      = "dev/infra"
+    # bucket = "h2gcp-tf-state"
+    bucket = "changeme"
+    prefix = "dev/infra"
   }
 }
