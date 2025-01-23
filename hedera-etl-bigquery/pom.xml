@@ -67,12 +67,12 @@
           <version>1.3.4</version>
         </dependency>
 
-
-    <!--        <dependency>-->
-    <!--            <groupId>com.google.protobuf</groupId>-->
-    <!--            <artifactId>protobuf-java</artifactId>-->
-    <!--            <version>4.27.5</version>-->
-    <!--        </dependency>-->
+      <dependency>
+        <groupId>org.apache.beam</groupId>
+        <artifactId>beam-runners-direct-java</artifactId>
+        <version>${beam.version}</version>
+        <scope>test</scope>
+      </dependency>
 
     <!-- Used when runner is set to 'DataflowRunner' -->
     <dependency>
@@ -115,13 +115,6 @@
           <artifactId>protobuf-java-util</artifactId>
         </exclusion>
       </exclusions>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <version>${junit-jupiter.version}</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -173,6 +166,14 @@
       <version>2.1.1</version>
     </dependency>
 
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.12</version>
+      <scope>test</scope>
+    </dependency>
+
+
   </dependencies>
 
   <build>
@@ -206,6 +207,14 @@
         <configuration>
           <mainClass>com.hedera.etl.HederaETLApplication</mainClass>
           <cleanupDaemonThreads>false</cleanupDaemonThreads>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.5.2</version>
+        <configuration>
+          <forkCount>0</forkCount>
         </configuration>
       </plugin>
     </plugins>

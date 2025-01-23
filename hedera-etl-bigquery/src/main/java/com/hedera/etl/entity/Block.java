@@ -36,7 +36,7 @@ public class Block {
   @Nullable
   private String previous_hash;
   @Nullable
-  private Integer size;
+  private Long size;
   @Nullable
   private TimestampRange timestamp;
 
@@ -50,7 +50,7 @@ public class Block {
             .name(item.getName())
             .number(item.getIndex())
             .previous_hash(item.getPreviousHash())
-            .size(item.getSize())
+            .size(item.getSize().longValue())
             .timestamp(TimestampRange.builder()
                     .from(item.getConsensusStart())
                     .to(item.getConsensusEnd())
