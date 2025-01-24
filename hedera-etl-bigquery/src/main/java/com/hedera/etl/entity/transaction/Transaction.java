@@ -4,6 +4,8 @@ import com.hedera.etl.recordfile.domain.transaction.RecordItem;
 import com.hedera.etl.recordfile.entity.EntityId;
 import com.hedera.etl.recordfile.utils.DomainUtils;
 
+import com.hedera.etl.util.TimeUtils;
+
 import com.hederahashgraph.api.proto.java.AccountAmount;
 import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
 import com.hederahashgraph.api.proto.java.TokenID;
@@ -30,6 +32,8 @@ import java.util.function.Predicate;
 @Builder
 @Log4j2
 public class Transaction {
+  @Nullable
+  private String created;
   @Nullable
   private Long consensus_timestamp;
   @Nullable
@@ -120,6 +124,7 @@ public class Transaction {
     //TODO replace with Builder pattern
     Transaction transaction = new Transaction();
     transaction.setCharged_tx_fee(txRecord.getTransactionFee());
+    transaction.setCreated(TimeUtils.fromNanos(recordItem.getConsensusTimestamp()));
     transaction.setConsensus_timestamp(recordItem.getConsensusTimestamp());
     transaction.setTransaction_id(recordItem.getPayerAccountId()+"@"+recordItem.getConsensusTimestamp() + (transactionId.getNonce() == 0 ? "": "/"+transactionId.getNonce()));
     //TODO verify!

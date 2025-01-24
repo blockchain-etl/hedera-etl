@@ -1,12 +1,13 @@
 package com.hedera.etl.entity.network;
 
 import com.hedera.etl.entity.FractionalAmount;
-import com.hedera.etl.entity.TimestampRange;
 
 import com.hedera.etl.entity.TransactionType;
 import com.hedera.etl.recordfile.domain.transaction.RecordItem;
 
 import com.hedera.etl.recordfile.utils.DomainUtils;
+
+import com.hedera.etl.util.TimeUtils;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,7 +16,6 @@ import lombok.NoArgsConstructor;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
 @DefaultSchema(JavaBeanSchema.class)
 @Data
@@ -23,6 +23,8 @@ import java.util.Objects;
 @AllArgsConstructor
 @Builder
 public class NetworkStake {
+  @Nullable
+  private String created;
   @Nullable
   private Long consensus_timestamp;
   @Nullable
@@ -67,6 +69,7 @@ public class NetworkStake {
             .reduce(0L, Long::sum);
 
     return builder()
+            .created(TimeUtils.fromNanos(consensusTimestamp))
             .consensus_timestamp(consensusTimestamp)
             .max_stake_rewarded(transactionBody.getMaxStakeRewarded())
             .max_staking_reward_rate_per_hbar(transactionBody.getMaxStakingRewardRatePerHbar())

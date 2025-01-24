@@ -1,12 +1,8 @@
 package com.hedera.etl.entity.balance;
 
-import com.hedera.etl.entity.transaction.StakingRewardTransfer;
-import com.hedera.etl.entity.transaction.Transaction;
-import com.hedera.etl.entity.transaction.TransactionTransfersInner;
-
 import com.hedera.etl.recordfile.domain.transaction.RecordItem;
 import com.hedera.etl.recordfile.entity.EntityId;
-import com.hedera.hapi.node.base.AccountID;
+import com.hedera.etl.util.TimeUtils;
 
 import com.hederahashgraph.api.proto.java.AccountAmount;
 import lombok.AllArgsConstructor;
@@ -18,7 +14,6 @@ import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Stream;
 
 @DefaultSchema(JavaBeanSchema.class)
 @Data
@@ -26,6 +21,8 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 @Builder
 public class Balance {
+  @Nullable
+  String created;
   @Nullable
   Long consensus_timestamp;
   @Nullable
@@ -51,12 +48,14 @@ public class Balance {
                                     .account_id(EntityId.of(transfer.getAccountID()).toString())
                                     .amount(transfer.getAmount())
                                     .consensus_timestamp(recordItem.getConsensusTimestamp())
+                                    .created(TimeUtils.fromNanos(recordItem.getConsensusTimestamp()))
                                     .build(),
 
                             builder()
                                     .account_id(payerAccount.toString())
                                     .amount(-transfer.getAmount())
                                     .consensus_timestamp(recordItem.getConsensusTimestamp())
+                                    .created(TimeUtils.fromNanos(recordItem.getConsensusTimestamp()))
                                     .build()
                     ).stream()
             )

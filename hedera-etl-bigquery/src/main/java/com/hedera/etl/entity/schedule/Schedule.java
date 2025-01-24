@@ -20,6 +20,7 @@ import com.hedera.etl.recordfile.entity.EntityId;
 
 import com.hedera.etl.recordfile.utils.DomainUtils;
 
+import com.hedera.etl.util.TimeUtils;
 import com.hedera.shaded.hapi.com.google.protobuf.ByteString;
 
 import com.hedera.shaded.hapi.com.google.protobuf.UnknownFieldSet;
@@ -46,7 +47,8 @@ import java.util.Set;
 @Builder
 @Log4j2
 public class Schedule {
-
+  @Nullable
+  private String created;
   @Nullable
   private Long consensus_timestamp;
   @Nullable
@@ -73,6 +75,9 @@ public class Schedule {
   private Boolean deleted;
 
   public static Schedule from(RecordItem recordItem) {
+    if (!recordItem.getTransactionBody().hasScheduleCreate()) {
+      return null;
+    }
 
     var body = recordItem.getTransactionBody().getScheduleCreate();
     long consensusTimestamp = recordItem.getConsensusTimestamp();
@@ -84,6 +89,7 @@ public class Schedule {
             EntityId.of(recordItem.getTransactionRecord().getReceipt().getScheduleID());
     if(recordItem.getTransactionBody().hasScheduleCreate()) {
       return Schedule.builder()
+              .created(TimeUtils.fromNanos(consensusTimestamp))
               .consensus_timestamp(consensusTimestamp)
               .creator_account_id(creatorAccount)
               .expiration_time(expirationTime)

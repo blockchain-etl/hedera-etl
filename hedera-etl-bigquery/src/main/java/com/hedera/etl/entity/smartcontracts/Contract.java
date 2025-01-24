@@ -8,6 +8,8 @@ import com.hedera.etl.recordfile.domain.transaction.RecordItem;
 import com.hedera.etl.recordfile.entity.EntityId;
 import com.hedera.etl.recordfile.utils.DomainUtils;
 
+import com.hedera.etl.util.TimeUtils;
+
 import com.hederahashgraph.api.proto.java.ContractCreateTransactionBody;
 import com.hederahashgraph.api.proto.java.ContractDeleteTransactionBody;
 import com.hederahashgraph.api.proto.java.ContractUpdateTransactionBody;
@@ -30,7 +32,10 @@ public class Contract {
   @Nullable private String auto_renew_account;
   @Nullable private Long auto_renew_period;
   @Nullable private String contract_id;
+  @Nullable private String created;
   @Nullable private Long created_timestamp;
+  @Nullable private String modified;
+  @Nullable private Long modified_timestamp;
   @Nullable private String evm_address;
   @Nullable private Long expiration_timestamp;
   @Nullable private String file_id;
@@ -52,6 +57,10 @@ public class Contract {
 
     if (recordItem.getTransactionBody().hasContractUpdateInstance()) {
       return from(recordItem, recordItem.getTransactionBody().getContractUpdateInstance());
+    }
+
+    if (recordItem.getTransactionBody().hasContractDeleteInstance()) {
+      return from(recordItem, recordItem.getTransactionBody().getContractDeleteInstance());
     }
 
     return null;
@@ -93,9 +102,13 @@ public class Contract {
       builder.proxy_account_id(proxyAccountId.toString());
     }
 
+    var consensusTimestamp = recordItem.getConsensusTimestamp();
+
     builder
             .memo(transactionBody.getMemo())
-            .removed(false);
+            .removed(false)
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
+            .modified_timestamp(consensusTimestamp);
 
     var contractId = recordItem.getTransactionRecord().getReceipt().getContractID();
     var sidecarRecords = recordItem.getSidecarRecords();
@@ -122,8 +135,12 @@ public class Contract {
   }
 
   private static Contract from(RecordItem recordItem, ContractDeleteTransactionBody transactionBody) {
+    var consensusTimestamp = recordItem.getConsensusTimestamp();
+
     return builder()
             .contract_id(EntityId.of(transactionBody.getContractID()).toString())
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
+            .modified_timestamp(consensusTimestamp)
             .removed(transactionBody.getPermanentRemoval())
             .build();
 
@@ -132,7 +149,13 @@ public class Contract {
   private static Contract from(RecordItem recordItem, ContractCreateTransactionBody transactionBody) {
     var contractCreateResult = recordItem.getTransactionRecord().getContractCreateResult();
 
-    var builder = builder();
+    var consensusTimestamp = recordItem.getConsensusTimestamp();
+
+    var builder = builder()
+            .created(TimeUtils.fromNanos(consensusTimestamp))
+            .created_timestamp(consensusTimestamp)
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
+            .modified_timestamp(consensusTimestamp);
 
     if (transactionBody.hasAutoRenewAccountId()) {
       // TODO: get hold of lookup

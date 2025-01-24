@@ -6,6 +6,8 @@ import com.hedera.etl.recordfile.entity.EntityId;
 
 import com.hedera.etl.recordfile.utils.DomainUtils;
 
+import com.hedera.etl.util.TimeUtils;
+
 import com.hederahashgraph.api.proto.java.TokenBurnTransactionBody;
 import com.hederahashgraph.api.proto.java.TokenCreateTransactionBody;
 import com.hederahashgraph.api.proto.java.TokenDeleteTransactionBody;
@@ -46,6 +48,8 @@ public class Token {
   @Nullable
   private Long auto_renew_period;
   @Nullable
+  private String created;
+  @Nullable
   private Long created_timestamp;
   @Nullable
   private Integer decimals;
@@ -69,6 +73,8 @@ public class Token {
   private byte[] metadata;
   @Nullable
   private Key metadatakey;
+  @Nullable
+  private String modified;
   @Nullable
   private Long modified_timestamp;
   @Nullable
@@ -142,6 +148,7 @@ public class Token {
     long consensusTimestamp = recordItem.getConsensusTimestamp();
 
     return builder()
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
             .modified_timestamp(consensusTimestamp)
             .token_id(tokenId.toString())
             .deleted(true)
@@ -154,6 +161,7 @@ public class Token {
     long newTotalSupply = recordItem.getTransactionRecord().getReceipt().getNewTotalSupply();
 
     return builder()
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
             .modified_timestamp(consensusTimestamp)
             .token_id(tokenId.toString())
             .total_supply(newTotalSupply)
@@ -166,6 +174,7 @@ public class Token {
     long newTotalSupply = recordItem.getTransactionRecord().getReceipt().getNewTotalSupply();
 
     return builder()
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
             .modified_timestamp(consensusTimestamp)
             .token_id(tokenId.toString())
             .total_supply(newTotalSupply)
@@ -178,6 +187,7 @@ public class Token {
     long newTotalSupply = recordItem.getTransactionRecord().getReceipt().getNewTotalSupply();
 
     return builder()
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
             .modified_timestamp(consensusTimestamp)
             .token_id(tokenId.toString())
             .total_supply(newTotalSupply)
@@ -189,6 +199,7 @@ public class Token {
     var tokenId = EntityId.of(transactionBody.getToken());
 
     return builder()
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
             .modified_timestamp(consensusTimestamp)
             .token_id(tokenId.toString())
             .pause_status(PauseStatus.PAUSED)
@@ -200,6 +211,7 @@ public class Token {
     var tokenId = EntityId.of(transactionBody.getToken());
 
     return builder()
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
             .modified_timestamp(consensusTimestamp)
             .token_id(tokenId.toString())
             .pause_status(PauseStatus.UNPAUSED)
@@ -232,8 +244,10 @@ public class Token {
       builder.memo(transactionBody.getMemo().getValue());
     }
 
-    builder.modified_timestamp(consensusTimestamp);
-    builder.token_id(tokenId.toString());
+    builder
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
+            .modified_timestamp(consensusTimestamp)
+            .token_id(tokenId.toString());
 
     if (transactionBody.hasFeeScheduleKey()) {
       builder.fee_schedule_key(Key.from(transactionBody.getFeeScheduleKey()));
@@ -293,6 +307,8 @@ public class Token {
     var treasury = EntityId.of(transactionBody.getTreasury());
 
     var tokenBuilder = Token.builder()
+            .created(TimeUtils.fromNanos(consensusTimestamp))
+            .modified(TimeUtils.fromNanos(consensusTimestamp))
             .created_timestamp(consensusTimestamp)
             .decimals(transactionBody.getDecimals())
             .freeze_default(transactionBody.getFreezeDefault())

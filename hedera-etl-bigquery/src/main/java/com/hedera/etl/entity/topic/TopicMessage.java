@@ -4,6 +4,8 @@ import com.hedera.etl.recordfile.domain.transaction.RecordItem;
 
 import com.hedera.etl.recordfile.entity.EntityId;
 
+import com.hedera.etl.util.TimeUtils;
+
 import com.hederahashgraph.api.proto.java.ConsensusMessageChunkInfo;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +22,9 @@ public class TopicMessage {
 
   @Nullable
   private ChunkInfo chunk_info;
+
+  @Nullable
+  private String created;
 
   @Nullable
   private Long consensus_timestamp;
@@ -66,6 +71,7 @@ public class TopicMessage {
     }
 
     return topicBuilder.chunk_info(chunkInfoBuilder.build())
+            .created(TimeUtils.fromNanos(recordItem.getConsensusTimestamp()))
             .consensus_timestamp(recordItem.getConsensusTimestamp())
             .message(toBytes(transactionBody.getMessage()))
             .payer_account_id(recordItem.getPayerAccountId().toString())

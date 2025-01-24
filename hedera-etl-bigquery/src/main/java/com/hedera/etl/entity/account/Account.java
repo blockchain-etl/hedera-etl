@@ -2,10 +2,10 @@ package com.hedera.etl.entity.account;
 
 import com.hedera.etl.recordfile.domain.transaction.RecordItem;
 import com.hedera.etl.recordfile.entity.AbstractEntity;
-import com.hedera.etl.recordfile.entity.Entity;
 import com.hedera.etl.recordfile.entity.EntityId;
 import com.hedera.etl.recordfile.utils.DomainUtils;
 
+import com.hedera.etl.util.TimeUtils;
 import com.hedera.shaded.hapi.com.google.protobuf.ByteString;
 
 import com.hederahashgraph.api.proto.java.Key;
@@ -53,7 +53,16 @@ public class Account {
   //@Nullable  private Balance balance;
 
   @Nullable
-  private String created_timestamp;
+  private String created;
+
+  @Nullable
+  private Long created_timestamp;
+
+  @Nullable
+  private String modified;
+
+  @Nullable
+  private Long modified_timestamp;
 
   @Nullable
   private Boolean decline_reward;
@@ -115,6 +124,13 @@ public class Account {
       //TODO refactor for Builder pattern
       Account account = new Account();
 
+      var consensusTimestamp = recordItem.getConsensusTimestamp();
+
+      account.setCreated(TimeUtils.fromNanos(consensusTimestamp));
+      account.setCreated_timestamp(consensusTimestamp);
+      account.setModified(TimeUtils.fromNanos(consensusTimestamp));
+      account.setModified_timestamp(consensusTimestamp);
+
       //TODO ???
       account.setAccount(EntityId.of(recordItem.getTransactionRecord().getReceipt().getAccountID()).toString());
 
@@ -171,6 +187,10 @@ public class Account {
       Account account = new Account();
 
       var transactionBody = recordItem.getTransactionBody().getCryptoUpdateAccount();
+
+      var consensusTimestamp = recordItem.getConsensusTimestamp();
+      account.setModified(TimeUtils.fromNanos(consensusTimestamp));
+      account.setModified_timestamp(consensusTimestamp);
 
       if (transactionBody.hasAutoRenewPeriod()) {
         account.setAuto_renew_period(transactionBody.getAutoRenewPeriod().getSeconds());

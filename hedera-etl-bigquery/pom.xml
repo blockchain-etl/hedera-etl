@@ -17,7 +17,7 @@
   </parent>
 
   <properties>
-    <beam.version>2.61.0</beam.version>
+    <beam.version>2.62.0</beam.version>
     <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
     <log4j.version>2.19.0</log4j.version>
     <lombok.version>1.18.36</lombok.version>
