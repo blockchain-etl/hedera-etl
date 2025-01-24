@@ -23,6 +23,7 @@ import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -159,7 +160,7 @@ public class Token {
             .build();
   }
 
-  private static Token from(RecordItem recordItem, TokenMintTransactionBody transactionBody) {
+  private static Token from(RecordItem recordItem, @NotNull TokenMintTransactionBody transactionBody) {
     var tokenId = EntityId.of(transactionBody.getToken());
     long consensusTimestamp = recordItem.getConsensusTimestamp();
     long newTotalSupply = recordItem.getTransactionRecord().getReceipt().getNewTotalSupply();

@@ -96,12 +96,15 @@ public class Transaction {
   private List<StakingRewardTransfer> staking_reward_transfers;
 
   @Nullable
-  List<TransactionTokenTransfersInner> token_transfers;
+  private List<TransactionTokenTransfersInner> token_transfers;
   @Nullable
-  List<TransactionTransfersInner> transfers;
+  private List<TransactionTransfersInner> transfers;
 
   @Nullable
-  List<AssessedCustomFee> assessed_custom_fees;
+  private List<AssessedCustomFee> assessed_custom_fees;
+
+  @Nullable
+  private EntityId schedule_ref;
 
   public static Transaction from(RecordItem recordItem) {
 
@@ -137,6 +140,8 @@ public class Transaction {
     transaction.setValid_duration_seconds(validDurationSeconds);
     transaction.setValid_start_ns(DomainUtils.timeStampInNanos(transactionId.getTransactionValidStart()));
     transaction.setStaking_reward_transfers(insertStakingRewardTransfers(recordItem));
+    transaction.setSchedule_ref(recordItem.getTransactionRecord()
+            .hasScheduleRef() ? EntityId.of(txRecord.getScheduleRef()) : null);
 
     //TODO handle this method?
 //    transactionHandler.updateTransaction(transaction, recordItem);

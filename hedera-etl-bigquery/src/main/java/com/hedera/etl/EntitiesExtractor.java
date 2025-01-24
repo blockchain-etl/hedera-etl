@@ -1,8 +1,10 @@
 package com.hedera.etl;
 
 import com.hedera.etl.entity.Block;
+import com.hedera.etl.entity.account.Account;
 import com.hedera.etl.entity.balance.Balance;
 import com.hedera.etl.entity.network.NetworkStake;
+import com.hedera.etl.entity.schedule.Schedule;
 import com.hedera.etl.entity.topic.TopicMessage;
 import com.hedera.etl.entity.transaction.Transaction;
 import com.hedera.etl.entity.smartcontracts.Contract;
@@ -40,7 +42,9 @@ public class EntitiesExtractor {
                 .add(TopicMessage.class, TopicMessage::from)
                 .add(Contract.class, Contract::from)
                 .add(Transaction.class, Transaction::from)
+                .add(Schedule.class, Schedule::from)
                 .add(NetworkStake.class, NetworkStake::from)
+                .add(Account.class, Account::from)
                 .flatten(Balance.class, Balance::from)
                 .getOutput();
 
