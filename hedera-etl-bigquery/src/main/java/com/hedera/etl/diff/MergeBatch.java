@@ -11,7 +11,7 @@ import org.apache.beam.sdk.values.Row;
 import java.time.LocalDate;
 
 @RequiredArgsConstructor
-public class DiffMergerBatch extends PTransform<PCollection<Row>, PCollection<Row>> {
+public class MergeBatch extends PTransform<PCollection<Row>, PCollection<Row>> {
 
   private final LocalDate FIRST_ENTRIES_DATE = LocalDate.of(2019, 9, 13);
 
@@ -29,11 +29,11 @@ public class DiffMergerBatch extends PTransform<PCollection<Row>, PCollection<Ro
 
     var rowsWithUpdates = input
             .apply("Union of current and historical data", Flatten.with(latestValues))
-            .apply("Merge diffs", new DiffMerger(timestampField, idField));
+            .apply("Merge diffs", Merge.diffs(idField, timestampField));
 
-    saveLatestValues(rowsWithUpdates.get(DiffMerger.LATEST));
+    saveLatestValues(rowsWithUpdates.get(Merge.LATEST));
 
-    return rowsWithUpdates.get(DiffMerger.UPDATED);
+    return rowsWithUpdates.get(Merge.UPDATED);
   }
 
   private PCollection<Row> loadLatestValues(PCollection<Row> input) {

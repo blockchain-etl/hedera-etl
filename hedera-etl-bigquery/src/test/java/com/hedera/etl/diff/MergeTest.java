@@ -10,7 +10,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import java.util.Map;
 
-public class DiffMergerTest {
+public class MergeTest {
   private final String timestampField = "timestamp";
   private final String idField = "id";
   private final String firstField = "first";
@@ -28,7 +28,7 @@ public class DiffMergerTest {
             .addNullableStringField(secondField)
             .build();
 
-    var diffMerger = new DiffMerger(timestampField, idField);
+    var diffMerger = Merge.diffs(idField, timestampField);
 
     // given
     var input = pipeline.apply(Create.of(
@@ -45,7 +45,7 @@ public class DiffMergerTest {
     var output = input.apply(diffMerger);
 
     // then
-    PAssert.that(output.get(DiffMerger.UPDATED)).containsInAnyOrder(
+    PAssert.that(output.get(Merge.UPDATED)).containsInAnyOrder(
             getRow(schema, 1L, "1", null, "a"),
             getRow(schema, 2L, "1", "b", "b"),
             getRow(schema, 3L, "1", "b", "c"),
@@ -55,7 +55,7 @@ public class DiffMergerTest {
             getRow(schema, 1L, "3", null, "a")
     );
 
-    PAssert.that(output.get(DiffMerger.LATEST)).containsInAnyOrder(
+    PAssert.that(output.get(Merge.LATEST)).containsInAnyOrder(
             getRow(schema, 3L, "1", "b", "c"),
             getRow(schema, 3L, "2", null, "c"),
             getRow(schema, 1L, "3", null, "a")
@@ -107,13 +107,13 @@ public class DiffMergerTest {
             getRow(schema, ts1, id3, null, "a")
     )).setCoder(RowCoder.of(schema));
 
-    var diffMerger = new DiffMerger("%s.%s".formatted(timestampField, toField), "%s.%s".formatted(idField, part1Field));
+    var diffMerger = Merge.diffs("%s.%s".formatted(idField, part1Field), "%s.%s".formatted(timestampField, toField));
 
     // when
     var output = input.apply(diffMerger);
 
     // then
-    PAssert.that(output.get(DiffMerger.UPDATED)).containsInAnyOrder(
+    PAssert.that(output.get(Merge.UPDATED)).containsInAnyOrder(
             getRow(schema, ts1, id1, null, "a"),
             getRow(schema, ts2, id1, "b", "b"),
             getRow(schema, ts3, id1, "b", "c"),
@@ -123,7 +123,7 @@ public class DiffMergerTest {
             getRow(schema, ts1, id3, null, "a")
     );
 
-    PAssert.that(output.get(DiffMerger.LATEST)).containsInAnyOrder(
+    PAssert.that(output.get(Merge.LATEST)).containsInAnyOrder(
             getRow(schema, ts3, id1, "b", "c"),
             getRow(schema, ts3, id2, null, "c"),
             getRow(schema, ts1, id3, null, "a")
@@ -139,5 +139,50 @@ public class DiffMergerTest {
             .withFieldValue(firstField, first)
             .withFieldValue(secondField, second)
             .build();
+  }
+
+  @Test
+  public void testSumMerger() {
+    var schema = Schema.builder()
+            .addInt64Field(timestampField)
+            .addStringField(idField)
+            .addNullableInt64Field(firstField)
+            .addNullableInt64Field(secondField)
+            .build();
+
+    var diffMerger = Merge.sum(idField, timestampField, firstField);
+
+    // given
+    var input = pipeline.apply(Create.of(
+            getRow(schema, 1L, "1", 1L, 1L),
+            getRow(schema, 2L, "1", 2L, 2L),
+            getRow(schema, 3L, "1", 3L, 3L),
+            getRow(schema, 1L, "2", 10L, 4L),
+            getRow(schema, 2L, "2", -1L, 5L),
+            getRow(schema, 3L, "2", 0L, 6L),
+            getRow(schema, 1L, "3", 1L, 7L)
+    )).setCoder(RowCoder.of(schema));
+
+    // when
+    var output = input.apply(diffMerger);
+
+    // then
+    PAssert.that(output.get(Merge.UPDATED)).containsInAnyOrder(
+            getRow(schema, 1L, "1", 1L, 1L),
+            getRow(schema, 2L, "1", 3L, 2L),
+            getRow(schema, 3L, "1", 6L, 3L),
+            getRow(schema, 1L, "2", 10L, 4L),
+            getRow(schema, 2L, "2", 9L, 5L),
+            getRow(schema, 3L, "2", 9L, 6L),
+            getRow(schema, 1L, "3", 1L, 7L)
+    );
+
+    PAssert.that(output.get(Merge.LATEST)).containsInAnyOrder(
+            getRow(schema, 3L, "1", 6L, 3L),
+            getRow(schema, 3L, "2", 9L, 6L),
+            getRow(schema, 1L, "3", 1L, 7L)
+    );
+
+    pipeline.run();
   }
 }

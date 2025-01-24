@@ -22,47 +22,62 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @RequiredArgsConstructor
-public class DiffMerger extends PTransform<PCollection<Row>, PCollectionTuple> {
-  private final String timestampField;
-  private final String idField;
-
+public class Merge extends PTransform<PCollection<Row>, PCollectionTuple> {
+  public static final TupleTag<Row> DIFFS = new TupleTag<>();
   public static final TupleTag<Row> UPDATED = new TupleTag<>();
   public static final TupleTag<Row> LATEST = new TupleTag<>();
+
+  private final String idField;
+
+  private final AbstractMerger mergerDoFn;
+
+  public static Merge diffs(String idField, String timestampField) {
+    return new Merge(idField, new DiffMerger(timestampField));
+  }
+
+  public static Merge sum(String idField, String timestampField, String summableField) {
+    return new Merge(idField, new SumMerger(timestampField, summableField));
+  }
 
   @Override
   public PCollectionTuple expand(PCollection<Row> input) {
     var inputCoder = input.getCoder();
 
     var groupedRows = input
-            .apply("Key by %s".formatted(idField), WithKeys.of(row -> getValueFromRowOrNested(String.class, row, idField)))
+            .apply("Key by %s".formatted(idField), WithKeys.of(row -> getValueFromRowOrNested(String.class, row,
+                    idField)))
             .setCoder(KvCoder.of(StringUtf8Coder.of(), inputCoder))
-            .apply("Group by key", GroupByKey.create()).setCoder(KvCoder.of(StringUtf8Coder.of(), IterableCoder.of(inputCoder)));
+            .apply("Group by key", GroupByKey.create())
+            .setCoder(KvCoder.of(StringUtf8Coder.of(), IterableCoder.of(inputCoder)));
 
     var mergedRows = groupedRows
             .apply("Remove keys", MapElements
                     .into(TypeDescriptors.iterables(TypeDescriptors.rows()))
                     .via(kv -> kv.getValue())).setCoder(IterableCoder.of(inputCoder))
             .apply("Merge diffs", ParDo
-                    .of(new AccumulatorMerger())
+                    .of(mergerDoFn)
                     .withOutputTags(UPDATED, TupleTagList.of(LATEST)));
 
     return PCollectionTuple.empty(mergedRows.getPipeline())
+            .and(DIFFS, input)
             .and(UPDATED, mergedRows.get(UPDATED).setCoder(inputCoder))
             .and(LATEST, mergedRows.get(LATEST).setCoder(inputCoder));
   }
 
-  private <T> T getValueFromRowOrNested(Class<T> type, Row row, String field) {
+  private static <T> T getValueFromRowOrNested(Class<T> type, Row row, String field) {
     var fields = field.split("\\.");
     var current = row;
     for (int i = 0; i < fields.length - 1; i++) {
       current = row.getRow(fields[i]);
     }
 
-    return current.getValue(fields[fields.length-1]);
+    return current.getValue(fields[fields.length - 1]);
   }
 
   @RequiredArgsConstructor
-  public class AccumulatorMerger extends DoFn<Iterable<Row>, Row> {
+  public static abstract class AbstractMerger extends DoFn<Iterable<Row>, Row> {
+    protected final String timestampField;
+
     @ProcessElement
     public void processElement(ProcessContext c) {
       var rows = c.element();
@@ -78,14 +93,15 @@ public class DiffMerger extends PTransform<PCollection<Row>, PCollectionTuple> {
     private List<Row> mergeDiffs(Iterable<Row> rows) {
       var sortedRows = StreamSupport.stream(rows.spliterator(), false)
               .sorted((row1, row2) -> Long.compare(
-                      getValueFromRowOrNested(Long.class, row1, timestampField),
-                      getValueFromRowOrNested(Long.class, row2, timestampField)
+                      getValueFromRowOrNested(Long.class, row1, this.timestampField),
+                      getValueFromRowOrNested(Long.class, row2, this.timestampField)
               ))
               .collect(Collectors.toList());
 
       var result = new ArrayList<Row>();
 
-      var lastRow = sortedRows.getFirst();
+      var lastRow = sortedRows.removeFirst();
+      result.add(lastRow);
       for (var row : sortedRows) {
         lastRow = updateRow(lastRow, row);
         result.add(lastRow);
@@ -94,7 +110,16 @@ public class DiffMerger extends PTransform<PCollection<Row>, PCollectionTuple> {
       return result;
     }
 
-    private Row updateRow(Row lastRow, Row diffRow) {
+    protected abstract Row updateRow(Row lastRow, Row diffRow);
+  }
+
+  public static class DiffMerger extends AbstractMerger {
+    public DiffMerger(String timestampField) {
+      super(timestampField);
+    }
+
+    @Override
+    protected Row updateRow(Row lastRow, Row diffRow) {
       var fields = diffRow.getSchema().getFieldNames();
 
       var rowBuilder = Row.fromRow(lastRow);
@@ -107,6 +132,26 @@ public class DiffMerger extends PTransform<PCollection<Row>, PCollectionTuple> {
       }
 
       return rowBuilder.build();
+    }
+  }
+
+  public static class SumMerger extends AbstractMerger {
+
+    private final String summableField;
+
+    public SumMerger(String timestampField, String summableField) {
+      super(timestampField);
+      this.summableField = summableField;
+    }
+
+    @Override
+    protected Row updateRow(Row lastRow, Row diffRow) {
+      var lastValue = lastRow.getInt64(summableField);
+      var newValue = diffRow.getInt64(summableField) + lastValue;
+
+      return Row.fromRow(diffRow)
+              .withFieldValue(summableField, newValue)
+              .build();
     }
   }
 }

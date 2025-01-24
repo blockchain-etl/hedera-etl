@@ -1,6 +1,7 @@
 package com.hedera.etl;
 
 import com.hedera.etl.entity.Block;
+import com.hedera.etl.entity.balance.Balance;
 import com.hedera.etl.entity.network.NetworkStake;
 import com.hedera.etl.entity.topic.TopicMessage;
 import com.hedera.etl.entity.transaction.Transaction;
@@ -18,67 +19,74 @@ import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.Row;
 import org.apache.beam.sdk.values.TypeDescriptor;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class EntitiesExtractor {
-  public static Map<String, PCollection<Row>> extract(PCollection<FileIO.ReadableFile> input) {
-    var recordFiles = input.apply("Parse Record Files", new RecordFileTransform());
-    var recordItems = recordFiles.apply("Extract Record Items", FlatMapElements
-            .into(TypeDescriptor.of(RecordItem.class))
-            .via(RecordFile::getItems));
+    public static Map<String, PCollection<Row>> extract(PCollection<FileIO.ReadableFile> input) {
+        var recordFiles = input.apply("Parse Record Files", new RecordFileTransform());
+        var recordItems = recordFiles.apply("Extract Record Items", FlatMapElements
+                .into(TypeDescriptor.of(RecordItem.class))
+                .via(RecordFile::getItems));
 
-    var extractedFromRecordFiles = Extract.from(recordFiles)
-            .add(Block.class, Block::from)
-            .getOutput();
+        var extractedFromRecordFiles = Extract.from(recordFiles)
+                .add(Block.class, Block::from)
+                .getOutput();
 
-    var extractedFromRecordItems = Extract.from(recordItems)
-            .add(Token.class, Token::from)
-            .add(TopicMessage.class, TopicMessage::from)
-            .add(Contract.class, Contract::from)
-            .add(Transaction.class, Transaction::from)
-            .add(NetworkStake.class, NetworkStake::from)
-            .getOutput();
+        var extractedFromRecordItems = Extract.from(recordItems)
+                .add(Token.class, Token::from)
+                .add(TopicMessage.class, TopicMessage::from)
+                .add(Contract.class, Contract::from)
+                .add(Transaction.class, Transaction::from)
+                .add(NetworkStake.class, NetworkStake::from)
+                .flatten(Balance.class, Balance::from)
+                .getOutput();
 
-    var result = new HashMap<String, PCollection<Row>>();
-    result.putAll(extractedFromRecordFiles);
-    result.putAll(extractedFromRecordItems);
+        var result = new HashMap<String, PCollection<Row>>();
+        result.putAll(extractedFromRecordFiles);
+        result.putAll(extractedFromRecordItems);
 
-    return result;
-  }
-
-  private static class Extract<InputT> {
-    private final PCollection<InputT> input;
-    @Getter
-    private final Map<String, PCollection<Row>> output;
-
-    private Extract(PCollection<InputT> input) {
-      this.input = input;
-      this.output = new HashMap<>();
+        return result;
     }
 
-    public <T> Extract<InputT> add(Class<T> type, SerializableFunction<InputT, T> mapper) {
-      var className = type.getSimpleName();
-      var toListMapper = (SerializableFunction<InputT, Iterable<T>>) input ->
-        Optional.ofNullable(mapper.apply(input))
-                .stream()
-                .toList();
+    private static class Extract<InputT> {
+        private final PCollection<InputT> input;
+        @Getter
+        private final Map<String, PCollection<Row>> output;
 
-      output.put(
-              className,
-              this.input
-                      .apply("Map Record Item into %s".formatted(className), FlatMapElements
-                              .<T>into(TypeDescriptor.of(type))
-                              .via(toListMapper))
-                      .apply("Convert %s into Rows".formatted(className), Convert.toRows())
-      );
+        private Extract(PCollection<InputT> input) {
+            this.input = input;
+            this.output = new HashMap<>();
+        }
 
-      return this;
+        public <T> Extract<InputT> add(Class<T> type, SerializableFunction<InputT, T> mapper) {
+            var toListMapper = (SerializableFunction<InputT, Iterable<T>>) input ->
+                    Optional.ofNullable(mapper.apply(input))
+                            .stream()
+                            .toList();
+
+            return flatten(type, toListMapper);
+        }
+
+        public <T> Extract<InputT> flatten(Class<T> type, SerializableFunction<InputT, Iterable<T>> mapper) {
+            var className = type.getSimpleName();
+
+            output.put(
+                    className,
+                    this.input
+                            .apply("Map Record Item into %s".formatted(className), FlatMapElements
+                                    .<T>into(TypeDescriptor.of(type))
+                                    .via(mapper))
+                            .apply("Convert %s into Rows".formatted(className), Convert.toRows())
+            );
+
+            return this;
+        }
+
+        public static <InputT> Extract<InputT> from(PCollection<InputT> input) {
+            return new Extract<>(input);
+        }
     }
-
-    public static <InputT> Extract<InputT> from(PCollection<InputT> input) {
-      return new Extract<>(input);
-    }
-  }
 }

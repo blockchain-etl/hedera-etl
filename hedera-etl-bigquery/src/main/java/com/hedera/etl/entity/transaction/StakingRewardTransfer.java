@@ -36,7 +36,7 @@ import javax.annotation.Nullable;
 public class StakingRewardTransfer{
 
   @Nullable
-  private long account_id;
+  private String account_id;
   @Nullable
   private long amount;
   @Nullable

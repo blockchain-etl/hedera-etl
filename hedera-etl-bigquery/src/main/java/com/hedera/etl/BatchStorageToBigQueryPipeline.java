@@ -22,9 +22,6 @@ package com.hedera.etl;
 
 import com.google.api.services.bigquery.model.TableReference;
 
-import com.hedera.etl.diff.DiffMergerBatch;
-import com.hedera.etl.entity.Block;
-
 import lombok.RequiredArgsConstructor;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.io.FileIO;

@@ -168,7 +168,7 @@ public class Transaction {
     for (var aa : recordItem.getTransactionRecord().getPaidStakingRewardsList()) {
       var accountId = EntityId.of(aa.getAccountID());
       var stakingRewardTransfer = new StakingRewardTransfer();
-      stakingRewardTransfer.setAccount_id(accountId.getId());
+      stakingRewardTransfer.setAccount_id(accountId.toString());
       stakingRewardTransfer.setAmount(aa.getAmount());
       stakingRewardTransfer.setConsensus_timestamp(consensusTimestamp);
       stakingRewardTransfer.setPayer_account_id(payerAccountId);
