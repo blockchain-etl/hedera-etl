@@ -1,5 +1,6 @@
 package com.hedera.etl.entity.topic;
 
+import com.hedera.etl.entity.TransactionType;
 import com.hedera.etl.recordfile.domain.transaction.RecordItem;
 
 import com.hedera.etl.recordfile.entity.EntityId;
@@ -49,6 +50,12 @@ public class TopicMessage {
 
   public static TopicMessage from(RecordItem recordItem) {
 
+    int transactionTypeValue = recordItem.getTransactionType();
+    TransactionType transactionType = TransactionType.of(transactionTypeValue);
+
+    if(transactionType != TransactionType.CONSENSUSSUBMITMESSAGE){
+      return null;
+    }
 
     var transactionBody = recordItem.getTransactionBody().getConsensusSubmitMessage();
     var transactionRecord = recordItem.getTransactionRecord();

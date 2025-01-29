@@ -121,49 +121,50 @@ public class Transaction {
     var nodeAccount = EntityId.of(body.getNodeAccountID());
     var transactionId = body.getTransactionID();
 
-    //TODO replace with Builder pattern
-    Transaction transaction = new Transaction();
-    transaction.setCharged_tx_fee(txRecord.getTransactionFee());
-    transaction.setCreated(TimeUtils.fromNanos(recordItem.getConsensusTimestamp()));
-    transaction.setConsensus_timestamp(recordItem.getConsensusTimestamp());
-    transaction.setTransaction_id(recordItem.getPayerAccountId()+"@"+recordItem.getConsensusTimestamp() + (transactionId.getNonce() == 0 ? "": "/"+transactionId.getNonce()));
+    Transaction.TransactionBuilder transactionBuilder = Transaction.builder();
+
+    transactionBuilder.charged_tx_fee(txRecord.getTransactionFee());
+    transactionBuilder.created(TimeUtils.fromNanos(recordItem.getConsensusTimestamp()));
+    transactionBuilder.consensus_timestamp(recordItem.getConsensusTimestamp());
+    transactionBuilder.transaction_id(recordItem.getPayerAccountId()+"@"+recordItem.getConsensusTimestamp() + (transactionId.getNonce() == 0 ? "": "/"+transactionId.getNonce()));
     //TODO verify!
-    //    transaction.setEntityId(EntityId.of(recordItem.getTransactionRecord().getTransactionID().getAccountID()));
-    transaction.setIndex(recordItem.getTransactionIndex());
-    transaction.setInitial_balance(0L);
-    transaction.setMax_fee(body.getTransactionFee());
-    transaction.setMemo(DomainUtils.toBytes(body.getMemoBytes()));
-    transaction.setNode_account_id(nodeAccount);
-    transaction.setNonce(transactionId.getNonce());
-    transaction.setPayer_account_id(recordItem.getPayerAccountId());
-    transaction.setResult(txRecord.getReceipt().getStatusValue());
-    transaction.setScheduled(txRecord.hasScheduleRef());
-    transaction.setTransaction_bytes(recordItem.getTransaction().toByteArray());
-    transaction.setTransaction_hash(DomainUtils.toBytes(txRecord.getTransactionHash()));
-    transaction.setTransaction_record_bytes(recordItem.getTransactionRecord().toByteArray());
-    transaction.setType(recordItem.getTransactionType());
-    transaction.setValid_duration_seconds(validDurationSeconds);
-    transaction.setValid_start_ns(DomainUtils.timeStampInNanos(transactionId.getTransactionValidStart()));
-    transaction.setStaking_reward_transfers(insertStakingRewardTransfers(recordItem));
-    transaction.setSchedule_ref(recordItem.getTransactionRecord()
+    //transaction.setEntityId(EntityId.of(recordItem.getTransactionRecord().getTransactionID().getAccountID()));
+    transactionBuilder.index(recordItem.getTransactionIndex());
+    transactionBuilder.initial_balance(0L);
+    transactionBuilder.max_fee(body.getTransactionFee());
+    transactionBuilder.memo(DomainUtils.toBytes(body.getMemoBytes()));
+    transactionBuilder.node_account_id(nodeAccount);
+    transactionBuilder.nonce(transactionId.getNonce());
+    transactionBuilder.payer_account_id(recordItem.getPayerAccountId());
+    transactionBuilder.result(txRecord.getReceipt().getStatusValue());
+    transactionBuilder.scheduled(txRecord.hasScheduleRef());
+    transactionBuilder.transaction_bytes(recordItem.getTransaction().toByteArray());
+    transactionBuilder.transaction_hash(DomainUtils.toBytes(txRecord.getTransactionHash()));
+    transactionBuilder.transaction_record_bytes(recordItem.getTransactionRecord().toByteArray());
+    transactionBuilder.type(recordItem.getTransactionType());
+    transactionBuilder.valid_duration_seconds(validDurationSeconds);
+    transactionBuilder.valid_start_ns(DomainUtils.timeStampInNanos(transactionId.getTransactionValidStart()));
+    transactionBuilder.staking_reward_transfers(insertStakingRewardTransfers(recordItem));
+    transactionBuilder.schedule_ref(recordItem.getTransactionRecord()
             .hasScheduleRef() ? EntityId.of(txRecord.getScheduleRef()) : null);
 
     //TODO handle this method?
-//    transactionHandler.updateTransaction(transaction, recordItem);
+    //transactionHandler.updateTransaction(transaction, recordItem);
 
-    transaction.setTransfers(insertTransferList(recordItem));
+    transactionBuilder.transfers(insertTransferList(recordItem));
 
     if (txRecord.hasParentConsensusTimestamp()) {
-      transaction.setParent_consensus_timestamp(
+      transactionBuilder.parent_consensus_timestamp(
               DomainUtils.timestampInNanosMax(txRecord.getParentConsensusTimestamp()));
     }
 
+    Transaction transaction = transactionBuilder.build();
+
     // Errata records can fail with FAIL_INVALID but still have items in the record committed to state.
     if (recordItem.isSuccessful() || recordItem.getTransactionStatus() == ResponseCodeEnum.FAIL_INVALID_VALUE) {
-//      insertAutomaticTokenAssociations(recordItem);
       // Record token transfers can be populated for multiple transaction types
       insertTokenTransfers(recordItem, transaction);
-      insertAssessedCustomFees(recordItem);
+      transaction.setAssessed_custom_fees(insertAssessedCustomFees(recordItem));
     }
 
     return transaction;

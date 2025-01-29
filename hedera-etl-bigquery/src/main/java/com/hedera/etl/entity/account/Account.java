@@ -121,66 +121,64 @@ public class Account {
       var key = transactionBody.hasKey() ? transactionBody.getKey().toByteArray() : null;
       boolean emptyKey = ArrayUtils.isEmpty(key);
 
-      //TODO refactor for Builder pattern
-      Account account = new Account();
+      AccountBuilder accountBuilder = Account.builder();
 
       var consensusTimestamp = recordItem.getConsensusTimestamp();
 
-      account.setCreated(TimeUtils.fromNanos(consensusTimestamp));
-      account.setCreated_timestamp(consensusTimestamp);
-      account.setModified(TimeUtils.fromNanos(consensusTimestamp));
-      account.setModified_timestamp(consensusTimestamp);
+      accountBuilder.created(TimeUtils.fromNanos(consensusTimestamp));
+      accountBuilder.created_timestamp(consensusTimestamp);
+      accountBuilder.modified(TimeUtils.fromNanos(consensusTimestamp));
+      accountBuilder.modified_timestamp(consensusTimestamp);
 
-      //TODO ???
-      account.setAccount(EntityId.of(recordItem.getTransactionRecord().getReceipt().getAccountID()).toString());
+      accountBuilder.account(EntityId.of(recordItem.getTransactionRecord().getReceipt().getAccountID()).toString());
 
-      account.setDeleted(recordItem.getTransactionBody().hasCryptoDelete());
+      accountBuilder.deleted(recordItem.getTransactionBody().hasCryptoDelete());
 
       if (!emptyAlias) {
-        account.setAlias(alias);
+        accountBuilder.alias(alias);
         if (emptyKey && alias.length > EVM_ADDRESS_LENGTH) {
-          account.setKey(alias);
+          accountBuilder.key(alias);
         }
       }
 
       if (!emptyKey) {
-        account.setKey(key);
+        accountBuilder.key(key);
       }
 
       var evmAddress = transactionRecord.getEvmAddress();
       if (evmAddress != ByteString.EMPTY) {
-        account.setEvm_address(DomainUtils.toBytes(evmAddress));
+        accountBuilder.evm_address(DomainUtils.toBytes(evmAddress));
       } else if (!emptyAlias) {
-        account.setEvm_address(aliasToEvmAddress(alias));
+        accountBuilder.evm_address(aliasToEvmAddress(alias));
       }
 
       if (transactionBody.hasAutoRenewPeriod()) {
-        account.setAuto_renew_period(transactionBody.getAutoRenewPeriod().getSeconds());
+        accountBuilder.auto_renew_period(transactionBody.getAutoRenewPeriod().getSeconds());
       }
 
-      account.setMax_automatic_token_associations(transactionBody.getMaxAutomaticTokenAssociations());
-      account.setMemo(transactionBody.getMemo());
-      account.setReceiver_sig_required(transactionBody.getReceiverSigRequired());
+      accountBuilder.max_automatic_token_associations(transactionBody.getMaxAutomaticTokenAssociations());
+      accountBuilder.memo(transactionBody.getMemo());
+      accountBuilder.receiver_sig_required(transactionBody.getReceiverSigRequired());
 
       if (recordItem.getHapiVersion().isLessThan(HAPI_VERSION_0_27_0)) {
-        return account;
+        return accountBuilder.build();
       }
-      account.setDecline_reward(transactionBody.getDeclineReward());
+      accountBuilder.decline_reward(transactionBody.getDeclineReward());
 
       switch (transactionBody.getStakedIdCase()) {
         case STAKEDID_NOT_SET -> {
-          return account;
+          return accountBuilder.build();
         }
-        case STAKED_NODE_ID -> account.setStaked_node_id(transactionBody.getStakedNodeId());
+        case STAKED_NODE_ID -> accountBuilder.staked_node_id(transactionBody.getStakedNodeId());
         case STAKED_ACCOUNT_ID -> {
           var accountId = EntityId.of(transactionBody.getStakedAccountId());
-          account.setStaked_account_id(accountId.getId());
+          accountBuilder.staked_account_id(accountId.getId());
         }
       }
 
-      account.setStake_period_start(getEpochDay(recordItem.getConsensusTimestamp()));
+      accountBuilder.stake_period_start(getEpochDay(recordItem.getConsensusTimestamp()));
 
-      return account;
+      return accountBuilder.build();
     }
     if (recordItem.getTransactionBody().hasCryptoUpdateAccount()) {
 
