@@ -27,39 +27,39 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory;
 
 public class HederaETLApplication {
 
-    public static void main(String[] args) {
-        var applicationOptions = PipelineOptionsFactory.fromArgs(args)
+  public static void main(String[] args) {
+    var applicationOptions =
+        PipelineOptionsFactory.fromArgs(args)
+            .withValidation()
+            .withoutStrictParsing()
+            .as(ApplicationOptions.class);
+
+    switch (applicationOptions.getMode()) {
+      case BATCH:
+        var options =
+            PipelineOptionsFactory.fromArgs(args)
                 .withValidation()
                 .withoutStrictParsing()
-                .as(ApplicationOptions.class);
-
-        switch (applicationOptions.getMode()) {
-            case BATCH:
-                var options =
-                        PipelineOptionsFactory
-                                .fromArgs(args)
-                                .withValidation()
-                                .withoutStrictParsing()
-                                .as(BatchStorageToBigQueryPipelineOptions.class);
-                new BatchStorageToBigQueryPipeline(options).run();
-                break;
-            case REALTIME:
-                throw new UnsupportedOperationException("Realtime mode is unsupported for now");
-            default:
-                throw new UnsupportedOperationException("Unknown mode " + applicationOptions.getMode());
-        }
-
+                .as(BatchStorageToBigQueryPipelineOptions.class);
+        new BatchStorageToBigQueryPipeline(options).run();
+        break;
+      case REALTIME:
+        throw new UnsupportedOperationException("Realtime mode is unsupported for now");
+      default:
+        throw new UnsupportedOperationException("Unknown mode " + applicationOptions.getMode());
     }
+  }
 
-    public interface ApplicationOptions extends PipelineOptions {
-        @Description("Which mode to use")
-        @Default.Enum("BATCH") // TODO: remove default value after implementation of realtime pipeline
-        Mode getMode();
-        void setMode(Mode value);
+  public interface ApplicationOptions extends PipelineOptions {
+    @Description("Which mode to use")
+    @Default.Enum("BATCH") // TODO: remove default value after implementation of realtime pipeline
+    Mode getMode();
 
-        enum Mode {
-            BATCH,
-            REALTIME,
-        }
+    void setMode(Mode value);
+
+    enum Mode {
+      BATCH,
+      REALTIME,
     }
+  }
 }

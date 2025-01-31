@@ -1,0 +1,31 @@
+plugins {
+  id 'java'
+  id 'application'
+}
+
+dependencies {
+  implementation(project(':hedera-reader'))
+  implementation 'org.hyperledger.besu:secp256k1:0.8.2'
+  implementation 'net.java.dev.jna:jna:5.16.0'
+  implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
+  testImplementation 'org.apache.beam:beam-runners-direct-java:2.62.0'
+  runtimeOnly 'org.apache.beam:beam-runners-google-cloud-dataflow-java:2.62.0'
+  implementation 'org.apache.beam:beam-sdks-java-core:2.62.0'
+  implementation 'org.apache.beam:beam-sdks-java-io-google-cloud-platform:2.62.0'
+  implementation ('com.hedera.hashgraph:hapi:0.57.3')
+  testImplementation 'junit:junit:4.13'
+}
+
+
+tasks.named('test', Test) {
+  useJUnit()
+  testLogging {
+    events "passed"
+  }
+}
+
+application {
+  mainClass = 'com.hedera.etl.HederaETLApplication'
+}
+
+description = 'Hedera ETL BigQuery'

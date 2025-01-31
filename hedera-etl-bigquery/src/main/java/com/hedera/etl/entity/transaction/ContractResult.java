@@ -16,72 +16,67 @@
 
 package com.hedera.etl.entity.transaction;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Collections;
+import java.util.List;
 
-import com.hedera.etl.recordfile.entity.EntityId;
-
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
-import java.util.Collections;
-import java.util.List;
+
+import com.hedera.etl.reader.recordfile.entity.EntityId;
 
 @Data
 @NoArgsConstructor
 @SuperBuilder
 public class ContractResult {
 
-    private Long amount;
+  private Long amount;
 
-    @ToString.Exclude
-    private byte[] bloom;
+  @ToString.Exclude private byte[] bloom;
 
-    @ToString.Exclude
-    private byte[] callResult;
+  @ToString.Exclude private byte[] callResult;
 
-    private Long consensusTimestamp;
+  private Long consensusTimestamp;
 
-    private long contractId;
+  private long contractId;
 
-    private List<Long> createdContractIds = Collections.emptyList();
+  private List<Long> createdContractIds = Collections.emptyList();
 
-    private String errorMessage;
+  private String errorMessage;
 
-    private byte[] failedInitcode;
+  private byte[] failedInitcode;
 
-    private byte[] functionParameters;
+  private byte[] functionParameters;
 
-    private byte[] functionResult; // Temporary field until we can confirm the migration captured everything
+  private byte[]
+      functionResult; // Temporary field until we can confirm the migration captured everything
 
-    private Long gasConsumed;
+  private Long gasConsumed;
 
-    private Long gasLimit;
+  private Long gasLimit;
 
-    private Long gasUsed;
+  private Long gasUsed;
 
-    private EntityId payerAccountId;
+  private EntityId payerAccountId;
 
-    private EntityId senderId;
+  private EntityId senderId;
 
-    private byte[] transactionHash;
+  private byte[] transactionHash;
 
-    private Integer transactionIndex;
+  private Integer transactionIndex;
 
-    private int transactionNonce;
+  private int transactionNonce;
 
-    private Integer transactionResult;
+  private Integer transactionResult;
 
-
-
-//    public ContractTransactionHash toContractTransactionHash() {
-//        return ContractTransactionHash.builder()
-//                .consensusTimestamp(consensusTimestamp)
-//                .hash(transactionHash)
-//                .entityId(contractId)
-//                .payerAccountId(payerAccountId.getId())
-//                .transactionResult(transactionResult)
-//                .build();
-//    }
+  // public ContractTransactionHash toContractTransactionHash() {
+  // return ContractTransactionHash.builder()
+  // .consensusTimestamp(consensusTimestamp)
+  // .hash(transactionHash)
+  // .entityId(contractId)
+  // .payerAccountId(payerAccountId.getId())
+  // .transactionResult(transactionResult)
+  // .build();
+  // }
 }

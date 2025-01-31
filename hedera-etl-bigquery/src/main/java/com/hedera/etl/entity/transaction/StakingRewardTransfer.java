@@ -16,7 +16,7 @@
 
 package com.hedera.etl.entity.transaction;
 
-import com.hedera.etl.recordfile.entity.EntityId;
+import javax.annotation.Nullable;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +25,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
-import javax.annotation.Nullable;
+
+import com.hedera.etl.reader.recordfile.entity.EntityId;
 
 @DefaultSchema(JavaBeanSchema.class)
 @Data
@@ -33,16 +34,10 @@ import javax.annotation.Nullable;
 @AllArgsConstructor
 @Builder
 @Log4j2
-public class StakingRewardTransfer{
+public class StakingRewardTransfer {
 
-  @Nullable
-  private String account_id;
-  @Nullable
-  private long amount;
-  @Nullable
-  private long consensus_timestamp;
-  @Nullable
-  private EntityId payer_account_id;
-
-
+  @Nullable private String account_id;
+  @Nullable private long amount;
+  @Nullable private long consensus_timestamp;
+  @Nullable private EntityId payer_account_id;
 }

@@ -1,12 +1,11 @@
 package com.hedera.etl.entity.token;
 
-import com.hedera.etl.recordfile.domain.transaction.RecordItem;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import com.hedera.etl.recordfile.entity.EntityId;
-
-import com.hedera.etl.recordfile.utils.DomainUtils;
-
-import com.hedera.etl.util.TimeUtils;
+import javax.annotation.Nullable;
 
 import com.hederahashgraph.api.proto.java.TokenBurnTransactionBody;
 import com.hederahashgraph.api.proto.java.TokenCreateTransactionBody;
@@ -15,7 +14,6 @@ import com.hederahashgraph.api.proto.java.TokenMintTransactionBody;
 import com.hederahashgraph.api.proto.java.TokenPauseTransactionBody;
 import com.hederahashgraph.api.proto.java.TokenUnpauseTransactionBody;
 import com.hederahashgraph.api.proto.java.TokenUpdateTransactionBody;
-import com.hederahashgraph.api.proto.java.TokenWipeAccount;
 import com.hederahashgraph.api.proto.java.TokenWipeAccountTransactionBody;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,13 +25,12 @@ import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import com.hedera.etl.reader.recordfile.domain.transaction.RecordItem;
+import com.hedera.etl.reader.recordfile.entity.EntityId;
+import com.hedera.etl.reader.recordfile.utils.DomainUtils;
+import com.hedera.etl.util.TimeUtils;
 
-import static com.hedera.etl.recordfile.domain.transaction.RecordFile.HAPI_VERSION_0_49_0;
+import static com.hedera.etl.reader.recordfile.domain.transaction.RecordFile.HAPI_VERSION_0_49_0;
 
 @DefaultSchema(JavaBeanSchema.class)
 @Data
@@ -41,69 +38,6 @@ import static com.hedera.etl.recordfile.domain.transaction.RecordFile.HAPI_VERSI
 @AllArgsConstructor
 @Builder
 public class Token {
-  @Nullable
-  private Key admin_key;
-  @Nullable
-  private String auto_renew_account;
-  @Nullable
-  private Long auto_renew_period;
-  @Nullable
-  private String created;
-  @Nullable
-  private Long created_timestamp;
-  @Nullable
-  private Integer decimals;
-  @Nullable
-  private Boolean deleted;
-  @Nullable
-  private Long expiry_timestamp;
-  @Nullable
-  private Key fee_schedule_key;
-  @Nullable
-  private Boolean freeze_default;
-  @Nullable
-  private Key freeze_key;
-  @Nullable
-  private Long initial_supply;
-  @Nullable
-  private Long max_supply;
-  @Nullable
-  private Key kyc_key;
-  @Nullable
-  private byte[] metadata;
-  @Nullable
-  private Key metadatakey;
-  @Nullable
-  private String modified;
-  @Nullable
-  private Long modified_timestamp;
-  @Nullable
-  private String name;
-  @Nullable
-  private String memo;
-  @Nullable
-  private Key pause_key;
-  @Nullable
-  private PauseStatus pause_status;
-  @Nullable
-  private Key supply_key;
-  @Nullable
-  private SupplyType supply_type;
-  @Nullable
-  private String symbol;
-  @Nullable
-  private String token_id;
-  @Nullable
-  private Long total_supply;
-  @Nullable
-  private String treasury_account_id;
-  @Nullable
-  private Type type;
-  @Nullable
-  private Key wipe_key;
-  @Nullable
-  private CustomFees custom_fees;
-
   public static Token from(RecordItem recordItem) {
     var transactionBody = recordItem.getTransactionBody();
     if (transactionBody.hasTokenCreation()) {
@@ -143,55 +77,108 @@ public class Token {
     return null;
   }
 
-  private static Token from(RecordItem recordItem, TokenDeleteTransactionBody tokenDeletion) {
-    var tokenId = EntityId.of(tokenDeletion.getToken());
-    long consensusTimestamp = recordItem.getConsensusTimestamp();
-
-    return builder()
-            .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .modified_timestamp(consensusTimestamp)
-            .token_id(tokenId.toString())
-            .deleted(true)
-            .build();
-  }
-
-  private static Token from(RecordItem recordItem, TokenWipeAccountTransactionBody transactionBody) {
-    var tokenId = EntityId.of(transactionBody.getToken());
-    long consensusTimestamp = recordItem.getConsensusTimestamp();
-    long newTotalSupply = recordItem.getTransactionRecord().getReceipt().getNewTotalSupply();
-
-    return builder()
-            .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .modified_timestamp(consensusTimestamp)
-            .token_id(tokenId.toString())
-            .total_supply(newTotalSupply)
-            .build();
-  }
-
-  private static Token from(RecordItem recordItem, @NotNull TokenMintTransactionBody transactionBody) {
-    var tokenId = EntityId.of(transactionBody.getToken());
-    long consensusTimestamp = recordItem.getConsensusTimestamp();
-    long newTotalSupply = recordItem.getTransactionRecord().getReceipt().getNewTotalSupply();
-
-    return builder()
-            .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .modified_timestamp(consensusTimestamp)
-            .token_id(tokenId.toString())
-            .total_supply(newTotalSupply)
-            .build();
-  }
-
   private static Token from(RecordItem recordItem, TokenBurnTransactionBody transactionBody) {
     var tokenId = EntityId.of(transactionBody.getToken());
     long consensusTimestamp = recordItem.getConsensusTimestamp();
     long newTotalSupply = recordItem.getTransactionRecord().getReceipt().getNewTotalSupply();
 
     return builder()
+        .modified(TimeUtils.fromNanos(consensusTimestamp))
+        .modified_timestamp(consensusTimestamp)
+        .token_id(tokenId.toString())
+        .total_supply(newTotalSupply)
+        .build();
+  }
+
+  private static Token from(RecordItem recordItem, TokenCreateTransactionBody transactionBody) {
+    long consensusTimestamp = recordItem.getConsensusTimestamp();
+    var tokenId = EntityId.of(recordItem.getTransactionRecord().getReceipt().getTokenID());
+    var treasury = EntityId.of(transactionBody.getTreasury());
+
+    var tokenBuilder =
+        Token.builder()
+            .created(TimeUtils.fromNanos(consensusTimestamp))
             .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .modified_timestamp(consensusTimestamp)
+            .created_timestamp(consensusTimestamp)
+            .decimals(transactionBody.getDecimals())
+            .freeze_default(transactionBody.getFreezeDefault())
+            .initial_supply(transactionBody.getInitialSupply())
+            .max_supply(transactionBody.getMaxSupply())
+            .name(transactionBody.getName())
+            .supply_type(SupplyType.fromId(transactionBody.getSupplyTypeValue()))
+            .symbol(transactionBody.getSymbol())
             .token_id(tokenId.toString())
-            .total_supply(newTotalSupply)
-            .build();
+            .total_supply(transactionBody.getInitialSupply())
+            .treasury_account_id(treasury.toString())
+            .type(Type.fromId(transactionBody.getTokenTypeValue()))
+            .custom_fees(CustomFees.from(transactionBody.getCustomFeesList(), tokenId));
+
+    if (transactionBody.hasFeeScheduleKey()) {
+      tokenBuilder.fee_schedule_key(Key.from(transactionBody.getFeeScheduleKey()));
+    }
+
+    if (transactionBody.hasFreezeKey()) {
+      tokenBuilder.freeze_key(Key.from(transactionBody.getFreezeKey()));
+    }
+
+    if (transactionBody.hasKycKey()) {
+      tokenBuilder.kyc_key(Key.from(transactionBody.getKycKey()));
+    }
+
+    // metadata and metadata key fields are supported from services 0.49.0. This is
+    // a workaround of
+    // the issue that
+    // services 0.48.x processes such transactions as if the fields are not present.
+    if (recordItem.getHapiVersion().isGreaterThanOrEqualTo(HAPI_VERSION_0_49_0)) {
+      tokenBuilder.metadata(transactionBody.getMetadata().toByteArray());
+
+      if (transactionBody.hasMetadataKey()) {
+        tokenBuilder.metadatakey(Key.from(transactionBody.getMetadataKey()));
+      }
+    }
+
+    if (transactionBody.hasPauseKey()) {
+      tokenBuilder
+          .pause_key(Key.from(transactionBody.getPauseKey()))
+          .pause_status(PauseStatus.UNPAUSED);
+    } else {
+      tokenBuilder.pause_status(PauseStatus.NOT_APPLICABLE);
+    }
+
+    if (transactionBody.hasSupplyKey()) {
+      tokenBuilder.supply_key(Key.from(transactionBody.getSupplyKey()));
+    }
+
+    if (transactionBody.hasWipeKey()) {
+      tokenBuilder.wipe_key(Key.from(transactionBody.getWipeKey()));
+    }
+    return tokenBuilder.build();
+  }
+
+  private static Token from(RecordItem recordItem, TokenDeleteTransactionBody tokenDeletion) {
+    var tokenId = EntityId.of(tokenDeletion.getToken());
+    long consensusTimestamp = recordItem.getConsensusTimestamp();
+
+    return builder()
+        .modified(TimeUtils.fromNanos(consensusTimestamp))
+        .modified_timestamp(consensusTimestamp)
+        .token_id(tokenId.toString())
+        .deleted(true)
+        .build();
+  }
+
+  private static Token from(
+      RecordItem recordItem, @NotNull TokenMintTransactionBody transactionBody) {
+    var tokenId = EntityId.of(transactionBody.getToken());
+    long consensusTimestamp = recordItem.getConsensusTimestamp();
+    long newTotalSupply = recordItem.getTransactionRecord().getReceipt().getNewTotalSupply();
+
+    return builder()
+        .modified(TimeUtils.fromNanos(consensusTimestamp))
+        .modified_timestamp(consensusTimestamp)
+        .token_id(tokenId.toString())
+        .total_supply(newTotalSupply)
+        .build();
   }
 
   private static Token from(RecordItem recordItem, TokenPauseTransactionBody transactionBody) {
@@ -199,11 +186,11 @@ public class Token {
     var tokenId = EntityId.of(transactionBody.getToken());
 
     return builder()
-            .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .modified_timestamp(consensusTimestamp)
-            .token_id(tokenId.toString())
-            .pause_status(PauseStatus.PAUSED)
-            .build();
+        .modified(TimeUtils.fromNanos(consensusTimestamp))
+        .modified_timestamp(consensusTimestamp)
+        .token_id(tokenId.toString())
+        .pause_status(PauseStatus.PAUSED)
+        .build();
   }
 
   private static Token from(RecordItem recordItem, TokenUnpauseTransactionBody transactionBody) {
@@ -211,11 +198,11 @@ public class Token {
     var tokenId = EntityId.of(transactionBody.getToken());
 
     return builder()
-            .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .modified_timestamp(consensusTimestamp)
-            .token_id(tokenId.toString())
-            .pause_status(PauseStatus.UNPAUSED)
-            .build();
+        .modified(TimeUtils.fromNanos(consensusTimestamp))
+        .modified_timestamp(consensusTimestamp)
+        .token_id(tokenId.toString())
+        .pause_status(PauseStatus.UNPAUSED)
+        .build();
   }
 
   private static Token from(RecordItem recordItem, TokenUpdateTransactionBody transactionBody) {
@@ -245,9 +232,9 @@ public class Token {
     }
 
     builder
-            .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .modified_timestamp(consensusTimestamp)
-            .token_id(tokenId.toString());
+        .modified(TimeUtils.fromNanos(consensusTimestamp))
+        .modified_timestamp(consensusTimestamp)
+        .token_id(tokenId.toString());
 
     if (transactionBody.hasFeeScheduleKey()) {
       builder.fee_schedule_key(Key.from(transactionBody.getFeeScheduleKey()));
@@ -261,7 +248,9 @@ public class Token {
       builder.kyc_key(Key.from(transactionBody.getKycKey()));
     }
 
-    // metadata and metadata key fields are supported from services 0.49.0. This is a workaround of the issue that
+    // metadata and metadata key fields are supported from services 0.49.0. This is
+    // a workaround of
+    // the issue that
     // services 0.48.x processes such transactions as if the fields are not present.
     if (recordItem.getHapiVersion().isGreaterThanOrEqualTo(HAPI_VERSION_0_49_0)) {
       if (transactionBody.hasMetadata()) {
@@ -301,84 +290,82 @@ public class Token {
     return builder.build();
   }
 
-  private static Token from(RecordItem recordItem, TokenCreateTransactionBody transactionBody) {
+  private static Token from(
+      RecordItem recordItem, TokenWipeAccountTransactionBody transactionBody) {
+    var tokenId = EntityId.of(transactionBody.getToken());
     long consensusTimestamp = recordItem.getConsensusTimestamp();
-    var tokenId = EntityId.of(recordItem.getTransactionRecord().getReceipt().getTokenID());
-    var treasury = EntityId.of(transactionBody.getTreasury());
+    long newTotalSupply = recordItem.getTransactionRecord().getReceipt().getNewTotalSupply();
 
-    var tokenBuilder = Token.builder()
-            .created(TimeUtils.fromNanos(consensusTimestamp))
-            .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .created_timestamp(consensusTimestamp)
-            .decimals(transactionBody.getDecimals())
-            .freeze_default(transactionBody.getFreezeDefault())
-            .initial_supply(transactionBody.getInitialSupply())
-            .max_supply(transactionBody.getMaxSupply())
-            .name(transactionBody.getName())
-            .supply_type(SupplyType.fromId(transactionBody.getSupplyTypeValue()))
-            .symbol(transactionBody.getSymbol())
-            .token_id(tokenId.toString())
-            .total_supply(transactionBody.getInitialSupply())
-            .treasury_account_id(treasury.toString())
-            .type(Type.fromId(transactionBody.getTokenTypeValue()))
-            .custom_fees(CustomFees.from(transactionBody.getCustomFeesList(), tokenId));
-
-    if (transactionBody.hasFeeScheduleKey()) {
-      tokenBuilder.fee_schedule_key(Key.from(transactionBody.getFeeScheduleKey()));
-    }
-
-    if (transactionBody.hasFreezeKey()) {
-      tokenBuilder.freeze_key(Key.from(transactionBody.getFreezeKey()));
-    }
-
-    if (transactionBody.hasKycKey()) {
-      tokenBuilder.kyc_key(Key.from(transactionBody.getKycKey()));
-    }
-
-    // metadata and metadata key fields are supported from services 0.49.0. This is a workaround of the issue that
-    // services 0.48.x processes such transactions as if the fields are not present.
-    if (recordItem.getHapiVersion().isGreaterThanOrEqualTo(HAPI_VERSION_0_49_0)) {
-      tokenBuilder.metadata(transactionBody.getMetadata().toByteArray());
-
-      if (transactionBody.hasMetadataKey()) {
-        tokenBuilder.metadatakey(Key.from(transactionBody.getMetadataKey()));
-      }
-    }
-
-    if (transactionBody.hasPauseKey()) {
-      tokenBuilder.pause_key(Key.from(transactionBody.getPauseKey()))
-              .pause_status(PauseStatus.UNPAUSED);
-    } else {
-      tokenBuilder.pause_status(PauseStatus.NOT_APPLICABLE);
-    }
-
-    if (transactionBody.hasSupplyKey()) {
-      tokenBuilder.supply_key(Key.from(transactionBody.getSupplyKey()));
-    }
-
-    if (transactionBody.hasWipeKey()) {
-      tokenBuilder.wipe_key(Key.from(transactionBody.getWipeKey()));
-    }
-    return tokenBuilder.build();
+    return builder()
+        .modified(TimeUtils.fromNanos(consensusTimestamp))
+        .modified_timestamp(consensusTimestamp)
+        .token_id(tokenId.toString())
+        .total_supply(newTotalSupply)
+        .build();
   }
 
+  @Nullable private Key admin_key;
+  @Nullable private String auto_renew_account;
+  @Nullable private Long auto_renew_period;
+  @Nullable private String created;
+  @Nullable private Long created_timestamp;
+  @Nullable private CustomFees custom_fees;
+  @Nullable private Integer decimals;
+  @Nullable private Boolean deleted;
+  @Nullable private Long expiry_timestamp;
+  @Nullable private Key fee_schedule_key;
+  @Nullable private Boolean freeze_default;
+  @Nullable private Key freeze_key;
+  @Nullable private Long initial_supply;
+  @Nullable private Key kyc_key;
+  @Nullable private Long max_supply;
+  @Nullable private String memo;
+  @Nullable private byte[] metadata;
+  @Nullable private Key metadatakey;
+  @Nullable private String modified;
+  @Nullable private Long modified_timestamp;
+  @Nullable private String name;
+  @Nullable private Key pause_key;
+
+  @Nullable private PauseStatus pause_status;
+
+  @Nullable private Key supply_key;
+
+  @Nullable private SupplyType supply_type;
+
+  @Nullable private String symbol;
+
+  @Nullable private String token_id;
+
+  @Nullable private Long total_supply;
+
+  @Nullable private String treasury_account_id;
+
+  @Nullable private Type type;
+
+  @Nullable private Key wipe_key;
+
   public enum PauseStatus {
-    NOT_APPLICABLE, PAUSED, UNPAUSED
+    NOT_APPLICABLE,
+    PAUSED,
+    UNPAUSED
   }
 
   @Getter
   @RequiredArgsConstructor
   public enum SupplyType {
-    INFINITE(0), FINITE(1);
+    FINITE(1),
+    INFINITE(0);
 
-    private final int id;
-
-    private static final Map<Integer, SupplyType> ID_MAP = Arrays.stream(values())
+    private static final Map<Integer, SupplyType> ID_MAP =
+        Arrays.stream(values())
             .collect(Collectors.toUnmodifiableMap(SupplyType::getId, Function.identity()));
 
     public static SupplyType fromId(int id) {
       return ID_MAP.getOrDefault(id, INFINITE);
     }
+
+    private final int id;
   }
 
   @Getter
@@ -387,13 +374,14 @@ public class Token {
     FUNGIBLE_COMMON(0),
     NON_FUNGIBLE_UNIQUE(1);
 
-    private final int id;
-
     private static final Map<Integer, Type> ID_MAP =
-            Arrays.stream(values()).collect(Collectors.toUnmodifiableMap(Type::getId, Function.identity()));
+        Arrays.stream(values())
+            .collect(Collectors.toUnmodifiableMap(Type::getId, Function.identity()));
 
     public static Type fromId(int id) {
       return ID_MAP.getOrDefault(id, FUNGIBLE_COMMON);
     }
+
+    private final int id;
   }
 }

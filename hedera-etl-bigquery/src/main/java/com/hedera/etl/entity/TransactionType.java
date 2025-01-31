@@ -19,8 +19,11 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import com.hedera.etl.entity.transaction.EntityOperation;
 
 @Getter
 @RequiredArgsConstructor
@@ -81,19 +84,13 @@ public enum TransactionType {
   TOKENCLAIMAIRDROP(60, EntityOperation.NONE);
 
   private static final Map<Integer, TransactionType> idMap =
-          Arrays.stream(values()).collect(Collectors.toMap(TransactionType::getProtoId, Function.identity()));
+      Arrays.stream(values())
+          .collect(Collectors.toMap(TransactionType::getProtoId, Function.identity()));
 
   private final int protoId;
   private final EntityOperation entityOperation;
 
   public static TransactionType of(int protoId) {
     return idMap.getOrDefault(protoId, UNKNOWN);
-  }
-
-  public enum EntityOperation {
-    NONE,
-    CREATE,
-    UPDATE,
-    DELETE
   }
 }

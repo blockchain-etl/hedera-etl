@@ -1,10 +1,10 @@
 package com.hedera.etl.entity.transaction;
 
-import com.hedera.etl.recordfile.domain.transaction.RecordItem;
-import com.hedera.etl.recordfile.entity.EntityId;
-import com.hedera.etl.recordfile.utils.DomainUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Predicate;
 
-import com.hedera.etl.util.TimeUtils;
+import javax.annotation.Nullable;
 
 import com.hederahashgraph.api.proto.java.AccountAmount;
 import com.hederahashgraph.api.proto.java.ResponseCodeEnum;
@@ -20,10 +20,11 @@ import lombok.NonNull;
 import lombok.extern.log4j.Log4j2;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Predicate;
+
+import com.hedera.etl.reader.recordfile.domain.transaction.RecordItem;
+import com.hedera.etl.reader.recordfile.entity.EntityId;
+import com.hedera.etl.reader.recordfile.utils.DomainUtils;
+import com.hedera.etl.util.TimeUtils;
 
 @DefaultSchema(JavaBeanSchema.class)
 @Data
@@ -32,92 +33,64 @@ import java.util.function.Predicate;
 @Builder
 @Log4j2
 public class Transaction {
-  @Nullable
-  private String created;
-  @Nullable
-  private Long consensus_timestamp;
-  @Nullable
-  private Long charged_tx_fee;
+  @Nullable private String created;
+  @Nullable private Long consensus_timestamp;
+  @Nullable private Long charged_tx_fee;
 
-  @Nullable
-  private EntityId entity_id;
+  @Nullable private EntityId entity_id;
 
-  @Nullable
-  private String transaction_id;
+  @Nullable private String transaction_id;
 
-  @Nullable
-  private Integer index;
+  @Nullable private Integer index;
 
-  @Nullable
-  private Long initial_balance;
+  @Nullable private Long initial_balance;
 
-  @Nullable
-  private byte[] memo;
+  @Nullable private byte[] memo;
 
-  @Nullable
-  private Long max_fee;
+  @Nullable private Long max_fee;
 
-  @Nullable
-  private List<NftTransfer> nft_transfer;
+  @Nullable private List<NftTransfer> nft_transfer;
 
-  @Nullable
-  private EntityId node_account_id;
+  @Nullable private EntityId node_account_id;
 
-  @Nullable
-  private Integer nonce;
+  @Nullable private Integer nonce;
 
-  @Nullable
-  private Long parent_consensus_timestamp;
+  @Nullable private Long parent_consensus_timestamp;
 
-  @Nullable
-  private EntityId payer_account_id;
+  @Nullable private EntityId payer_account_id;
 
-  @Nullable
-  private Integer result;
+  @Nullable private Integer result;
 
-  @Nullable
-  private boolean scheduled;
+  @Nullable private boolean scheduled;
 
-  @Nullable
-  private byte[] transaction_bytes;
+  @Nullable private byte[] transaction_bytes;
 
-  @Nullable
-  private byte[] transaction_hash;
+  @Nullable private byte[] transaction_hash;
 
-  @Nullable
-  private byte[] transaction_record_bytes;
+  @Nullable private byte[] transaction_record_bytes;
 
-  @Nullable
-  private Integer type;
+  @Nullable private Integer type;
 
-  @Nullable
-  private Long valid_duration_seconds;
+  @Nullable private Long valid_duration_seconds;
 
-  @Nullable
-  private Long valid_start_ns;
+  @Nullable private Long valid_start_ns;
 
-  @Nullable
-  private List<StakingRewardTransfer> staking_reward_transfers;
+  @Nullable private List<StakingRewardTransfer> staking_reward_transfers;
 
-  @Nullable
-  private List<TransactionTokenTransfersInner> token_transfers;
-  @Nullable
-  private List<TransactionTransfersInner> transfers;
+  @Nullable private List<TransactionTokenTransfersInner> token_transfers;
+  @Nullable private List<TransactionTransfersInner> transfers;
 
-  @Nullable
-  private List<AssessedCustomFee> assessed_custom_fees;
+  @Nullable private List<AssessedCustomFee> assessed_custom_fees;
 
-  @Nullable
-  private EntityId schedule_ref;
+  @Nullable private EntityId schedule_ref;
 
   public static Transaction from(RecordItem recordItem) {
 
     TransactionBody body = recordItem.getTransactionBody();
     TransactionRecord txRecord = recordItem.getTransactionRecord();
 
-    Long validDurationSeconds = body.hasTransactionValidDuration()
-            ? body.getTransactionValidDuration().getSeconds()
-            : null;
+    Long validDurationSeconds =
+        body.hasTransactionValidDuration() ? body.getTransactionValidDuration().getSeconds() : null;
     var nodeAccount = EntityId.of(body.getNodeAccountID());
     var transactionId = body.getTransactionID();
 
@@ -126,9 +99,13 @@ public class Transaction {
     transactionBuilder.charged_tx_fee(txRecord.getTransactionFee());
     transactionBuilder.created(TimeUtils.fromNanos(recordItem.getConsensusTimestamp()));
     transactionBuilder.consensus_timestamp(recordItem.getConsensusTimestamp());
-    transactionBuilder.transaction_id(recordItem.getPayerAccountId()+"@"+recordItem.getConsensusTimestamp() + (transactionId.getNonce() == 0 ? "": "/"+transactionId.getNonce()));
-    //TODO verify!
-    //transaction.setEntityId(EntityId.of(recordItem.getTransactionRecord().getTransactionID().getAccountID()));
+    transactionBuilder.transaction_id(
+        recordItem.getPayerAccountId()
+            + "@"
+            + recordItem.getConsensusTimestamp()
+            + (transactionId.getNonce() == 0 ? "" : "/" + transactionId.getNonce()));
+    // TODO verify!
+    // transaction.setEntityId(EntityId.of(recordItem.getTransactionRecord().getTransactionID().getAccountID()));
     transactionBuilder.index(recordItem.getTransactionIndex());
     transactionBuilder.initial_balance(0L);
     transactionBuilder.max_fee(body.getTransactionFee());
@@ -143,25 +120,30 @@ public class Transaction {
     transactionBuilder.transaction_record_bytes(recordItem.getTransactionRecord().toByteArray());
     transactionBuilder.type(recordItem.getTransactionType());
     transactionBuilder.valid_duration_seconds(validDurationSeconds);
-    transactionBuilder.valid_start_ns(DomainUtils.timeStampInNanos(transactionId.getTransactionValidStart()));
+    transactionBuilder.valid_start_ns(
+        DomainUtils.timeStampInNanos(transactionId.getTransactionValidStart()));
     transactionBuilder.staking_reward_transfers(insertStakingRewardTransfers(recordItem));
-    transactionBuilder.schedule_ref(recordItem.getTransactionRecord()
-            .hasScheduleRef() ? EntityId.of(txRecord.getScheduleRef()) : null);
+    transactionBuilder.schedule_ref(
+        recordItem.getTransactionRecord().hasScheduleRef()
+            ? EntityId.of(txRecord.getScheduleRef())
+            : null);
 
-    //TODO handle this method?
-    //transactionHandler.updateTransaction(transaction, recordItem);
+    // TODO handle this method?
+    // transactionHandler.updateTransaction(transaction, recordItem);
 
     transactionBuilder.transfers(insertTransferList(recordItem));
 
     if (txRecord.hasParentConsensusTimestamp()) {
       transactionBuilder.parent_consensus_timestamp(
-              DomainUtils.timestampInNanosMax(txRecord.getParentConsensusTimestamp()));
+          DomainUtils.timestampInNanosMax(txRecord.getParentConsensusTimestamp()));
     }
 
     Transaction transaction = transactionBuilder.build();
 
-    // Errata records can fail with FAIL_INVALID but still have items in the record committed to state.
-    if (recordItem.isSuccessful() || recordItem.getTransactionStatus() == ResponseCodeEnum.FAIL_INVALID_VALUE) {
+    // Errata records can fail with FAIL_INVALID but still have items in the record committed to
+    // state.
+    if (recordItem.isSuccessful()
+        || recordItem.getTransactionStatus() == ResponseCodeEnum.FAIL_INVALID_VALUE) {
       // Record token transfers can be populated for multiple transaction types
       insertTokenTransfers(recordItem, transaction);
       transaction.setAssessed_custom_fees(insertAssessedCustomFees(recordItem));
@@ -198,14 +180,14 @@ public class Transaction {
       return transactionTransfersInners;
     }
 
-
-
     long consensusTimestamp = recordItem.getConsensusTimestamp();
     var transferList = transactionRecord.getTransferList();
     EntityId payerAccountId = recordItem.getPayerAccountId();
     var body = recordItem.getTransactionBody();
     boolean failedTransfer =
-            !recordItem.isSuccessful() && body.hasCryptoTransfer() && consensusTimestamp < 1577836799000000000L;
+        !recordItem.isSuccessful()
+            && body.hasCryptoTransfer()
+            && consensusTimestamp < 1577836799000000000L;
 
     for (int i = 0; i < transferList.getAccountAmountsCount(); ++i) {
       var aa = transferList.getAccountAmounts(i);
@@ -235,14 +217,13 @@ public class Transaction {
       transactionTransfersInner.setIs_approval(cryptoTransfer.getIsApproval());
 
       transactionTransfersInners.add(transactionTransfersInner);
-
     }
 
     return transactionTransfersInners;
   }
 
   private static void insertNonFungibleTokenTransfers(
-          RecordItem recordItem, Transaction transaction, TokenTransferList tokenTransferList) {
+      RecordItem recordItem, Transaction transaction, TokenTransferList tokenTransferList) {
     if (tokenTransferList.getNftTransfersList().isEmpty()) {
       return;
     }
@@ -284,45 +265,46 @@ public class Transaction {
 
       transaction.setToken_transfers(insertFungibleTokenTransfers(recordItem, tokenTransferList));
       insertNonFungibleTokenTransfers(recordItem, transaction, tokenTransferList);
-
     }
-
   }
 
   private static List<AssessedCustomFee> insertAssessedCustomFees(RecordItem recordItem) {
 
     List<AssessedCustomFee> assessedCustomFees = new ArrayList<>();
 
-      long consensusTimestamp = recordItem.getConsensusTimestamp();
-      var assessedCustomFeesList = recordItem.getTransactionRecord().getAssessedCustomFeesList();
-      for (int i = 0; i < assessedCustomFeesList.size(); i++) {
-        var protoAssessedCustomFee = assessedCustomFeesList.get(i);
-        var collectorAccountId = EntityId.of(protoAssessedCustomFee.getFeeCollectorAccountId());
-        // the effective payers must also appear in the *transfer lists of this transaction and the
-        // corresponding EntityIds should have been added to EntityListener, so skip it here.
-        var tokenId = EntityId.of(protoAssessedCustomFee.getTokenId());
-        var assessedCustomFee = new AssessedCustomFee();
-        assessedCustomFee.setAmount(protoAssessedCustomFee.getAmount());
-        assessedCustomFee.setCollector_account_id(collectorAccountId.getId());
-        assessedCustomFee.setConsensus_timestamp(consensusTimestamp);
-        assessedCustomFee.setPayer_account_id(recordItem.getPayerAccountId());
-        assessedCustomFee.setToken_id(tokenId);
+    long consensusTimestamp = recordItem.getConsensusTimestamp();
+    var assessedCustomFeesList = recordItem.getTransactionRecord().getAssessedCustomFeesList();
+    for (int i = 0; i < assessedCustomFeesList.size(); i++) {
+      var protoAssessedCustomFee = assessedCustomFeesList.get(i);
+      var collectorAccountId = EntityId.of(protoAssessedCustomFee.getFeeCollectorAccountId());
+      // the effective payers must also appear in the *transfer lists of this transaction and the
+      // corresponding EntityIds should have been added to EntityListener, so skip it here.
+      var tokenId = EntityId.of(protoAssessedCustomFee.getTokenId());
+      var assessedCustomFee = new AssessedCustomFee();
+      assessedCustomFee.setAmount(protoAssessedCustomFee.getAmount());
+      assessedCustomFee.setCollector_account_id(collectorAccountId.getId());
+      assessedCustomFee.setConsensus_timestamp(consensusTimestamp);
+      assessedCustomFee.setPayer_account_id(recordItem.getPayerAccountId());
+      assessedCustomFee.setToken_id(tokenId);
 
-        if (protoAssessedCustomFee.getEffectivePayerAccountIdCount() > 0) {
-          var effectivePayerEntityIds = new ArrayList<Long>();
-          for (var protoAccountId : protoAssessedCustomFee.getEffectivePayerAccountIdList()) {
-            var effectivePayerAccountId = EntityId.of(protoAccountId);
-            effectivePayerEntityIds.add(effectivePayerAccountId.getId());
-            recordItem.addEntityId(effectivePayerAccountId);
-          }
-          assessedCustomFee.setEffective_payer_account_ids(effectivePayerEntityIds);
+      if (protoAssessedCustomFee.getEffectivePayerAccountIdCount() > 0) {
+        var effectivePayerEntityIds = new ArrayList<Long>();
+        for (var protoAccountId : protoAssessedCustomFee.getEffectivePayerAccountIdList()) {
+          var effectivePayerAccountId = EntityId.of(protoAccountId);
+          effectivePayerEntityIds.add(effectivePayerAccountId.getId());
+          recordItem.addEntityId(effectivePayerAccountId);
         }
-          assessedCustomFees.add(assessedCustomFee);
+        assessedCustomFee.setEffective_payer_account_ids(effectivePayerEntityIds);
       }
-      return assessedCustomFees;
+      assessedCustomFees.add(assessedCustomFee);
+    }
+    return assessedCustomFees;
   }
 
-  private static boolean isApprovalNftTransfer(com.hederahashgraph.api.proto.java.NftTransfer nftTransfer, TokenID tokenId, TransactionBody body) {
+  private static boolean isApprovalNftTransfer(
+      com.hederahashgraph.api.proto.java.NftTransfer nftTransfer,
+      TokenID tokenId,
+      TransactionBody body) {
     if (!body.hasCryptoTransfer()) {
       return false;
     }
@@ -335,8 +317,8 @@ public class Transaction {
 
       for (var transfer : transferList.getNftTransfersList()) {
         if (transfer.getSerialNumber() == nftTransfer.getSerialNumber()
-                && transfer.getReceiverAccountID().equals(nftTransfer.getReceiverAccountID())
-                && transfer.getSenderAccountID().equals(nftTransfer.getSenderAccountID())) {
+            && transfer.getReceiverAccountID().equals(nftTransfer.getReceiverAccountID())
+            && transfer.getSenderAccountID().equals(nftTransfer.getSenderAccountID())) {
           return transfer.getIsApproval();
         }
       }
@@ -350,7 +332,7 @@ public class Transaction {
       return null;
     }
     List<AccountAmount> accountAmountsList =
-            body.getCryptoTransfer().getTransfers().getAccountAmountsList();
+        body.getCryptoTransfer().getTransfers().getAccountAmountsList();
     for (AccountAmount a : accountAmountsList) {
       if (aa.getAmount() == a.getAmount() && aa.getAccountID().equals(a.getAccountID())) {
         return a;
@@ -360,7 +342,7 @@ public class Transaction {
   }
 
   private static AccountAmount findAccountAmount(
-          Predicate<AccountAmount> accountAmountPredicate, EntityId tokenId, TransactionBody body) {
+      Predicate<AccountAmount> accountAmountPredicate, EntityId tokenId, TransactionBody body) {
     if (!body.hasCryptoTransfer()) {
       return null;
     }
@@ -378,7 +360,8 @@ public class Transaction {
     return null;
   }
 
-  private static List<TransactionTokenTransfersInner> insertFungibleTokenTransfers(RecordItem recordItem, TokenTransferList tokenTransferList) {
+  private static List<TransactionTokenTransfersInner> insertFungibleTokenTransfers(
+      RecordItem recordItem, TokenTransferList tokenTransferList) {
 
     List<TransactionTokenTransfersInner> transactionTokenTransfersInners = new ArrayList<>();
 
@@ -400,7 +383,8 @@ public class Transaction {
       AccountAmount accountAmount = tokenTransfers.get(i);
       EntityId accountId = EntityId.of(accountAmount.getAccountID());
       long amount = accountAmount.getAmount();
-      var tokenTransfer = isDeletedTokenDissociate ? new DissociateTokenTransfer() : new TokenTransfer();
+      var tokenTransfer =
+          isDeletedTokenDissociate ? new DissociateTokenTransfer() : new TokenTransfer();
       tokenTransfer.setAmount(amount);
       tokenTransfer.setId(new TokenTransfer.Id(consensusTimestamp, tokenId, accountId));
       tokenTransfer.setIS_APPROVAL(false);
@@ -408,7 +392,8 @@ public class Transaction {
 
       handleNegativeAccountAmounts(tokenId, body, accountAmount, amount, tokenTransfer);
 
-      TransactionTokenTransfersInner transactionTokenTransfersInner = new TransactionTokenTransfersInner();
+      TransactionTokenTransfersInner transactionTokenTransfersInner =
+          new TransactionTokenTransfersInner();
 
       transactionTokenTransfersInner.setToken_id(tokenId.toString());
       transactionTokenTransfersInner.setAccount(tokenTransfer.getPAYER_ACCOUNT_ID().toString());
@@ -421,23 +406,27 @@ public class Transaction {
   }
 
   private static void handleNegativeAccountAmounts(
-          EntityId tokenId,
-          TransactionBody body,
-          AccountAmount accountAmount,
-          long amount,
-          TokenTransfer tokenTransfer) {
+      EntityId tokenId,
+      TransactionBody body,
+      AccountAmount accountAmount,
+      long amount,
+      TokenTransfer tokenTransfer) {
     // If a record AccountAmount with amount < 0 is not in the body;
-    // but an AccountAmount with the same (TokenID, AccountID) combination is in the body with is_approval=true,
+    // but an AccountAmount with the same (TokenID, AccountID) combination is in the body with
+    // is_approval=true,
     // then again set is_approval=true
     if (amount < 0) {
 
-      // Is the accountAmount from the record also inside a body's transfer list for the given tokenId?
-      AccountAmount accountAmountInsideTransferList = findAccountAmount(accountAmount::equals, tokenId, body);
+      // Is the accountAmount from the record also inside a body's transfer list for the given
+      // tokenId?
+      AccountAmount accountAmountInsideTransferList =
+          findAccountAmount(accountAmount::equals, tokenId, body);
       if (accountAmountInsideTransferList == null) {
 
         // Is there any account amount inside the body's transfer list for the given tokenId
         // with the same accountId as the accountAmount from the record?
-        AccountAmount accountAmountWithSameIdInsideBody = findAccountAmount(
+        AccountAmount accountAmountWithSameIdInsideBody =
+            findAccountAmount(
                 aa -> aa.getAccountID().equals(accountAmount.getAccountID()) && aa.getIsApproval(),
                 tokenId,
                 body);
@@ -449,5 +438,4 @@ public class Transaction {
       }
     }
   }
-
 }

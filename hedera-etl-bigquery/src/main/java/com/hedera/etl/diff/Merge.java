@@ -1,5 +1,10 @@
 package com.hedera.etl.diff;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.beam.sdk.coders.IterableCoder;
 import org.apache.beam.sdk.coders.KvCoder;
@@ -16,10 +21,6 @@ import org.apache.beam.sdk.values.Row;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.TupleTagList;
 import org.apache.beam.sdk.values.TypeDescriptors;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @RequiredArgsConstructor
 public class Merge extends PTransform<PCollection<Row>, PCollectionTuple> {
@@ -43,25 +44,30 @@ public class Merge extends PTransform<PCollection<Row>, PCollectionTuple> {
   public PCollectionTuple expand(PCollection<Row> input) {
     var inputCoder = input.getCoder();
 
-    var groupedRows = input
-            .apply("Key by %s".formatted(idField), WithKeys.of(row -> getValueFromRowOrNested(String.class, row,
-                    idField)))
+    var groupedRows =
+        input
+            .apply(
+                "Key by %s".formatted(idField),
+                WithKeys.of(row -> getValueFromRowOrNested(String.class, row, idField)))
             .setCoder(KvCoder.of(StringUtf8Coder.of(), inputCoder))
             .apply("Group by key", GroupByKey.create())
             .setCoder(KvCoder.of(StringUtf8Coder.of(), IterableCoder.of(inputCoder)));
 
-    var mergedRows = groupedRows
-            .apply("Remove keys", MapElements
-                    .into(TypeDescriptors.iterables(TypeDescriptors.rows()))
-                    .via(kv -> kv.getValue())).setCoder(IterableCoder.of(inputCoder))
-            .apply("Merge diffs", ParDo
-                    .of(mergerDoFn)
-                    .withOutputTags(UPDATED, TupleTagList.of(LATEST)));
+    var mergedRows =
+        groupedRows
+            .apply(
+                "Remove keys",
+                MapElements.into(TypeDescriptors.iterables(TypeDescriptors.rows()))
+                    .via(kv -> kv.getValue()))
+            .setCoder(IterableCoder.of(inputCoder))
+            .apply(
+                "Merge diffs",
+                ParDo.of(mergerDoFn).withOutputTags(UPDATED, TupleTagList.of(LATEST)));
 
     return PCollectionTuple.empty(mergedRows.getPipeline())
-            .and(DIFFS, input)
-            .and(UPDATED, mergedRows.get(UPDATED).setCoder(inputCoder))
-            .and(LATEST, mergedRows.get(LATEST).setCoder(inputCoder));
+        .and(DIFFS, input)
+        .and(UPDATED, mergedRows.get(UPDATED).setCoder(inputCoder))
+        .and(LATEST, mergedRows.get(LATEST).setCoder(inputCoder));
   }
 
   private static <T> T getValueFromRowOrNested(Class<T> type, Row row, String field) {
@@ -75,7 +81,7 @@ public class Merge extends PTransform<PCollection<Row>, PCollectionTuple> {
   }
 
   @RequiredArgsConstructor
-  public static abstract class AbstractMerger extends DoFn<Iterable<Row>, Row> {
+  public abstract static class AbstractMerger extends DoFn<Iterable<Row>, Row> {
     protected final String timestampField;
 
     @ProcessElement
@@ -91,11 +97,13 @@ public class Merge extends PTransform<PCollection<Row>, PCollectionTuple> {
     }
 
     private List<Row> mergeDiffs(Iterable<Row> rows) {
-      var sortedRows = StreamSupport.stream(rows.spliterator(), false)
-              .sorted((row1, row2) -> Long.compare(
-                      getValueFromRowOrNested(Long.class, row1, this.timestampField),
-                      getValueFromRowOrNested(Long.class, row2, this.timestampField)
-              ))
+      var sortedRows =
+          StreamSupport.stream(rows.spliterator(), false)
+              .sorted(
+                  (row1, row2) ->
+                      Long.compare(
+                          getValueFromRowOrNested(Long.class, row1, this.timestampField),
+                          getValueFromRowOrNested(Long.class, row2, this.timestampField)))
               .collect(Collectors.toList());
 
       var result = new ArrayList<Row>();
@@ -149,9 +157,7 @@ public class Merge extends PTransform<PCollection<Row>, PCollectionTuple> {
       var lastValue = lastRow.getInt64(summableField);
       var newValue = diffRow.getInt64(summableField) + lastValue;
 
-      return Row.fromRow(diffRow)
-              .withFieldValue(summableField, newValue)
-              .build();
+      return Row.fromRow(diffRow).withFieldValue(summableField, newValue).build();
     }
   }
 }

@@ -1,14 +1,6 @@
 package com.hedera.etl.entity.smartcontracts;
 
-import com.hedera.etl.entity.TimestampRange;
-
-import com.hedera.etl.entity.TransactionType;
-import com.hedera.etl.recordfile.domain.transaction.RecordItem;
-
-import com.hedera.etl.recordfile.entity.EntityId;
-import com.hedera.etl.recordfile.utils.DomainUtils;
-
-import com.hedera.etl.util.TimeUtils;
+import javax.annotation.Nullable;
 
 import com.hederahashgraph.api.proto.java.ContractCreateTransactionBody;
 import com.hederahashgraph.api.proto.java.ContractDeleteTransactionBody;
@@ -20,7 +12,12 @@ import lombok.NoArgsConstructor;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
 
-import javax.annotation.Nullable;
+import com.hedera.etl.entity.TimestampRange;
+import com.hedera.etl.entity.TransactionType;
+import com.hedera.etl.reader.recordfile.domain.transaction.RecordItem;
+import com.hedera.etl.reader.recordfile.entity.EntityId;
+import com.hedera.etl.reader.recordfile.utils.DomainUtils;
+import com.hedera.etl.util.TimeUtils;
 
 @DefaultSchema(JavaBeanSchema.class)
 @Data
@@ -51,7 +48,7 @@ public class Contract {
 
   public static Contract from(RecordItem recordItem) {
     if (recordItem.getTransactionRecord().hasContractCreateResult()
-            || recordItem.getTransactionBody().hasContractCreateInstance()) {
+        || recordItem.getTransactionBody().hasContractCreateInstance()) {
       return from(recordItem, recordItem.getTransactionBody().getContractCreateInstance());
     }
 
@@ -66,19 +63,20 @@ public class Contract {
     return null;
   }
 
-  private static Contract from(RecordItem recordItem, ContractUpdateTransactionBody transactionBody) {
+  private static Contract from(
+      RecordItem recordItem, ContractUpdateTransactionBody transactionBody) {
     var contractCreateResult = recordItem.getTransactionRecord().getContractCreateResult();
 
     var builder = builder();
 
     if (transactionBody.hasAutoRenewAccountId()) {
       // TODO: get hold of lookup
-//      var autoRenewAccount = entityIdService
-//              .lookup(transactionBody.getAutoRenewAccountId())
-//              .orElse(EntityId.EMPTY);
-//      if (!EntityId.isEmpty(autoRenewAccount)) {
-//        builder.auto_renew_account(autoRenewAccount);
-//      }
+      // var autoRenewAccount = entityIdService
+      // .lookup(transactionBody.getAutoRenewAccountId())
+      // .orElse(EntityId.EMPTY);
+      // if (!EntityId.isEmpty(autoRenewAccount)) {
+      // builder.auto_renew_account(autoRenewAccount);
+      // }
       // TODO: replace with lookup once done
       builder.auto_renew_account(EntityId.of(transactionBody.getAutoRenewAccountId()).toString());
     }
@@ -89,8 +87,8 @@ public class Contract {
 
     if (contractCreateResult.hasEvmAddress()) {
       builder.evm_address(
-              DomainUtils.bytesToHex(DomainUtils.toBytes(contractCreateResult.getEvmAddress().getValue()))
-      );
+          DomainUtils.bytesToHex(
+              DomainUtils.toBytes(contractCreateResult.getEvmAddress().getValue())));
     }
 
     if (transactionBody.hasAdminKey()) {
@@ -105,10 +103,10 @@ public class Contract {
     var consensusTimestamp = recordItem.getConsensusTimestamp();
 
     builder
-            .memo(transactionBody.getMemo())
-            .removed(false)
-            .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .modified_timestamp(consensusTimestamp);
+        .memo(transactionBody.getMemo())
+        .removed(false)
+        .modified(TimeUtils.fromNanos(consensusTimestamp))
+        .modified_timestamp(consensusTimestamp);
 
     var contractId = recordItem.getTransactionRecord().getReceipt().getContractID();
     var sidecarRecords = recordItem.getSidecarRecords();
@@ -127,31 +125,34 @@ public class Contract {
       }
     }
 
-    // for child transactions FileID is located in parent ContractCreate/EthereumTransaction types
+    // for child transactions FileID is located in parent
+    // ContractCreate/EthereumTransaction types
     // and initcode is located in the sidecar
     updateChildFromParent(builder, recordItem);
 
     return builder.build();
   }
 
-  private static Contract from(RecordItem recordItem, ContractDeleteTransactionBody transactionBody) {
+  private static Contract from(
+      RecordItem recordItem, ContractDeleteTransactionBody transactionBody) {
     var consensusTimestamp = recordItem.getConsensusTimestamp();
 
     return builder()
-            .contract_id(EntityId.of(transactionBody.getContractID()).toString())
-            .modified(TimeUtils.fromNanos(consensusTimestamp))
-            .modified_timestamp(consensusTimestamp)
-            .removed(transactionBody.getPermanentRemoval())
-            .build();
-
+        .contract_id(EntityId.of(transactionBody.getContractID()).toString())
+        .modified(TimeUtils.fromNanos(consensusTimestamp))
+        .modified_timestamp(consensusTimestamp)
+        .removed(transactionBody.getPermanentRemoval())
+        .build();
   }
 
-  private static Contract from(RecordItem recordItem, ContractCreateTransactionBody transactionBody) {
+  private static Contract from(
+      RecordItem recordItem, ContractCreateTransactionBody transactionBody) {
     var contractCreateResult = recordItem.getTransactionRecord().getContractCreateResult();
 
     var consensusTimestamp = recordItem.getConsensusTimestamp();
 
-    var builder = builder()
+    var builder =
+        builder()
             .created(TimeUtils.fromNanos(consensusTimestamp))
             .created_timestamp(consensusTimestamp)
             .modified(TimeUtils.fromNanos(consensusTimestamp))
@@ -159,12 +160,12 @@ public class Contract {
 
     if (transactionBody.hasAutoRenewAccountId()) {
       // TODO: get hold of lookup
-//      var autoRenewAccount = entityIdService
-//              .lookup(transactionBody.getAutoRenewAccountId())
-//              .orElse(EntityId.EMPTY);
-//      if (!EntityId.isEmpty(autoRenewAccount)) {
-//        builder.auto_renew_account(autoRenewAccount);
-//      }
+      // var autoRenewAccount = entityIdService
+      // .lookup(transactionBody.getAutoRenewAccountId())
+      // .orElse(EntityId.EMPTY);
+      // if (!EntityId.isEmpty(autoRenewAccount)) {
+      // builder.auto_renew_account(autoRenewAccount);
+      // }
       // TODO: replace with lookup once done
       builder.auto_renew_account(EntityId.of(transactionBody.getAutoRenewAccountId()).toString());
     }
@@ -175,8 +176,8 @@ public class Contract {
 
     if (contractCreateResult.hasEvmAddress()) {
       builder.evm_address(
-              DomainUtils.bytesToHex(DomainUtils.toBytes(contractCreateResult.getEvmAddress().getValue()))
-      );
+          DomainUtils.bytesToHex(
+              DomainUtils.toBytes(contractCreateResult.getEvmAddress().getValue())));
     }
 
     if (transactionBody.hasAdminKey()) {
@@ -188,9 +189,7 @@ public class Contract {
       builder.proxy_account_id(proxyAccountId.toString());
     }
 
-    builder
-            .memo(transactionBody.getMemo())
-            .removed(false);
+    builder.memo(transactionBody.getMemo()).removed(false);
 
     switch (transactionBody.getInitcodeSourceCase()) {
       case FILEID:
@@ -204,7 +203,8 @@ public class Contract {
         break;
     }
 
-    // for child transactions FileID is located in parent ContractCreate/EthereumTransaction types
+    // for child transactions FileID is located in parent
+    // ContractCreate/EthereumTransaction types
     // and initcode is located in the sidecar
     updateChildFromParent(builder, recordItem);
 
@@ -222,14 +222,16 @@ public class Contract {
 
     switch (type) {
       case CONTRACTCREATEINSTANCE -> updateChildFromContractCreateParent(builder, parentRecordItem);
-      case ETHEREUMTRANSACTION -> updateChildFromEthereumTransactionParent(builder, parentRecordItem);
+      case ETHEREUMTRANSACTION ->
+          updateChildFromEthereumTransactionParent(builder, parentRecordItem);
       default -> {
         // no-op
       }
     }
   }
 
-  private static void updateChildFromContractCreateParent(ContractBuilder contract, RecordItem recordItem) {
+  private static void updateChildFromContractCreateParent(
+      ContractBuilder contract, RecordItem recordItem) {
     var transactionBody = recordItem.getTransactionBody().getContractCreateInstance();
 
     switch (transactionBody.getInitcodeSourceCase()) {
@@ -250,7 +252,8 @@ public class Contract {
     }
   }
 
-  private static void updateChildFromEthereumTransactionParent(ContractBuilder contract, RecordItem recordItem) {
+  private static void updateChildFromEthereumTransactionParent(
+      ContractBuilder contract, RecordItem recordItem) {
     var body = recordItem.getTransactionBody().getEthereumTransaction();
 
     // use callData FileID if present

@@ -15,17 +15,16 @@
  */
 package com.hedera.etl.entity.transaction;
 
-import com.hedera.etl.recordfile.entity.EntityId;
+import javax.annotation.Nullable;
 
-import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
-import javax.annotation.Nullable;
+
+import com.hedera.etl.reader.recordfile.entity.EntityId;
 
 @DefaultSchema(JavaBeanSchema.class)
 @Data
@@ -36,18 +35,13 @@ public class NftTransfer {
 
   public static final long WILDCARD_SERIAL_NUMBER = -1;
 
-  @Nullable
-  private Boolean is_approval;
+  @Nullable private Boolean is_approval;
 
-  @Nullable
-  private EntityId receiver_account_id;
+  @Nullable private EntityId receiver_account_id;
 
-  @Nullable
-  private EntityId sender_account_id;
+  @Nullable private EntityId sender_account_id;
 
-  @Nullable
-  private Long serial_number;
+  @Nullable private Long serial_number;
 
-  @Nullable
-  private EntityId token_id;
+  @Nullable private EntityId token_id;
 }

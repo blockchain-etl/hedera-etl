@@ -17,8 +17,8 @@
 package com.hedera.etl.entity.transaction;
 
 public enum EntityOperation {
-    NONE,
-    CREATE,
-    UPDATE,
-    DELETE
+  CREATE,
+  DELETE,
+  NONE,
+  UPDATE
 }

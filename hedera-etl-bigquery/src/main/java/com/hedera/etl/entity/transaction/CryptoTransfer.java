@@ -16,8 +16,6 @@
 
 package com.hedera.etl.entity.transaction;
 
-import com.hedera.etl.recordfile.entity.EntityId;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +23,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
+
+import com.hedera.etl.reader.recordfile.entity.EntityId;
 
 @DefaultSchema(JavaBeanSchema.class)
 @Data
@@ -34,16 +34,15 @@ import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
 @Log4j2
 public class CryptoTransfer {
 
-    private long amount;
+  private long amount;
 
-    private long consensusTimestamp;
+  private long consensusTimestamp;
 
-    private long entityId;
+  private long entityId;
 
-    private ErrataType errata;
+  private ErrataType errata;
 
-    private Boolean isApproval;
+  private Boolean isApproval;
 
-    private EntityId payerAccountId;
-
+  private EntityId payerAccountId;
 }

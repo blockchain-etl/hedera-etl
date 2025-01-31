@@ -16,18 +16,16 @@
 
 package com.hedera.etl.entity.transaction;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-
-import com.hedera.etl.recordfile.entity.EntityId;
+import java.io.Serial;
+import java.io.Serializable;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.io.Serial;
-import java.io.Serializable;
+
+import com.hedera.etl.reader.recordfile.entity.EntityId;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE) // For Builder
 @Builder
@@ -35,14 +33,13 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class TokenTransfer {
 
-    private Id id;
+  private Boolean IS_APPROVAL;
 
+  private EntityId PAYER_ACCOUNT_ID;
 
-    private long amount;
+  private long amount;
 
-    private Boolean IS_APPROVAL;
-
-    private EntityId PAYER_ACCOUNT_ID;
+  private Id id;
 
   @Builder(toBuilder = true)
   @Data
@@ -50,8 +47,7 @@ public class TokenTransfer {
   @NoArgsConstructor
   public static class Id implements Serializable {
 
-    @Serial
-    private static final long serialVersionUID = 8693129287509470469L;
+    @Serial private static final long serialVersionUID = 8693129287509470469L;
 
     private long consensusTimestamp;
 
@@ -59,5 +55,4 @@ public class TokenTransfer {
 
     private EntityId accountId;
   }
-
 }

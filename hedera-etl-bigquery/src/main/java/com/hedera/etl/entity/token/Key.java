@@ -1,5 +1,7 @@
 package com.hedera.etl.entity.token;
 
+import javax.annotation.Nullable;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,27 +9,23 @@ import lombok.NoArgsConstructor;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
 
-import javax.annotation.Nullable;
-
 @DefaultSchema(JavaBeanSchema.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Key {
-    @Nullable
-    private KeyType _type;
-    @Nullable
-    private byte[] key;
+  public static Key from(com.hederahashgraph.api.proto.java.Key key) {
+    return Key.builder()._type(KeyType.ProtobufEncoded).key(key.toByteArray()).build();
+  }
 
-    public enum KeyType {
-        ECDSA_SECP256K1, ED25519, ProtobufEncoded
-    }
+  @Nullable private KeyType _type;
 
-    public static Key from(com.hederahashgraph.api.proto.java.Key key) {
-      return Key.builder()
-              ._type(KeyType.ProtobufEncoded)
-              .key(key.toByteArray())
-              .build();
-    }
+  @Nullable private byte[] key;
+
+  public enum KeyType {
+    ECDSA_SECP256K1,
+    ED25519,
+    ProtobufEncoded
+  }
 }

@@ -1,0 +1,79 @@
+plugins {
+  id 'java'
+  id 'io.freefair.lombok' version '8.12' apply false
+  id 'com.diffplug.spotless' version "7.0.2" apply false
+}
+
+subprojects {
+  apply plugin: 'com.diffplug.spotless'
+  spotless {
+    java {
+      googleJavaFormat()
+
+      toggleOffOn()
+      removeUnusedImports()
+      formatAnnotations()
+      importOrder(
+              'java',
+              'javax',
+              '',
+              'com.hedera.etl',
+              '\\#java',
+              '\\#javax',
+              '\\#',
+              '\\#com.hedera.etl',
+      )
+
+      custom 'no-wildcard-imports', {
+        if (it.contains('.*\n')) {
+          throw new IllegalStateException('No wildcard imports allowed')
+        }
+        it
+      }
+      trimTrailingWhitespace()
+      leadingTabsToSpaces(4)
+      endWithNewline()
+
+      target 'src/*/java/**/*.java'
+
+      // Exclude generated files
+      targetExclude(
+              'src/generated/**/*.java',
+              'build/**/*.java'
+      )
+    }
+  }
+
+  repositories {
+    mavenCentral()
+    maven {
+      url = uri('https://hyperledger.jfrog.io/artifactory/besu-maven/')
+    }
+  }
+
+  apply plugin: 'java'
+  apply plugin: 'io.freefair.lombok'
+
+  dependencies {
+    implementation 'org.apache.logging.log4j:log4j-api:2.19.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.19.0'
+    implementation 'org.apache.logging.log4j:log4j-slf4j2-impl:2.19.0'
+    implementation 'org.slf4j:slf4j-api:2.0.6'
+    implementation 'commons-codec:commons-codec:1.18.0'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.2'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.18.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
+  }
+
+  group = 'com.hedera'
+  version = '0.0.1'
+  java.sourceCompatibility = JavaVersion.VERSION_21
+
+  tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+  }
+
+  tasks.withType(Javadoc) {
+    options.encoding = 'UTF-8'
+  }
+}

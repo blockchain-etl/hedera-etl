@@ -17,6 +17,6 @@
 package com.hedera.etl.entity.transaction;
 
 public enum ErrataType {
-    INSERT,
-    DELETE
+  DELETE,
+  INSERT
 }

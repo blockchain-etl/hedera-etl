@@ -20,44 +20,54 @@ package com.hedera.etl;
  * ‍
  */
 
+import java.time.LocalDate;
+
 import org.apache.beam.sdk.options.Default;
 import org.apache.beam.sdk.options.DefaultValueFactory;
 import org.apache.beam.sdk.options.Description;
 import org.apache.beam.sdk.options.Hidden;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import java.time.LocalDate;
 
 public interface BatchStorageToBigQueryPipelineOptions extends PipelineOptions {
-    @Description("GCS bucket with Record Files")
-    String getInputBucket();
-    void setInputBucket(String value);
+  @Description("GCS bucket with Record Files")
+  String getInputBucket();
 
-    @Description("Date from which ingest Record files")
-    LocalDate getIngestionDate();
-    void setIngestionDate(LocalDate value);
+  void setInputBucket(String value);
 
-    @Description("The file path to consume from. The name should be in the format of " +
-            "filesystem://path/to/files")
-    @Hidden
-    @Default.InstanceFactory(InputPatternFactory.class)
-    String getInputPathPattern();
-    void setInputPathPattern(String value);
+  @Description("Date from which ingest Record files")
+  LocalDate getIngestionDate();
 
-    class InputPatternFactory implements DefaultValueFactory<String> {
-        public String create(@NonNull PipelineOptions pipelineOptions) {
-            var options = pipelineOptions.as(BatchStorageToBigQueryPipelineOptions.class);
-            return "gs://" + options.getInputBucket() + "/recordstreams/records*/" + options.getIngestionDate() + "*.{rcd,rcd.gz}";
-        }
+  void setIngestionDate(LocalDate value);
+
+  @Description(
+      "The file path to consume from. The name should be in the format of "
+          + "filesystem://path/to/files")
+  @Hidden
+  @Default.InstanceFactory(InputPatternFactory.class)
+  String getInputPathPattern();
+
+  void setInputPathPattern(String value);
+
+  class InputPatternFactory implements DefaultValueFactory<String> {
+    public String create(@NonNull PipelineOptions pipelineOptions) {
+      var options = pipelineOptions.as(BatchStorageToBigQueryPipelineOptions.class);
+      return "gs://"
+          + options.getInputBucket()
+          + "/recordstreams/records*/"
+          + options.getIngestionDate()
+          + "*.{rcd,rcd.gz}";
     }
+  }
 
-    @Description("Output dataset for entities")
-    String getOutputDataset();
-    void setOutputDataset(String value);
+  @Description("Output dataset for entities")
+  String getOutputDataset();
 
-    @Hidden
-    @Description("Disable mere history input")
-    boolean getDisableMergeHistoryInput();
-    void setDisableMergeHistoryInput(boolean value);
+  void setOutputDataset(String value);
 
+  @Hidden
+  @Description("Disable mere history input")
+  boolean getDisableMergeHistoryInput();
+
+  void setDisableMergeHistoryInput(boolean value);
 }

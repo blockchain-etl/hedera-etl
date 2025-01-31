@@ -1,6 +1,6 @@
 package com.hedera.etl.diff;
 
-import com.hedera.etl.BatchStorageToBigQueryPipelineOptions;
+import java.time.LocalDate;
 
 import org.apache.beam.sdk.io.gcp.bigquery.BigQueryIO;
 import org.apache.beam.sdk.schemas.transforms.Convert;
@@ -10,7 +10,8 @@ import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionTuple;
 import org.apache.beam.sdk.values.Row;
-import java.time.LocalDate;
+
+import com.hedera.etl.BatchStorageToBigQueryPipelineOptions;
 
 public class MergeBatch extends PTransform<PCollection<Row>, PCollectionTuple> {
 
@@ -24,7 +25,8 @@ public class MergeBatch extends PTransform<PCollection<Row>, PCollectionTuple> {
     return new MergeBatch(entityName, Merge.diffs(idField, timestampField));
   }
 
-  public static MergeBatch sum(String entityName, String idField, String timestampField, String summableField) {
+  public static MergeBatch sum(
+      String entityName, String idField, String timestampField, String summableField) {
     return new MergeBatch(entityName, Merge.sum(idField, timestampField, summableField));
   }
 
@@ -39,7 +41,8 @@ public class MergeBatch extends PTransform<PCollection<Row>, PCollectionTuple> {
 
     var latestValues = loadLatestValues(input, options);
 
-    var rowsWithUpdates = input
+    var rowsWithUpdates =
+        input
             .apply("Union of current and historical data", Flatten.with(latestValues))
             .apply("Merge diffs", merger);
 
@@ -48,7 +51,8 @@ public class MergeBatch extends PTransform<PCollection<Row>, PCollectionTuple> {
     return rowsWithUpdates;
   }
 
-  private PCollection<Row> loadLatestValues(PCollection<Row> input, BatchStorageToBigQueryPipelineOptions options) {
+  private PCollection<Row> loadLatestValues(
+      PCollection<Row> input, BatchStorageToBigQueryPipelineOptions options) {
     var pipeline = input.getPipeline();
 
     var previousIngestDate = options.getIngestionDate().minusDays(1);
@@ -57,22 +61,33 @@ public class MergeBatch extends PTransform<PCollection<Row>, PCollectionTuple> {
     }
 
     return pipeline
-            .apply("Load latest values", BigQueryIO
-                    .readTableRowsWithSchema()
-                    .from(HistoryUtil.getTableFor(options.getOutputDataset(), "%s_latest".formatted(entityName), previousIngestDate)))
-            .apply("Convert to Row", Convert.toRows());
+        .apply(
+            "Load latest values",
+            BigQueryIO.readTableRowsWithSchema()
+                .from(
+                    HistoryUtil.getTableFor(
+                        options.getOutputDataset(),
+                        "%s_latest".formatted(entityName),
+                        previousIngestDate)))
+        .apply("Convert to Row", Convert.toRows());
   }
 
-  private void saveLatestValues(PCollection<Row> input, BatchStorageToBigQueryPipelineOptions options) {
-    var outputTable = HistoryUtil.getTableFor(options.getOutputDataset(), "%s_latest".formatted(entityName), options.getIngestionDate());
-    input.apply("Save latest to BigQuery", BigQueryIO.<Row>write()
+  private void saveLatestValues(
+      PCollection<Row> input, BatchStorageToBigQueryPipelineOptions options) {
+    var outputTable =
+        HistoryUtil.getTableFor(
+            options.getOutputDataset(),
+            "%s_latest".formatted(entityName),
+            options.getIngestionDate());
+    input.apply(
+        "Save latest to BigQuery",
+        BigQueryIO.<Row>write()
             .to(outputTable)
             .ignoreUnknownValues()
             .useBeamSchema()
             .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_IF_NEEDED)
             .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_TRUNCATE)
             .withoutValidation()
-            .withMethod(BigQueryIO.Write.Method.FILE_LOADS)
-    );
+            .withMethod(BigQueryIO.Write.Method.FILE_LOADS));
   }
 }

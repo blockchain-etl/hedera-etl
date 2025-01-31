@@ -16,10 +16,8 @@
 
 package com.hedera.etl.entity.transaction;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-
-import com.hedera.etl.recordfile.entity.EntityId;
+import java.util.Collections;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,10 +25,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.beam.sdk.schemas.JavaBeanSchema;
 import org.apache.beam.sdk.schemas.annotations.DefaultSchema;
-import java.io.Serial;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
+
+import com.hedera.etl.reader.recordfile.entity.EntityId;
 
 @DefaultSchema(JavaBeanSchema.class)
 @Data
@@ -39,15 +35,15 @@ import java.util.List;
 @Builder
 public class AssessedCustomFee {
 
-    private long amount;
+  private long amount;
 
-    private long collector_account_id;
+  private long collector_account_id;
 
-    private long consensus_timestamp;
+  private long consensus_timestamp;
 
-    private List<Long> effective_payer_account_ids = Collections.emptyList();
+  private List<Long> effective_payer_account_ids = Collections.emptyList();
 
-    private EntityId token_id;
+  private EntityId payer_account_id;
 
-    private EntityId payer_account_id;
+  private EntityId token_id;
 }
