@@ -55,4 +55,9 @@ public interface BatchStorageToBigQueryPipelineOptions extends PipelineOptions {
     String getOutputDataset();
     void setOutputDataset(String value);
 
+    @Hidden
+    @Description("Disable mere history input")
+    boolean getDisableMergeHistoryInput();
+    void setDisableMergeHistoryInput(boolean value);
+
 }

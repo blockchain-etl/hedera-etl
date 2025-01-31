@@ -23,9 +23,9 @@ import java.util.stream.StreamSupport;
 
 @RequiredArgsConstructor
 public class Merge extends PTransform<PCollection<Row>, PCollectionTuple> {
-  public static final TupleTag<Row> DIFFS = new TupleTag<>();
-  public static final TupleTag<Row> UPDATED = new TupleTag<>();
-  public static final TupleTag<Row> LATEST = new TupleTag<>();
+  public static final TupleTag<Row> DIFFS = new TupleTag<>("diffs");
+  public static final TupleTag<Row> UPDATED = new TupleTag<>("");
+  public static final TupleTag<Row> LATEST = new TupleTag<>("latest");
 
   private final String idField;
 

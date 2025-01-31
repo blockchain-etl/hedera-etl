@@ -1,5 +1,6 @@
 package com.hedera.etl;
 
+import com.hedera.etl.diff.MergeBatch;
 import com.hedera.etl.entity.Block;
 import com.hedera.etl.entity.account.Account;
 import com.hedera.etl.entity.balance.Balance;
@@ -17,8 +18,10 @@ import lombok.Getter;
 import org.apache.beam.sdk.io.FileIO;
 import org.apache.beam.sdk.schemas.transforms.Convert;
 import org.apache.beam.sdk.transforms.FlatMapElements;
+import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PCollectionTuple;
 import org.apache.beam.sdk.values.Row;
 import org.apache.beam.sdk.values.TypeDescriptor;
 
@@ -39,13 +42,25 @@ public class EntitiesExtractor {
 
         var extractedFromRecordItems = Extract.from(recordItems)
                 .add(Token.class, Token::from)
+                .postprocessMultiOut(Token.class,
+                        MergeBatch.diffs("token", "token_id", "modified")
+                )
                 .add(TopicMessage.class, TopicMessage::from)
                 .add(Contract.class, Contract::from)
+                .postprocessMultiOut(Contract.class,
+                        MergeBatch.diffs("contract", "contract_id", "modified")
+                )
                 .add(Transaction.class, Transaction::from)
                 .add(Schedule.class, Schedule::from)
                 .add(NetworkStake.class, NetworkStake::from)
                 .add(Account.class, Account::from)
+                .postprocessMultiOut(Account.class,
+                        MergeBatch.diffs("account", "account", "modified")
+                )
                 .flatten(Balance.class, Balance::from)
+                .postprocessMultiOut(Balance.class,
+                        MergeBatch.sum("balance", "account_id", "created", "amount")
+                )
                 .getOutput();
 
         var result = new HashMap<String, PCollection<Row>>();
@@ -88,6 +103,31 @@ public class EntitiesExtractor {
 
             return this;
         }
+
+        public <T> Extract<InputT> postprocess(Class<T> type, PTransform<PCollection<Row>, PCollection<Row>> transform) {
+          var className = type.getSimpleName();
+
+          output.put(
+                  className,
+                  output.get(className).apply("Postprocess %s".formatted(className), transform)
+          );
+
+          return this;
+        }
+
+      public <T> Extract<InputT> postprocessMultiOut(Class<T> type, PTransform<PCollection<Row>, PCollectionTuple> transform) {
+        var className = type.getSimpleName();
+
+        var outputs = output.get(className).apply("Postprocess %s".formatted(className), transform);
+
+        output.remove(className);
+
+        outputs.getAll().forEach((tag, pcol) -> {
+          output.put("%s_%s".formatted(className, tag.getId()), (PCollection<Row>) pcol);
+        });
+
+        return this;
+      }
 
         public static <InputT> Extract<InputT> from(PCollection<InputT> input) {
             return new Extract<>(input);
