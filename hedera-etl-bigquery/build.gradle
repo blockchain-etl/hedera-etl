@@ -29,3 +29,31 @@ application {
 }
 
 description = 'Hedera ETL BigQuery'
+
+task deployFlexTemplate {
+
+  def dockerImage = providers.gradleProperty('flex.dockerImage')
+  def templateFile = providers.gradleProperty('flex.templateFile')
+
+  doLast {
+    if (dockerImage.present && templateFile.present) {
+      exec {
+        executable = 'gcloud'
+        args = [
+                'dataflow',
+                'flex-template',
+                'build',
+                templateFile.get(),
+                "--image-gcr-path=${dockerImage.get()}",
+                '--sdk-language=JAVA',
+                '--flex-template-base-image=JAVA21',
+                "--env=FLEX_TEMPLATE_JAVA_MAIN_CLASS='${project.application.mainClass.get()}'"
+        ] + configurations.runtimeClasspath.asList().collect {"--jar='${it}'" }
+      }
+    } else {
+      throw new InvalidUserDataException(
+              'Missing Flex Template properties, please add -PflexTemplate.dockerImage-"<docker image>" and -PflexTemplate.templateFile-"<gs path to save template>" to your argument'
+      )
+    }
+  }
+}

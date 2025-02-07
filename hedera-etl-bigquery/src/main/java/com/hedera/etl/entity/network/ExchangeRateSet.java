@@ -65,7 +65,7 @@ public class ExchangeRateSet {
 
     try {
       var exchangeRateSet =
-              com.hederahashgraph.api.proto.java.ExchangeRateSet.parseFrom(contents.toByteArray());
+          com.hederahashgraph.api.proto.java.ExchangeRateSet.parseFrom(contents.toByteArray());
 
       return builder()
           .current_rate(ExchangeRate.from(exchangeRateSet.getCurrentRate()))

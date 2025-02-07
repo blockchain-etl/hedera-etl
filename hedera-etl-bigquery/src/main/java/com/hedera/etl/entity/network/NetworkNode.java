@@ -41,6 +41,7 @@ public class NetworkNode {
   @Nullable private Long reward_rate_start;
   @Nullable private List<Endpoint> service_endpoints;
   @Nullable private Long stake;
+  @Nullable private Long stake_rewarded;
   @Nullable private Long stake_not_rewarded;
   @Nullable private Long staking_period;
   @Nullable private Long timestamp;
@@ -94,6 +95,7 @@ public class NetworkNode {
                     .reward_rate_start(null)
                     .service_endpoints(List.of())
                     .stake(nodeStake.getStake())
+                    .stake(nodeStake.getStakeRewarded())
                     .stake_not_rewarded(nodeStake.getStakeNotRewarded())
                     .staking_period(stakingPeriod)
                     .timestamp(consensusTimestamp)

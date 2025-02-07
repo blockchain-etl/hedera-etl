@@ -109,33 +109,30 @@ mvn compile exec:java -PdirectRunner -Dexec.args=" \
 
 #### Running on GCP Dataflow
 
-1. Setup GCS bucket which is used for staging, templates, and temp location.
+1. Setup GCS bucket and Docker repository which is used for staging, templates, and temp location.
 
 ```bash
-BUCKET_NAME=... # Set your bucket name
-PIPELINE_FOLDER=gs://${BUCKET_NAME}/etl-bigquery
+DOCKER_IMAGE=... # Set your docker name
+TEMPLATE_FILE=gs://... # Set your template file name
 ```
 
 2. Build and upload template to GCS bucket
 
 ```bash
-cd hedera-etl-bigquery
-
-mvn compile exec:java \
- -Dexec.args=" \
- --project=${PROJECT_ID} \
- --stagingLocation=${PIPELINE_FOLDER}/staging \
- --tempLocation=${PIPELINE_FOLDER}/temp \
- --templateLocation=${PIPELINE_FOLDER}/template \
- --runner=DataflowRunner"
+./gradlew deployFlexTemplate \
+ -Pflex.dockerImage=$DOCKER_IMAGE \
+ -Pflex.templateFile=$TEMPLATE_FILE
 ```
 
 3. Start Dataflow job using the template
 
 ```bash
-gcloud dataflow jobs run etl-bigquery-`date +"%Y%m%d-%H%M%S%z"` \
- --gcs-location=${PIPELINE_FOLDER}/template \
- --parameters "inputSubscription=${SUBSCRIPTION},outputTransactionsTable=${TRANSACTIONS_TABLE},outputErrorsTable=${ERRORS_TABLE}"
+gcloud dataflow flex-template run \
+ etl-bigquery-`date +"%Y%m%d-%H%M%S%z" \
+ --template-file-gcs-location=$TEMPLATE_FILE \
+ --region=europe-west1 \
+ --max-workers=5 \
+ --parameters=ingestionDate=`date +"%Y-%m-%d",inputBucket="<bucket with your data>",outputDataset="<your output dataset>",tempLocation="gs://<your dataflow staging bucket>/temp/"
 ```
 Controller service account can be configured by adding
 `--service-account-email=my-service-account-name@<project-id>.iam.gserviceaccount.com`. See
