@@ -104,6 +104,7 @@ public class RecordItem implements StreamItem, Serializable {
     if (contractTransactionPredicate == null || !contractTransactionPredicate.test(entityId)) {
       return;
     }
+
     getContractTransactions()
         .computeIfAbsent(
             entityId.getId(),

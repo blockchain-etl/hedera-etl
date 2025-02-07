@@ -20,6 +20,9 @@ import com.hedera.etl.diff.MergeBatch;
 import com.hedera.etl.entity.Block;
 import com.hedera.etl.entity.account.Account;
 import com.hedera.etl.entity.balance.Balance;
+import com.hedera.etl.entity.network.ExchangeRateSet;
+import com.hedera.etl.entity.network.NetworkFee;
+import com.hedera.etl.entity.network.NetworkNode;
 import com.hedera.etl.entity.network.NetworkStake;
 import com.hedera.etl.entity.schedule.Schedule;
 import com.hedera.etl.entity.smartcontracts.Contract;
@@ -57,6 +60,11 @@ public class EntitiesExtractor {
             .flatten(Balance.class, Balance::from)
             .postprocessMultiOut(
                 Balance.class, MergeBatch.sum("balance", "account_id", "created", "amount"))
+            .add(ExchangeRateSet.class, ExchangeRateSet::from)
+            .add(NetworkFee.class, NetworkFee::from)
+            .flatten(NetworkNode.class, NetworkNode::from)
+            .postprocessMultiOut(
+                NetworkNode.class, MergeBatch.diffs("network_node", "node_id", "timestamp"))
             .getOutput();
 
     var result = new HashMap<String, PCollection<Row>>();

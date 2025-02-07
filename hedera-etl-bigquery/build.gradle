@@ -12,7 +12,7 @@ dependencies {
   runtimeOnly 'org.apache.beam:beam-runners-google-cloud-dataflow-java:2.62.0'
   implementation 'org.apache.beam:beam-sdks-java-core:2.62.0'
   implementation 'org.apache.beam:beam-sdks-java-io-google-cloud-platform:2.62.0'
-  implementation ('com.hedera.hashgraph:hapi:0.57.3')
+  implementation 'com.hedera.hashgraph:hapi:0.57.3'
   testImplementation 'junit:junit:4.13'
 }
 
