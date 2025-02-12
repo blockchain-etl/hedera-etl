@@ -26,8 +26,7 @@ Schema of BigQuery tables is for now managed by Apache Beam. It will be managed 
 
 #### Creating tables
 
-`terraform` CLI will be needed to create the tables. [terraform apply](scripts/create-tables.sh) can be used to create all the
-tables together.
+`terraform` CLI will be needed to create the tables. See [terraform docs](terraform/README.md) how to set them up.
 
 ### ETL to BigQuery
 
@@ -41,11 +40,13 @@ For requirements to deploy on GCP Dataflow, refer [deployment](docs/deployment.m
 
 Configure GCP project id and cloud infrastructure.
 
+To login to your GCP project use:
+
 ```bash
 gcloud auth application-default login
-terraform -chdir=terraform init
-terraform -chdir=terraform apply
 ```
+
+To setup infrastructure see [terraform docs](terraform/README.md).
 
 #### Running from local machine
 
