@@ -1,0 +1,56 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "fields": [
+      {
+        "mode": "REQUIRED",
+        "name": "expiration_time",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "REQUIRED",
+        "name": "cent_equivalent",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "REQUIRED",
+        "name": "hbar_equivalent",
+        "type": "INTEGER"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "current_rate",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "REQUIRED",
+        "name": "expiration_time",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "REQUIRED",
+        "name": "cent_equivalent",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "REQUIRED",
+        "name": "hbar_equivalent",
+        "type": "INTEGER"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "next_rate",
+    "type": "RECORD"
+  }
+]

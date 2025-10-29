@@ -1,0 +1,69 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "count",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "size",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "number",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "from",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "to",
+        "type": "INTEGER"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "timestamp",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "hash",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "gas_used",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "hapi_version",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "logs_bloom",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "previous_hash",
+    "type": "STRING"
+  }
+]

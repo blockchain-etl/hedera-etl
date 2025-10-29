@@ -26,18 +26,24 @@ import org.apache.beam.sdk.options.ValueProvider;
 
 public interface PubSubToBigQueryPipelineOptions extends PubsubOptions {
 
-    @Description("The Cloud Pub/Sub subscription to consume from. The name should be in the format of " +
-            "projects/<project-id>/subscriptions/<subscription-name>.")
-    ValueProvider<String> getInputSubscription();
-    void setInputSubscription(ValueProvider<String> value);
+  @Description(
+      "The Cloud Pub/Sub subscription to consume from. The name should be in the format of "
+          + "projects/<project-id>/subscriptions/<subscription-name>.")
+  ValueProvider<String> getInputSubscription();
 
-    @Description("BigQuery table to output transactions to. The name should be in the format of " +
-            "<project-id>:<dataset-id>.<table-name>.")
-    ValueProvider<String> getOutputTransactionsTable();
-    void setOutputTransactionsTable(ValueProvider<String> value);
+  @Description(
+      "BigQuery table to output errors to. The name should be in the format of "
+          + "<project-id>:<dataset-id>.<table-name>.")
+  ValueProvider<String> getOutputErrorsTable();
 
-    @Description("BigQuery table to output errors to. The name should be in the format of " +
-            "<project-id>:<dataset-id>.<table-name>.")
-    ValueProvider<String> getOutputErrorsTable();
-    void setOutputErrorsTable(ValueProvider<String> value);
+  @Description(
+      "BigQuery table to output transactions to. The name should be in the format of "
+          + "<project-id>:<dataset-id>.<table-name>.")
+  ValueProvider<String> getOutputTransactionsTable();
+
+  void setInputSubscription(ValueProvider<String> value);
+
+  void setOutputErrorsTable(ValueProvider<String> value);
+
+  void setOutputTransactionsTable(ValueProvider<String> value);
 }

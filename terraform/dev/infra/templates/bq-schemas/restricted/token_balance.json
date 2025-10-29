@@ -1,0 +1,42 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "token_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "consensus_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "amount",
+    "type": "NUMERIC"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "account_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "serial_number",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "transaction_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "block_timestamp_to",
+    "type": "INTEGER"
+  }
+]

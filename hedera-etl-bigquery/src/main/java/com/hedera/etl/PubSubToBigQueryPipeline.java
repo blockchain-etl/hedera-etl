@@ -30,29 +30,36 @@ import org.apache.beam.sdk.io.gcp.pubsub.PubsubIO;
 @RequiredArgsConstructor
 public class PubSubToBigQueryPipeline {
 
-    private final PubSubToBigQueryPipelineOptions options;
-    private final String jsonTableSchema;
+  private final String jsonTableSchema;
+  private final PubSubToBigQueryPipelineOptions options;
 
-    void run() {
-        Pipeline pipeline = Pipeline.create(options);
-        WriteResult writeResult = pipeline
-                .apply("PubSubListener", PubsubIO.readStrings()
-                        .fromSubscription(options.getInputSubscription())
-                        .withIdAttribute("consensusTimestamp"))
-                .apply("WriteToBigQuery", BigQueryIO.<String>write()
-                        .to(options.getOutputTransactionsTable())
-                        .withFormatFunction(new TransactionJsonToTableRow())
-                        .withJsonSchema(jsonTableSchema)
-                        .ignoreUnknownValues()
-                        .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER)
-                        .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
-                        .withoutValidation()
-                        .withExtendedErrorInfo()
-                        .withMethod(BigQueryIO.Write.Method.STREAMING_INSERTS)
-                        .withFailedInsertRetryPolicy(InsertRetryPolicy.retryTransientErrors()));
-        writeResult.getFailedInsertsWithErr()
-                .apply(new BigQueryErrorsSink(
-                        options.getOutputErrorsTable(), Utility.getResource("errors-schema.json")));
-        pipeline.run();
-    }
+  void run() {
+    Pipeline pipeline = Pipeline.create(options);
+    WriteResult writeResult =
+        pipeline
+            .apply(
+                "PubSubListener",
+                PubsubIO.readStrings()
+                    .fromSubscription(options.getInputSubscription())
+                    .withIdAttribute("consensusTimestamp"))
+            .apply(
+                "WriteToBigQuery",
+                BigQueryIO.<String>write()
+                    .to(options.getOutputTransactionsTable())
+                    .withFormatFunction(new TransactionJsonToTableRow())
+                    .withJsonSchema(jsonTableSchema)
+                    .ignoreUnknownValues()
+                    .withCreateDisposition(BigQueryIO.Write.CreateDisposition.CREATE_NEVER)
+                    .withWriteDisposition(BigQueryIO.Write.WriteDisposition.WRITE_APPEND)
+                    .withoutValidation()
+                    .withExtendedErrorInfo()
+                    .withMethod(BigQueryIO.Write.Method.STREAMING_INSERTS)
+                    .withFailedInsertRetryPolicy(InsertRetryPolicy.retryTransientErrors()));
+    writeResult
+        .getFailedInsertsWithErr()
+        .apply(
+            new BigQueryErrorsSink(
+                options.getOutputErrorsTable(), Utility.getResource("errors-schema.json")));
+    pipeline.run();
+  }
 }

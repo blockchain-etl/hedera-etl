@@ -1,0 +1,37 @@
+[
+  {
+    "mode": "REQUIRED",
+    "name": "address",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "timestamp",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "transaction_hash",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "amount",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "block_height",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "block_hash",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "chain_specific",
+    "type": "STRING"
+  }
+]

@@ -1,22 +1,21 @@
 # Configurations
 
-## Deduplication
+## Hedera ETL
 
-Configurations can be set in `application.yml` file. For more options, refer this
-[article](https://www.baeldung.com/spring-properties-file-outside-jar).
+Following configurations can be set for the ETL job:
 
-Following configurations can be set for deduplication job:
-
-| Name | Default | Description |
-|----------------------------------------------------|------------------|----------------------------------------|
-| `hedera.dedupe.credentialsLocation`                |                  | Location of Json key file with appropriate permissions in format `file:/path/to/key.json` |
-| `hedera.dedupe.datasetName`                        |                  | Name of BigQuery dataset containing the tables |
-| `hedera.dedupe.fullFixedRate`                      | 84600000 (24 hr) | Rate at which full deduplication should be run. Format: milliseconds |
-| `hedera.dedupe.incrementalFixedRate`               | 300000 (5 min)   | Rate at which incremental deduplication should be run. Format: milliseconds |
-| `hedera.dedupe.catchupProbeIntervalSec`            | 21600 (6 hr)     | Interval to calculate endTimestamp when deduplication is catching up |
-| `hedera.dedupe.steadyStateProbeIntervalSec`        | 600 (10 min)     | Interval to calculate endTimestamp when deduplication is all caught up and in steady state |
-| `hedera.dedupe.metricsEnabled`                     | false            | Set to true to publish metrics to Stackdriver |
-| `hedera.dedupe.projectId`                          |                  | Project containing the BigQuery tables |
-| `hedera.dedupe.stateTableName`                     | state            | Name of state table |
-| `hedera.dedupe.transactionsTableName`              | transactions     | Name of transactions table |
-
+| Name                                  | Default                                                                                          | Description                                                                                                                   |
+|---------------------------------------|--------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
+| `inputBucket`                         |                                                                                                  | GCS bucket with Record Files                                                                                                  |
+| `inputNodes`                          | 0.0.3                                                                                            | List of nodes from which to ingest bytes                                                                                      |
+| `ingestionDate`                       |                                                                                                  | Date from which ingest Record files                                                                                           |
+| `startAboveFile`                      |                                                                                                  | Start ingestion process above this file (useful if you have to point to exact file the job had to reingest)                   |
+| `lastValidHash`                       | 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000 | Hash of the last ingested file                                                                                                |
+| `restrictedAccessDataset`             |                                                                                                  | Output dataset for restricted access dataset                                                                                  |
+| `openAccessDataset`                   |                                                                                                  | Output dataset for open access dataset                                                                                        |
+| `disableMergeHistoryInput`            | false                                                                                            | Disable merge history input (useful for first-time ingestion)                                                                 |
+| `enabledOutputs`                      |                                                                                                  | List of enabled output entities, restricted.tablename enables tables in restricted dataset and open.tablename in the open one |
+| `filePollingTimeout` (streaming only) | 5                                                                                                | Name of transactions table                                                                                                    |
+| `filePollingTimeout` (streaming only) | 5                                                                                                | Name of transactions table                                                                                                    |
+| `startingTimestamp` (streaming only)  |                                                                                                  | Starting timestamp                                                                                                            |
+| `rewindToTimestamp` (streaming only)  |                                                                                                  | Quickly rewind to this timestamp before starting ingestion one per second (by default job will rewind itself to now)          |

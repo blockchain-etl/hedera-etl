@@ -1,0 +1,22 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "gas",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "transaction_type",
+    "type": "STRING"
+  }
+]

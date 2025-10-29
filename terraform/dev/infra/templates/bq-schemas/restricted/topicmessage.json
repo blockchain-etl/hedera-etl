@@ -1,0 +1,86 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "message",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "consensus_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "running_hash_version",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "sequence_number",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "number",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "total",
+        "type": "INTEGER"
+      },
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE",
+            "name": "nonce",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "scheduled",
+            "type": "BOOLEAN"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "transaction_valid_start",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "account_id",
+            "type": "STRING"
+          }
+        ],
+        "mode": "NULLABLE",
+        "name": "initial_transaction_id",
+        "type": "RECORD"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "chunk_info",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "payer_account_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "running_hash",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "topic_id",
+    "type": "STRING"
+  }
+]

@@ -1,0 +1,133 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "description",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "memo",
+    "type": "STRING"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "admin_key",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "stake",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "staking_period",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max_stake",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "min_stake",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "reward_rate_start",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "stake_rewarded",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "stake_not_rewarded",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "file_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "node_account_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "node_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "node_cert_hash",
+    "type": "STRING"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "public_key",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "port",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "domain_name",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "ip_address_v4",
+        "type": "STRING"
+      }
+    ],
+    "mode": "REPEATED",
+    "name": "service_endpoints",
+    "type": "RECORD"
+  }
+]
