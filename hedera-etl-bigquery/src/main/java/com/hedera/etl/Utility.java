@@ -23,25 +23,27 @@ package com.hedera.etl;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+
 import org.apache.beam.sdk.metrics.Counter;
 import org.apache.beam.sdk.metrics.Distribution;
 import org.apache.beam.sdk.metrics.Metrics;
 
 public class Utility {
 
-    public static String getResource(String path) {
-        try {
-            return Files.readString(Paths.get(Utility.class.getClassLoader().getResource(path).getPath()));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
+  public static Counter getCounter(String name) {
+    return Metrics.counter(PubSubToBigQueryPipeline.class, name);
+  }
 
-    public static Counter getCounter(String name) {
-        return Metrics.counter(PubSubToBigQueryPipeline.class, name);
-    }
+  public static Distribution getDistribution(String name) {
+    return Metrics.distribution(PubSubToBigQueryPipeline.class, name);
+  }
 
-    public static Distribution getDistribution(String name) {
-        return Metrics.distribution(PubSubToBigQueryPipeline.class, name);
+  public static String getResource(String path) {
+    try {
+      return Files.readString(
+          Paths.get(Utility.class.getClassLoader().getResource(path).getPath()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+  }
 }

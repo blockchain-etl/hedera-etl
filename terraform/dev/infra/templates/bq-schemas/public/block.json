@@ -1,0 +1,57 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "slot",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "size",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "timestamp",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "block_height",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "difficulty",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "total_difficulty",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "network_fee_used",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "network_fee_limit",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "block_hash",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "parent_block_hash",
+    "type": "STRING"
+  },
+  {
+    "mode": "REQUIRED",
+    "name": "chain_specific",
+    "type": "STRING"
+  }
+]

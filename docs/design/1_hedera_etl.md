@@ -1,142 +1,42 @@
 ## Design for Hedera-ETL
 
 ### Goal
-- Load Hedera transactions into BigQuery
+- Mirror as much of Mirror Node REST API as possible as Big Query dataset
 - If a transaction is in record stream, it should be in BigQuery
 - Load pipeline should be able to support following scale:
   - 100 TPS (3 billion/year)
   - Avg. txn size = 2kb (16GB/day, 6TB/year)
 
-### Non goals
-- Dataset for accounts' details
-
 ### Schema
 
-Hedera transactions and receipts are protocol buffers (https://github.com/hashgraph/hedera-protobuf/tree/master/src/main/proto).
-BigQuery's storage engine (ColumnIO) and processing engine (Dremel) were designed to work great for protocol buffers.
-So the schema would be natural adaptation of Hedera's protobuf (with few deviations, mentioned below) and would look like:
-```
-transactions (table name, not part of column names)
-├── consensusTimestampTruncated: int
-├── consensusTimestamp: int
-├── transactionType: int
-├── entity:
-│   ├── shardNum: int
-│   ├── realmNum: int
-│   ├── entityNum: int
-│   └── type: int
-├── transaction
-│   └── body
-│       ├── transactionID
-│       │   ├── transactionValidStart: int
-│       │   └── accountID: entity
-│       ├── nodeAccountID: entity
-│       ├── transactionFee: int
-│       ├── transactionValidDuration
-│       │   └── seconds: int
-│       ├─── memo: string
-│       ├── cryptoCreateAccount
-│       │   ├── initialBalance: int
-│       │   └── proxyAccountID: entity
-│       ├── contractCall
-│       │   ├── gas: int
-│       │   ├── amount: int
-│       │   └── functionParameters: bytes
-│       ├── contractCreateInstance
-│       │   ├── gas: int
-│       │   ├── initialBalance: int
-│       │   ├── proxyAccountID: entity
-│       │   ├── constructorParameters: bytes
-│       │   └── memo: bytes
-│       ├── cryptoAddClaim
-│       │   └── claim
-│       │       └── hash: bytes
-│       ├── consensusSubmitMessage
-│       │   └── message: bytes
-│       ├── fileCreate
-│       │   └── contents: bytes
-│       ├── fileAppend
-│       │   └── contents: bytes
-│       └── fileUpdate
-│           └── contents: bytes
-├── record
-│   ├── receipt
-│   │   ├── status: int
-│   │   ├── topicRunningHash: bytes
-│   │   └── topicSequenceNumber: int
-│   ├── transactionHash: bytes
-│   ├── transactionFee: int
-│   ├── contractCallResult
-│   │   ├── contractCallResult: bytes
-│   │   ├── errorMessage: string
-│   │   └── gasUsed: int
-│   ├── contractCreateResult
-│   │   ├── contractCallResult: bytes
-│   │   ├── errorMessage: string
-│   │   └── gasUsed: int
-│   └── transferList
-│       └── accountAmounts (repeated)
-│           ├── accountID: entity
-│           └── amount: int
-└── nonFeeTransfers
-    └── accountAmounts (repeated)
-        ├── accountID: entity
-        └── amount: int
+There are two datasets - one containing open access schema but less detailed and restricted one, containing much more
+details. Schemas for both datasets are available at
+[terraform/dev/infra/templates/bq-schemas](../../terraform/dev/infra/templates/bq-schemas).
 
-entity
-├── shardNum: int
-├── realmNum: int
-└── entityNum: int
-```
-
-- Table will be partitioned using `consensusTimestampTruncated`.
-- One of the possibility was to flatten `transferList` and `nonFeeTransfers` fields. However, the repetition count
-for those fields is not fixed and can be even 10+, so keeping them repeated is the only option.
-- Max depth allowed in BigQuery schema is 16. Our current max depth is around 6.
-
-Deviations in schema (from PB):
-These additional fields have been added since they are often used in queries and would be otherwise cumbersome to filter on:
-- consensusTimestamp, entity, nonFeeTransfers
-- transactionType: No corresponding field in PB. Deduced based on which field in `oneof data{...}` is set.
+- All tables are partitioned daily by either `created` or `modified` column, which corresponds to consensus timestamp
+  truncated to microseconds.
 
 ### Ingestion
 
-ETL will extract transactions (in json format) from a PubSub topic, transform them into BigQuery's TableRow format,
-and load them into BigQuery table via streaming inserts.
+ETL extracts transactions from a Google Storage bucket containing Record Files, e.g. gs://hedera-mainnet-streams,
+maps them to corresponding entities and saves them into BigQuery, either using Batch Loads or Streaming Write API,
+depending on mode in which ETL is run.
 
-![Ingestion](../images/hedera_etl_ingestion.png)
+There is also an input of historical data of stateful entities stored in BQ, updated after each batch ingestion
+
+The job can ingest data in two modes, batch and streaming. Batch would be mainly used to ingest bulk of data at once,
+one day at a time, once data ingestion would catch up to present time the user should run ETL in streaming mode, which
+will ingest current data immediately. In streaming mode job lists files in GCS bucket for each passing minute, with
+allowed lateness of 5 minutes by default, meaning that files for current wall time have 5 minutes to appear in GCS
+bucket, otherwise they'll be ignored.
 
 #### Invariants
 
-##### At-least-once guarantee from streaming inserts 
-Ensuring exactly-once using streaming inserts is not possible
-([ref](https://cloud.google.com/bigquery/streaming-data-into-bigquery#dataconsistency)). BigQuery's native
-deduplication logic can be helpful here to large extent, but it doesn't guarantee exactly-once. In limited
-experience of running above job for 10 hours, no errors were seen.
- 
-##### At-most-once guarantee from deduplication job
-A deduplication job will run periodically (say every few minutes). It will detect duplicates using
-`consensusTimestamp` and delete them from the table. \
-One limitation here is: "Streaming inserts reside temporarily in the streaming buffer, which has different
-availability characteristics than managed storage". So rows inserted via streaming can not be modified using `DELETE`,
-`UPDATE` or `MERGE` ([ref](https://cloud.google.com/bigquery/docs/reference/standard-sql/data-manipulation-language#limitations)).
-Which means deduplication job can remove duplicates only ~30min after the insert. 
+##### At-least-once guarantee from Storage Write API inserts
+Exactly-once delivery to BQ is provided by using Storage Write API in exactly once mode.
+([ref](https://cloud.google.com/dataflow/docs/guides/write-to-bigquery#:~:text=writing%20to%20BigQuery%3A-,STORAGE_WRITE_API,-.%20In%20this%20mode)).
 
-Two above invariants together guarantee exactly-once (for data older than say 1hr).
-
-BigQuery service's limits worth noting:
-- Max streaming row size: 1MB
-- Max rows per streaming insert request: 10,000
-- Max row inserts: 100k/sec (with deduplication)
-- Price: $0.010 per 200MB (Individual rows are calculated using a 1 KB minimum size)
 
 ### Initial data load
 
-There will be no special one-off process to load existing data. Mirror node will start processing
-the stream from the start and will eventually catchup with latest files on the stream.
-While this process will take longer (10+ days), it'll help us gain experience with BigQuery and
-build trust in the new ETL process.
-
- ### Outstanding items
-- Make BQ queries corresponding to our REST APIs.
-
+To speed up processing, the job can be run in batch mode, which will ingest data for each day SEQUENTIALLY

@@ -1,0 +1,185 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$ref": "#/definitions/TransactionChainSpecificField",
+  "definitions": {
+    "TransactionChainSpecificField": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/TransactionType"
+        },
+        "status": {
+          "$ref": "#/definitions/TransactionStatus"
+        },
+        "is_scheduled": {
+          "type": "boolean"
+        },
+        "transfers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Transfer"
+          }
+        },
+        "token_transfers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/TokenTransfer"
+          }
+        },
+        "nft_transfers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/NFTTransfer"
+          }
+        },
+        "staking_reward_transfers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/StakingRewardTransfer"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "status",
+        "is_scheduled",
+        "transfers"
+      ],
+      "additionalProperties": false
+    },
+    "TransactionType": {
+      "type": "string",
+      "enum": [
+        "CryptoTransfer",
+        "CryptoCreateAccount",
+        "CryptoDelete",
+        "CryptoUpdateAccount",
+        "ContractCall",
+        "ContractCreateInstance",
+        "ContractUpdateInstance",
+        "FileCreate",
+        "FileDelete",
+        "FileUpdate",
+        "Freeze",
+        "TokenCreate",
+        "TokenMint",
+        "TokenBurn",
+        "TokenTransfer",
+        "TokenUpdate",
+        "TokenDelete",
+        "TransactionRecordQuery",
+        "AccountBalanceQuery"
+      ]
+    },
+    "TransactionStatus": {
+      "type": "string",
+      "enum": [
+        "SUCCESS",
+        "FAILURE",
+        "PENDING",
+        "UNKNOWN",
+        "TIMEOUT",
+        "INSUFFICIENT_FUNDS",
+        "INVALID_TRANSACTION",
+        "BUSY",
+        "NOT_SUPPORTED",
+        "INVALID_ACCOUNT"
+      ]
+    },
+    "Transfer": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string",
+          "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "is_approval": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "account",
+        "amount",
+        "is_approval"
+      ],
+      "additionalProperties": false
+    },
+    "TokenTransfer": {
+      "type": "object",
+      "properties": {
+        "token_id": {
+          "type": "string",
+          "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+        },
+        "account": {
+          "type": "string",
+          "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "is_approval": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "token_id",
+        "account",
+        "amount",
+        "is_approval"
+      ],
+      "additionalProperties": false
+    },
+    "NFTTransfer": {
+      "type": "object",
+      "properties": {
+        "is_approval": {
+          "type": "boolean"
+        },
+        "receiver_account_id": {
+          "type": "string",
+          "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+        },
+        "sender_account_id": {
+          "type": "string",
+          "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+        },
+        "serial_number": {
+          "type": "number"
+        },
+        "token_id": {
+          "type": "string",
+          "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+        }
+      },
+      "required": [
+        "is_approval",
+        "receiver_account_id",
+        "sender_account_id",
+        "serial_number",
+        "token_id"
+      ],
+      "additionalProperties": false
+    },
+    "StakingRewardTransfer": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string",
+          "pattern": "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$"
+        },
+        "amount": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "account",
+        "amount"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

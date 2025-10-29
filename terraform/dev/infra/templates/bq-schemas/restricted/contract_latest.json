@@ -1,0 +1,131 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "nonce",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "from",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "to",
+        "type": "INTEGER"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "timestamp",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "expiration_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "permanent_removal",
+    "type": "BOOLEAN"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "contract_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "obtainer_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "proxy_account_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "runtime_bytecode",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "memo",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "auto_renew_period",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "deleted",
+    "type": "BOOLEAN"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "modified_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "admin_key",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "auto_renew_account",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "modified",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max_automatic_token_associations",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "evm_address",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "bytecode",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "file_id",
+    "type": "STRING"
+  }
+]

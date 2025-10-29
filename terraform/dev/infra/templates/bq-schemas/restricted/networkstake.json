@@ -1,0 +1,106 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "consensus_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max_stake_rewarded",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max_staking_reward_rate_per_hbar",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max_total_reward",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "reserved_staking_rewards",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "reward_balance_threshold",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "stake_total",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "staking_period",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "staking_period_duration",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "staking_periods_stored",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "staking_reward_rate",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "staking_start_threshold",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "unreserved_staking_reward_balance",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "numerator",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "denominator",
+        "type": "INTEGER"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "node_reward_fee_fraction",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "numerator",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "denominator",
+        "type": "INTEGER"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "staking_reward_fee_fraction",
+    "type": "RECORD"
+  }
+]

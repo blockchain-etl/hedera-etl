@@ -1,8 +1,0 @@
-spring:
-  cloud:
-    gcp:
-      projectId: ${hedera.dedupe.projectId}
-      credentials:
-        location: ${hedera.dedupe.credentialsLocation}
-      bigquery:
-        datasetName: ${hedera.dedupe.datasetName}

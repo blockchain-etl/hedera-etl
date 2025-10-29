@@ -1,39 +1,16 @@
 # Deployment
 
 ## Requirements:
-1. BigQuery tables : transactions, errors, dedupe_state, transaction_types
-1. PubSub topic for transactions
-1. GCS bucket : Used for dataflow templates, staging and as temp location
-1. ETL Pipeline from PubSub to BigQuery:
-    1. PubSub subscription
-    1. Service account with following roles: BigQuery Data Editor, Dataflow Worker, Pub/Sub Subscriber, and Storage
-       Admin
-1. Deduplication Task
-    1. Service account with following roles: BigQuery Data Editor, BigQuery Job User, Monitoring Metric
-       Writer
-1. Mirror Importer
-    1. Service account with following roles: PubSub Publisher
-1. (Optional) ETL Pipeline from PubSub to GCS
-    1. GCS Bucket: For output of pipeline
-    1. Service account with following roles: Dataflow Worker, Pub/Sub Editor (for creating subscription), and
-       Storage Admin
-
-Resource creation can be automated using [setup-gcp-resources.sh](../scripts/setup-gcp-resources.sh).
-[Google Cloud SDK](https://cloud.google.com/sdk/docs) is required to run the script.
+1. Infrastructure (BQ tables, enabled APIs and so on)
+2. Created docker repository in the cloud
 
 ## Steps
 
-1. Deploy ETL pipeline
+1. Deploy ETL pipeline Flex Template
 
-Use [deploy-etl-pipeline.sh](../scripts/deploy-etl-pipeline.sh) script to deploy the etl pipeline to GCP Dataflow.
+Run
+```sh
+./gradlew deployFlexTemplate -Pflex.dockerImage=<region>-docker.pkg.dev/<GCP Project>/<Docker Repository Name>/hedera-etl -Pflex.templateFile=gs://<Bucket to store flex template description>/hedera-etl.json`
+```
 
-2. Deploy Deduplication task
-
-TODO
-
-3. Deploy Hedera Mirror Node Importer to publish transactions to the pubsub topic. See
-Mirror Nodes [installation](https://github.com/hashgraph/hedera-mirror-node/blob/master/docs/installation.md) and
-[configuration](https://github.com/hashgraph/hedera-mirror-node/blob/master/docs/configuration.md#importer) for more
-details.
-
-
+2. Run ETL

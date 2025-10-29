@@ -1,0 +1,114 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "account",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "memo",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "auto_renew_period",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "deleted",
+    "type": "BOOLEAN"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "expiry_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "modified_timestamp",
+    "type": "INTEGER"
+  },
+    {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "modified",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max_automatic_token_associations",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "evm_address",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "decline_reward",
+    "type": "BOOLEAN"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "ethereum_nonce",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "pending_reward",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "receiver_sig_required",
+    "type": "BOOLEAN"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "staked_account_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "staked_node_id",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "stake_period_start",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "key",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "alias",
+    "type": "BYTES"
+  }
+]

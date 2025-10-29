@@ -1,0 +1,301 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "nonce",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "bytes",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "type",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "index",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "node",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "result",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "scheduled",
+    "type": "BOOLEAN"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "consensus_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "payer_account_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max_fee",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "account",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "amount",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "is_approval",
+        "type": "BOOLEAN"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "errata",
+        "type": "STRING"
+      }
+    ],
+    "mode": "REPEATED",
+    "name": "transfers",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "charged_tx_fee",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "initial_balance",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "parent_consensus_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "resultCode",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "valid_duration_seconds",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "valid_start_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "entity_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "transaction_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "memo_base64",
+    "type": "STRING"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "token_id",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "is_approval",
+        "type": "BOOLEAN"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "serial_number",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "receiver_account_id",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "sender_account_id",
+        "type": "STRING"
+      }
+    ],
+    "mode": "REPEATED",
+    "name": "nft_transfers",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "transaction_hash",
+    "type": "STRING"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "amount",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "consensus_timestamp",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "payer_account_id",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "account_id",
+        "type": "STRING"
+      }
+    ],
+    "mode": "REPEATED",
+    "name": "staking_reward_transfers",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "account",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "token_id",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "amount",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "is_approval",
+        "type": "BOOLEAN"
+      }
+    ],
+    "mode": "REPEATED",
+    "name": "token_transfers",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "REQUIRED",
+        "name": "token_id",
+        "type": "STRING"
+      },
+      {
+        "mode": "REQUIRED",
+        "name": "amount",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "REQUIRED",
+        "name": "collector_account_id",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "REQUIRED",
+        "name": "consensus_timestamp",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "REQUIRED",
+        "name": "payer_account_id",
+        "type": "STRING"
+      },
+      {
+        "mode": "REPEATED",
+        "name": "effective_payer_account_ids",
+        "type": "INTEGER"
+      }
+    ],
+    "mode": "REPEATED",
+    "name": "assessed_custom_fees",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "denominating_token_id",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "amount",
+        "type": "INTEGER"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "account_id",
+        "type": "STRING"
+      }
+    ],
+    "mode": "REPEATED",
+    "name": "max_custom_fees",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "batch_key",
+    "type": "RECORD"
+  }
+]

@@ -1,0 +1,392 @@
+[
+  {
+    "mode": "NULLABLE",
+    "name": "name",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "type",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "symbol",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "metadata",
+    "type": "BYTES"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created",
+    "type": "TIMESTAMP"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "decimals",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "memo",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "auto_renew_period",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "created_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "deleted",
+    "type": "BOOLEAN"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "expiry_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "freeze_default",
+    "type": "BOOLEAN"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "initial_supply",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "max_supply",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "modified_timestamp",
+    "type": "INTEGER"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "total_supply",
+    "type": "INTEGER"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "admin_key",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "auto_renew_account",
+    "type": "STRING"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "created_timestamp",
+        "type": "INTEGER"
+      },
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE",
+            "name": "all_collectors_are_exempt",
+            "type": "BOOLEAN"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "amount",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "collector_account_id",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "denominating_token_id",
+            "type": "STRING"
+          }
+        ],
+        "mode": "REPEATED",
+        "name": "fixed_fees",
+        "type": "RECORD"
+      },
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE",
+            "name": "maximum",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "minimum",
+            "type": "INTEGER"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "all_collectors_are_exempt",
+            "type": "BOOLEAN"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "numerator",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "denominator",
+                "type": "INTEGER"
+              }
+            ],
+            "mode": "NULLABLE",
+            "name": "amount",
+            "type": "RECORD"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "net_of_transfers",
+            "type": "BOOLEAN"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "collector_account_id",
+            "type": "STRING"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "denominating_token_id",
+            "type": "STRING"
+          }
+        ],
+        "mode": "REPEATED",
+        "name": "fractional_fees",
+        "type": "RECORD"
+      },
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE",
+            "name": "all_collectors_are_exempt",
+            "type": "BOOLEAN"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "numerator",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "denominator",
+                "type": "INTEGER"
+              }
+            ],
+            "mode": "NULLABLE",
+            "name": "amount",
+            "type": "RECORD"
+          },
+          {
+            "mode": "NULLABLE",
+            "name": "collector_account_id",
+            "type": "STRING"
+          },
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE",
+                "name": "amount",
+                "type": "INTEGER"
+              },
+              {
+                "mode": "NULLABLE",
+                "name": "denominating_token_id",
+                "type": "STRING"
+              }
+            ],
+            "mode": "NULLABLE",
+            "name": "fallback_fee",
+            "type": "RECORD"
+          }
+        ],
+        "mode": "REPEATED",
+        "name": "royalty_fees",
+        "type": "RECORD"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "custom_fees",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "fee_schedule_key",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "freeze_key",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "kyc_key",
+    "type": "RECORD"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "metadata_key",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "modified",
+    "type": "TIMESTAMP"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "pause_key",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "pause_status",
+    "type": "STRING"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "supply_key",
+    "type": "RECORD"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "supply_type",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "token_id",
+    "type": "STRING"
+  },
+  {
+    "mode": "NULLABLE",
+    "name": "treasury_account_id",
+    "type": "STRING"
+  },
+  {
+    "fields": [
+      {
+        "mode": "NULLABLE",
+        "name": "key",
+        "type": "STRING"
+      },
+      {
+        "mode": "NULLABLE",
+        "name": "_type",
+        "type": "STRING"
+      }
+    ],
+    "mode": "NULLABLE",
+    "name": "wipe_key",
+    "type": "RECORD"
+  }
+]

@@ -1,0 +1,96 @@
+plugins {
+  id 'java'
+  id 'application'
+  id "org.jsonschema2pojo" version "1.2.2"
+}
+
+dependencies {
+  implementation(project(':hedera-reader'))
+  implementation 'org.hyperledger.besu:secp256k1:0.8.2'
+  implementation 'net.java.dev.jna:jna:5.16.0'
+  implementation 'org.bouncycastle:bcprov-jdk18on:1.79'
+  implementation 'org.apache.beam:beam-runners-direct-java:2.67.0'
+  implementation 'org.apache.beam:beam-runners-google-cloud-dataflow-java:2.67.0'
+  implementation 'org.apache.beam:beam-sdks-java-core:2.67.0'
+  implementation 'org.apache.beam:beam-sdks-java-io-google-cloud-platform:2.67.0'
+  implementation 'com.hedera.hashgraph:hapi:0.63.5'
+  implementation 'org.apache.beam:beam-sdks-java-extensions-kryo:2.67.0'
+  testImplementation 'junit:junit:4.13'
+}
+
+
+tasks.named('test', Test) {
+  minHeapSize = "8g" // initial heap size
+  maxHeapSize = "8g" // maximum heap size
+
+  useJUnit()
+  testLogging {
+    events "passed"
+  }
+}
+
+application {
+  mainClass = 'com.hedera.etl.HederaETLApplication'
+  applicationDefaultJvmArgs = ['-Xmx16g']
+}
+
+description = 'Hedera ETL BigQuery'
+
+jsonSchema2Pojo {
+  sourceFiles = files("${sourceSets.main.output.resourcesDir}/json-schema")
+  targetPackage = 'com.hedera.etl.entity.jsonschema'
+}
+
+compileJava {
+  options.compilerArgs << '-parameters'
+}
+
+task deployFlexTemplate {
+
+  doLast {
+    exec {
+      var dir = file("${rootProject.buildDir}/generated/")
+      var script = file("${dir}/deploy-flex-template.sh")
+
+      executable = 'sh'
+      args = [script]
+    }
+  }
+}
+
+task createDeployFlexTemplateScript {
+
+  def dockerImage = providers.gradleProperty('flex.dockerImage')
+  def templateFile = providers.gradleProperty('flex.templateFile')
+
+  doLast {
+    if (dockerImage.present && templateFile.present) {
+        var executable = 'gcloud'
+        var args = [
+                'dataflow',
+                'flex-template',
+                'build',
+                templateFile.get(),
+                "--image-gcr-path=${dockerImage.get()}",
+                '--sdk-language=JAVA',
+                '--flex-template-base-image=JAVA21',
+                "--env=FLEX_TEMPLATE_JAVA_MAIN_CLASS='${project.application.mainClass.get()}'"
+        ] + configurations.runtimeClasspath.asList().findAll {it.toString().endsWith('.jar')}.collect {"--jar=${it}"}
+
+        var text = [executable, *args].join(' \\\n')
+        println("Producing script:\n\n${text}")
+
+        var dir = file("${rootProject.buildDir}/generated/")
+        dir.mkdirs()
+        var script = file("${dir}/deploy-flex-template.sh")
+
+        script.text = text
+    } else {
+      throw new InvalidUserDataException(
+              'Missing Flex Template properties, please add -Pflex.dockerImage-"<docker image>" and -Pflex.templateFile-"<gs path to save template>" to your argument'
+      )
+    }
+  }
+}
+
+tasks.deployFlexTemplate.dependsOn(tasks.createDeployFlexTemplateScript)
